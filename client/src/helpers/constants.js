@@ -1,0 +1,19 @@
+export const FOLDER_MAX_NAME_LENGTH = 20;
+export const FILE_MAX_NAME_LENGTH = 20;
+
+export const FOLDER_COLORS = Object.freeze({
+  DEFAULT: "#6366f1",
+  RED: "#ef4444",
+  AMBER: "#f59e0b",
+  EMERALD: "#10b981",
+  BLUE: "#3b82f6",
+  VIOLET: "#8b5cf6",
+  PINK: "#ec4899",
+  TEAL: "#14b8a6",
+  SLATE: "#64748b",
+});
+
+export const ERROR_MESSAGES = Object.freeze({
+  FOLDER_NAME_REQUIRED: "Folder name is required.",
+  FOLDER_NAME_DUPLICATE: "A folder with this name already exists.",
+});
