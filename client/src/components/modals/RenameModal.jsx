@@ -43,14 +43,14 @@ const RenameModal = ({ isOpen, onClose, item, itemType }) => {
         <div className="flex justify-end gap-4">
           <button 
             onClick={handleClose} 
-            className="py-2.5 px-5 rounded-xl font-semibold text-sm transition-all bg-bg-hover text-text-muted hover:text-text-main cursor-pointer"
+            className="py-2.5 px-5 rounded-xl font-normal text-sm transition-all bg-bg-hover text-text-muted hover:text-text-main cursor-pointer"
           >
             Cancel
           </button>
           <button 
             onClick={handleRename} 
             disabled={!newName.trim()}
-            className="py-2.5 px-5 rounded-xl font-bold text-sm transition-all bg-primary text-white hover:bg-primary-hover shadow-lg shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            className="py-2.5 px-5 rounded-xl font-medium text-sm transition-all bg-primary text-white hover:bg-primary-hover shadow-lg shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
             Save Changes
           </button>

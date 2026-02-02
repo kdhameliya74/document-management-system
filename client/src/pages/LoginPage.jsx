@@ -43,7 +43,7 @@ const LoginPage = () => {
         transition={{ duration: 0.5 }}
       >
         <div className="text-center mb-10">
-          <h1 className="text-3xl font-bold text-text-main mb-2">
+          <h1 className="text-3xl font-medium text-text-main mb-2">
             Welcome Back
           </h1>
           <p className="text-text-muted">
@@ -93,7 +93,7 @@ const LoginPage = () => {
           <button
             type="submit"
             disabled={loading}
-            className="flex items-center justify-center gap-2 cursor-pointer text-white bg-primary p-4 rounded-xl font-bold text-sm hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 hover:-translate-y-px active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+            className="flex items-center justify-center gap-2 cursor-pointer text-white bg-primary p-4 rounded-xl font-medium text-sm hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 hover:-translate-y-px active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
           >
             {loading ? <Loader className="animate-spin" size={18} /> : null}
             <span>{loading ? 'Signing In...' : 'Sign In'}</span>
@@ -106,7 +106,7 @@ const LoginPage = () => {
             Don't have an account?
             <Link
               to={ROUTES.SIGNUP}
-              className="text-primary font-semibold ml-1 hover:underline"
+              className="text-primary font-normal ml-1 hover:underline"
             >
               Sign Up
             </Link>

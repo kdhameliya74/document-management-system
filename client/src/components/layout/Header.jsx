@@ -24,7 +24,7 @@ const Header = () => {
           <Settings size={18} />
         </button>
         <div className="flex items-center gap-2 cursor-pointer p-1 pr-2 rounded-xl transition-colors hover:bg-bg-hover">
-          <div className="w-8 h-8 bg-linear-to-br from-secondary to-primary rounded-full flex items-center justify-center text-white font-semibold text-sm">
+          <div className="w-8 h-8 bg-linear-to-br from-secondary to-primary rounded-full flex items-center justify-center text-white font-normal text-sm">
             {user?.firstName?.charAt(0).toUpperCase() || 'U'}
           </div>
           <span className="font-medium text-sm text-text-main line-clamp-1">{user?.fullName || 'User'}</span>

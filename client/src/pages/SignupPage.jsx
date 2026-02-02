@@ -87,7 +87,7 @@ const SignupPage = () => {
         transition={{ duration: 0.5 }}
       >
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-text-main mb-2">Create Account</h1>
+          <h1 className="text-3xl font-medium text-text-main mb-2">Create Account</h1>
           <p className="text-text-muted">Get started with your free account</p>
         </div>
 
@@ -191,7 +191,7 @@ const SignupPage = () => {
             />
           </div>
 
-          <button type="submit" className="flex items-center justify-center gap-2 bg-primary text-white p-4 rounded-xl font-bold text-sm transition-all shadow-lg shadow-primary/20 hover:bg-primary-hover hover:-translate-y-px active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed mt-2" disabled={loading}>
+          <button type="submit" className="flex items-center justify-center gap-2 bg-primary text-white p-4 rounded-xl font-medium text-sm transition-all shadow-lg shadow-primary/20 hover:bg-primary-hover hover:-translate-y-px active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed mt-2" disabled={loading}>
             {loading ? <Loader className="animate-spin" size={18} /> : null}
             <span>{loading ? 'Creating Account...' : 'Sign Up'}</span>
             {!loading && <ArrowRight size={18} />}
@@ -201,7 +201,7 @@ const SignupPage = () => {
         <div className="mt-8 text-center text-text-muted">
           <p>
             Already have an account? 
-            <Link to={ROUTES.LOGIN} className="text-primary font-semibold ml-1 hover:underline">
+            <Link to={ROUTES.LOGIN} className="text-primary font-normal ml-1 hover:underline">
               Sign In
             </Link>
           </p>

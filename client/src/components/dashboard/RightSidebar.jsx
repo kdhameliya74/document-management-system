@@ -41,7 +41,7 @@ const RightSidebar = () => {
         </button>
 
         <div className="mb-8 mt-2">
-          <h3 className="text-lg font-semibold">{isFolder ? 'Folder Details' : 'File Details'}</h3>
+          <h3 className="text-lg font-normal">{isFolder ? 'Folder Details' : 'File Details'}</h3>
         </div>
 
         <div className="flex flex-col items-center mb-8 text-center">
@@ -52,7 +52,7 @@ const RightSidebar = () => {
               <FileText size={64} color="#94a3b8" />
             )}
           </div>
-          <h4 className="text-base font-semibold mb-1 break-words">{selectedItem.name}</h4>
+          <h4 className="text-base font-normal mb-1 break-words">{selectedItem.name}</h4>
           <span className="text-sm text-text-muted">{isFolder ? 'Folder' : selectedItem.type}</span>
         </div>
 
@@ -77,7 +77,7 @@ const RightSidebar = () => {
           <div className="flex gap-4 items-start text-text-muted">
             <Info size={16} />
             <div className="flex flex-col gap-1">
-              <span className="text-xs font-semibold uppercase tracking-wider text-text-muted/60">Type</span>
+              <span className="text-xs font-normal uppercase tracking-wider text-text-muted/60">Type</span>
               <span className="text-sm text-text-main">{isFolder ? 'Folder' : selectedItem.type}</span>
             </div>
           </div>
@@ -86,7 +86,7 @@ const RightSidebar = () => {
             <div className="flex gap-4 items-start text-text-muted">
               <Info size={16} />
               <div className="flex flex-col gap-1">
-                <span className="text-xs font-semibold uppercase tracking-wider text-text-muted/60">Size</span>
+                <span className="text-xs font-normal uppercase tracking-wider text-text-muted/60">Size</span>
                 <span className="text-sm text-text-main">{selectedItem.size ? `${(selectedItem.size / 1024).toFixed(2)} KB` : 'Unknown'}</span>
               </div>
             </div>
@@ -95,7 +95,7 @@ const RightSidebar = () => {
           <div className="flex gap-4 items-start text-text-muted">
             <Clock size={16} />
             <div className="flex flex-col gap-1">
-              <span className="text-xs font-semibold uppercase tracking-wider text-text-muted/60">Created</span>
+              <span className="text-xs font-normal uppercase tracking-wider text-text-muted/60">Created</span>
               <span className="text-sm text-text-main">
                 {selectedItem.createdAt ? format(new Date(selectedItem.createdAt), 'MMM d, yyyy') : 'Unknown'}
               </span>
@@ -105,7 +105,7 @@ const RightSidebar = () => {
           <div className="flex gap-4 items-start text-text-muted">
             <User size={16} />
             <div className="flex flex-col gap-1">
-              <span className="text-xs font-semibold uppercase tracking-wider text-text-muted/60">Owner</span>
+              <span className="text-xs font-normal uppercase tracking-wider text-text-muted/60">Owner</span>
               <span className="text-sm text-text-main">{user?.name || 'Me'}</span>
             </div>
           </div>
@@ -116,7 +116,7 @@ const RightSidebar = () => {
       {showDeleteModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[2000]">
           <div className="bg-bg-panel border border-border-muted rounded-xl w-full max-w-[400px] p-6 shadow-2xl">
-            <h3 className="text-lg font-semibold mb-4 text-text-main">Delete Item</h3>
+            <h3 className="text-lg font-normal mb-4 text-text-main">Delete Item</h3>
             <p className="text-text-muted mb-6">Are you sure you want to delete "{selectedItem.name}"?</p>
             <div className="flex justify-end gap-4">
               <button onClick={() => setShowDeleteModal(false)} className="py-2 px-4 rounded-lg font-medium text-sm transition-all bg-bg-hover text-text-main hover:bg-bg-hover/80 cursor-pointer">Cancel</button>
