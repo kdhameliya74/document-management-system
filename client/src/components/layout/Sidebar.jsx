@@ -57,7 +57,7 @@ const Sidebar = () => {
         </NavLink>
       </div>
 
-      <div className="mt-auto pt-4 border-t border-border-muted">
+      <div className="mt-auto pt-4 border-t border-border-muted -mx-4">
         <button
           onClick={handleLogout}
           className="
