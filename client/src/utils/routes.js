@@ -8,6 +8,8 @@ const ROUTES = {
     FOLDER_BASE: '/dashboard/folder',
     FOLDER_ROOT: '/dashboard/folder/root',
     FOLDER: '/dashboard/folder/:folderId',
+    RECENT: '/dashboard/recent',
+    SHARED: '/dashboard/shared',
     FOLDER_DYNAMIC: (folderId) => `/dashboard/folder/${folderId}`,
     TRASH: '/dashboard/trash',
     RELATIVE: {

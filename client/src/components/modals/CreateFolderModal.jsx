@@ -1,16 +1,18 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-
+import { Folder } from 'lucide-react';
 import { FOLDER_COLORS, ERROR_MESSAGES } from "@/helpers/constants.js";
 
 import { addFolder } from "@/store/fileSystemSlice";
 import Modal from "@/components/common/Modal";
 
 const CreateFolderModal = ({ isOpen, onClose, currentFolderId }) => {
+
   const [folderName, setFolderName] = useState("");
   const [errorMessage, setErrorMessage] = useState(null);
   const [selectedColor, setSelectedColor] = useState(FOLDER_COLORS.DEFAULT);
   const { folders } = useSelector((state) => state.fileSystem);
+  
   const dispatch = useDispatch();
 
   const handleCreate = () => {
@@ -51,7 +53,7 @@ const CreateFolderModal = ({ isOpen, onClose, currentFolderId }) => {
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={handleCancel} title="Create New Folder">
+    <Modal isOpen={isOpen} onClose={handleCancel} title="Create New Folder" icon={Folder}>
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-3">
           <label htmlFor="folder_name" className="text-sm text-text-muted px-1">
@@ -100,16 +102,16 @@ const CreateFolderModal = ({ isOpen, onClose, currentFolderId }) => {
         <div className="flex justify-end gap-4 mt-2">
           <button
             onClick={handleCancel}
-            className="py-2.5 px-5 rounded-xl font-semibold text-sm transition-all bg-bg-hover text-text-muted hover:text-text-main cursor-pointer"
+            className="py-2.5 px-5 rounded-xl font-normal text-sm transition-all bg-bg-hover text-text-muted hover:text-text-main cursor-pointer"
           >
             Cancel
           </button>
           <button
             onClick={handleCreate}
             disabled={!folderName.trim()}
-            className="py-2.5 px-5 rounded-xl font-bold text-sm transition-all bg-primary text-white hover:bg-primary-hover shadow-lg shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            className="py-2.5 px-5 rounded-xl font-medium text-sm transition-all bg-primary text-white hover:bg-primary-hover shadow-lg shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
-            Create Folder
+            Create
           </button>
         </div>
       </div>

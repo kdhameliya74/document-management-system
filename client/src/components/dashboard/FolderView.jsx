@@ -136,7 +136,7 @@ const FolderView = () => {
       {/* Top section */}
       <div className="flex items-center justify-between pb-4 border-b border-border-muted -mx-6 px-6">
         <div className="flex items-center gap-4">
-          <h2 className="text-2xl font-bold text-text-main">
+          <h2 className="text-2xl font-medium text-text-main">
             {currentFolder.name}
           </h2>
         </div>

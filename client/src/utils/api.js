@@ -16,7 +16,6 @@ api.interceptors.request.use(
   (config) => {
     // Get token from localStorage (primary) or cookies (fallback)
     const token = localStorage.getItem('token') || Cookies.get('token');
-    console.log('TOKEN from API', token);
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
