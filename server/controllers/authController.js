@@ -3,6 +3,7 @@ import { asyncHandler } from '../middleware/error.js';
 
 // Helper function to send token response
 const isProduction = process.env.NODE_ENV === 'production';
+
 const sendTokenResponse = (user, statusCode, res) => {
   const token = user.generateAuthToken();
 

@@ -1,11 +1,13 @@
 import mongoose from 'mongoose';
+import { FOLDER_VALIDATION } from '../constants/Folder.js';
+import { PERMISSION_LEVELS, PERMISSION_ARRAY } from '../constants/Shared.js';
 
 const folderSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: [true, 'Please provide folder name'],
+    required: [true, FOLDER_VALIDATION.NAME_REQUIRED],
     trim: true,
-    maxlength: [255, 'Folder name cannot be more than 255 characters']
+    maxlength: [255, FOLDER_VALIDATION.NAME_MAXLENGTH]
   },
   owner: {
     type: mongoose.Schema.Types.ObjectId,
@@ -45,8 +47,8 @@ const folderSchema = new mongoose.Schema({
     },
     permission: {
       type: String,
-      enum: ['view', 'edit', 'admin'],
-      default: 'view'
+      enum: PERMISSION_ARRAY,
+      default: PERMISSION_LEVELS.VIEW
     },
     sharedAt: {
       type: Date,
@@ -59,12 +61,13 @@ const folderSchema = new mongoose.Schema({
   },
   publicLink: {
     type: String,
-    default: null,
     unique: true,
     sparse: true
   }
 }, {
-  timestamps: true
+  timestamps: true,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
 });
 
 // Index for faster queries
@@ -72,8 +75,7 @@ folderSchema.index({ owner: 1, parent: 1 });
 folderSchema.index({ owner: 1, isTrashed: 1 });
 folderSchema.index({ path: 1 });
 
-// Pre-save middleware to build path
-folderSchema.pre('save', async function(next) {
+folderSchema.pre('validate', async function(next) {
   if (this.isNew || this.isModified('parent') || this.isModified('name')) {
     if (this.parent) {
       const parentFolder = await mongoose.model('Folder').findById(this.parent);
@@ -90,14 +92,14 @@ folderSchema.pre('save', async function(next) {
 });
 
 // Method to check if user has access
-folderSchema.methods.hasAccess = function(userId, requiredPermission = 'view') {
+folderSchema.methods.hasAccess = function(userId, requiredPermission = PERMISSION_LEVELS.VIEW) {
   // Owner has full access
   if (this.owner.toString() === userId.toString()) {
     return true;
   }
 
   // Check if public
-  if (this.isPublic && requiredPermission === 'view') {
+  if (this.isPublic && requiredPermission === PERMISSION_LEVELS.VIEW) {
     return true;
   }
 
@@ -108,7 +110,11 @@ folderSchema.methods.hasAccess = function(userId, requiredPermission = 'view') {
 
   if (!sharedUser) return false;
 
-  const permissionLevels = { view: 1, edit: 2, admin: 3 };
+  const permissionLevels = {
+    [PERMISSION_LEVELS.VIEW]: 1,
+    [PERMISSION_LEVELS.EDIT]: 2,
+    [PERMISSION_LEVELS.ADMIN]: 3
+  };
   return permissionLevels[sharedUser.permission] >= permissionLevels[requiredPermission];
 };
 

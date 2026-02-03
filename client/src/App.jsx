@@ -10,6 +10,7 @@ import LoginPage from "@/pages/LoginPage";
 import SignupPage from "@/pages/SignupPage";
 import DashboardPage from "@/pages/DashboardPage";
 import ROUTES from "@/utils/routes";
+import { Toaster } from "react-hot-toast";
 
 const PrivateRoute = ({ children }) => {
   const { isAuthenticated, isCheckingAuth } = useSelector((state) => state.auth);
@@ -28,6 +29,7 @@ function App() {
   if (isCheckingAuth) return null; // 👈 GLOBAL BLOCKER
   return (
     <Router>
+      <Toaster position="top-right" />
       <Routes>
         <Route
           path={ROUTES.LOGIN}
@@ -37,6 +39,7 @@ function App() {
             </PublicRoute>
           }
         />
+        
         <Route
           path={ROUTES.SIGNUP}
           element={

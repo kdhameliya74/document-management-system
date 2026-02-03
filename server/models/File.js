@@ -1,11 +1,13 @@
 import mongoose from 'mongoose';
+import { FILE_VALIDATION } from '../constants/File.js';
+import { PERMISSION_LEVELS, PERMISSION_ARRAY } from '../constants/Shared.js';
 
 const fileSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: [true, 'Please provide file name'],
+    required: [true, FILE_VALIDATION.NAME_REQUIRED],
     trim: true,
-    maxlength: [255, 'File name cannot be more than 255 characters']
+    maxlength: [255, FILE_VALIDATION.NAME_MAXLENGTH]
   },
   originalName: {
     type: String,
@@ -64,7 +66,7 @@ const fileSchema = new mongoose.Schema({
   }],
   description: {
     type: String,
-    maxlength: [1000, 'Description cannot be more than 1000 characters']
+    maxlength: [1000, FILE_VALIDATION.DESCRIPTION_MAXLENGTH]
   },
   sharedWith: [{
     user: {
@@ -73,8 +75,8 @@ const fileSchema = new mongoose.Schema({
     },
     permission: {
       type: String,
-      enum: ['view', 'edit', 'admin'],
-      default: 'view'
+      enum: PERMISSION_ARRAY,
+      default: PERMISSION_LEVELS.VIEW
     },
     sharedAt: {
       type: Date,
@@ -87,7 +89,6 @@ const fileSchema = new mongoose.Schema({
   },
   publicLink: {
     type: String,
-    default: null,
     unique: true,
     sparse: true
   },
@@ -110,14 +111,14 @@ fileSchema.index({ name: 'text', tags: 'text' }); // Text search
 fileSchema.index({ mimeType: 1 });
 
 // Method to check if user has access
-fileSchema.methods.hasAccess = function(userId, requiredPermission = 'view') {
+fileSchema.methods.hasAccess = function(userId, requiredPermission = PERMISSION_LEVELS.VIEW) {
   // Owner has full access
   if (this.owner.toString() === userId.toString()) {
     return true;
   }
 
   // Check if public
-  if (this.isPublic && requiredPermission === 'view') {
+  if (this.isPublic && requiredPermission === PERMISSION_LEVELS.VIEW) {
     return true;
   }
 
@@ -128,7 +129,11 @@ fileSchema.methods.hasAccess = function(userId, requiredPermission = 'view') {
 
   if (!sharedUser) return false;
 
-  const permissionLevels = { view: 1, edit: 2, admin: 3 };
+  const permissionLevels = {
+    [PERMISSION_LEVELS.VIEW]: 1,
+    [PERMISSION_LEVELS.EDIT]: 2,
+    [PERMISSION_LEVELS.ADMIN]: 3
+  };
   return permissionLevels[sharedUser.permission] >= permissionLevels[requiredPermission];
 };
 

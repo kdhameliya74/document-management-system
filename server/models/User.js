@@ -1,46 +1,47 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { USER_ROLES, USER_VALIDATION, STORAGE_CONSTANTS, AUTH_CONSTANTS } from '../constants/User.js';
 
 const userSchema = new mongoose.Schema({
   firstName: {
     type: String,
-    required: [true, 'Please provide first name'],
+    required: [true, USER_VALIDATION.FIRST_NAME_REQUIRED],
     trim: true,
-    maxlength: [50, 'First name cannot be more than 50 characters']
+    maxlength: [50, USER_VALIDATION.FIRST_NAME_MAXLENGTH]
   },
   lastName: {
     type: String,
-    required: [true, 'Please provide last name'],
+    required: [true, USER_VALIDATION.LAST_NAME_REQUIRED],
     trim: true,
-    maxlength: [50, 'Last name cannot be more than 50 characters']
+    maxlength: [50, USER_VALIDATION.LAST_NAME_MAXLENGTH]
   },
   email: {
     type: String,
-    required: [true, 'Please provide email'],
+    required: [true, USER_VALIDATION.EMAIL_REQUIRED],
     unique: true,
     lowercase: true,
     trim: true,
     match: [
       /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
-      'Please provide a valid email'
+      USER_VALIDATION.EMAIL_INVALID
     ]
   },
   password: {
     type: String,
-    required: [true, 'Please provide password'],
-    minlength: [8, 'Password must be at least 8 characters'],
+    required: [true, USER_VALIDATION.PASSWORD_REQUIRED],
+    minlength: [8, USER_VALIDATION.PASSWORD_MINLENGTH],
     select: false
   },
   username: {
     type: String,
-    required: [true, 'Please provide username'],
+    required: [true, USER_VALIDATION.USERNAME_REQUIRED],
     unique: true,
     trim: true,
-    maxlength: [50, 'Username cannot be more than 50 characters'],
+    maxlength: [50, USER_VALIDATION.USERNAME_MAXLENGTH],
     match: [
       /^[a-zA-Z0-9_]+$/,
-      'Username can only contain letters, numbers, and underscores'
+      USER_VALIDATION.USERNAME_INVALID
     ]
   },
   avatar: {
@@ -49,8 +50,8 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['user', 'admin'],
-    default: 'user'
+    enum: [USER_ROLES.USER, USER_ROLES.ADMIN],
+    default: USER_ROLES.USER
   },
   storageUsed: {
     type: Number,
@@ -58,7 +59,7 @@ const userSchema = new mongoose.Schema({
   },
   storageLimit: {
     type: Number,
-    default: 5368709120
+    default: STORAGE_CONSTANTS.DEFAULT_LIMIT
   },
   isEmailVerified: {
     type: Boolean,
@@ -86,7 +87,7 @@ userSchema.pre('save', async function(next) {
     next();
   }
   
-  const salt = await bcrypt.genSalt(parseInt(process.env.BCRYPT_ROUNDS) || 12);
+  const salt = await bcrypt.genSalt(parseInt(process.env.BCRYPT_ROUNDS) || AUTH_CONSTANTS.BCRYPT_ROUNDS_DEFAULT);
   this.password = await bcrypt.hash(this.password, salt);
 });
 

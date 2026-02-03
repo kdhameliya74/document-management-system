@@ -127,8 +127,6 @@ const FolderView = () => {
     closeContextMenu();
   };
 
-
-
   if (!currentFolder) return <div>Loading...</div>;
 
   return (
