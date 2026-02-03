@@ -59,6 +59,7 @@ export const createFolder = asyncHandler(async (req, res, next) => {
 });
 
 export const getFolders = asyncHandler(async (req, res, next) => {
+  console.log('I am here')
   const userId = req.user?.id;
   const { parent } = req.body;
 

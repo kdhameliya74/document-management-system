@@ -5,7 +5,7 @@ import { protect } from '../middleware/auth.js';
 const router = express.Router();
 
 router.post('/create', protect, createFolder);
-router.post('/all', protect, createFolder);
+router.post('/all', protect, getFolders);
 
 
 export default router;

@@ -7,7 +7,7 @@ const fileSystemAPI = {
     return response.data;
   },
   getAll: async (parentId) => {
-    const response = await api.post("/folders/all", parentId);
+    const response = await api.post("/folders/all", { parent: parentId });
     return response.data;
   },
 };

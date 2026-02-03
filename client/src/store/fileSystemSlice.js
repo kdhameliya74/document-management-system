@@ -16,6 +16,8 @@ const initialState = {
   currentFolderId: "root",
   selectedId: null,
   showDetails: false,
+  isLoading: false,
+  error: null,
 };
 
 /*
@@ -35,14 +37,14 @@ export const createFolder = createAsyncThunk(
   },
 );
 
-export const fetchFolders = createAsyncThunk(
+export const fetchDocuments = createAsyncThunk(
   "folders/all",
   async (parentId, { rejectWithValue }) => {
     try {
       const data = await fileSystemAPI.getAll(parentId);
-      return data.folders;
+      return { folders: data.folders, parentId: parentId || 'root' };
     } catch (err) {
-      return rejectWithValue(err?.message || "No folders available");
+      return rejectWithValue(err?.response?.data?.message || err?.message || "No folders available");
     }
   },
 );
@@ -124,13 +126,48 @@ const fileSystemSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    builder.addCase(createFolder.fulfilled, (state, action) => {
-      const { id: newFolderId, parent } = action.payload;
-      state.folders[newFolderId] = action.payload;
-      if (state.folders[parent]) {
-        state.folders[parent].childFolderIds.push(newFolderId);
-      }
-    });
+    builder
+      .addCase(createFolder.fulfilled, (state, action) => {
+        const { parent } = action.payload;
+        const normalizedFolder = {
+          ...action.payload,
+          childFolderIds: [],
+          childFileIds: [],
+        };
+        state.folders[normalizedFolder.id] = normalizedFolder;
+        if (parent && state.folders[parent]) {
+          if (!state.folders[parent].childFolderIds.includes(normalizedFolder.id)) {
+            state.folders[parent].childFolderIds.push(normalizedFolder.id);
+          }
+        }
+      })
+      .addCase(fetchDocuments.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchDocuments.fulfilled, (state, action) => {
+        state.isLoading = false;
+        const { folders, parentId } = action.payload;
+
+        const childFolderIds = [];
+        folders.forEach((folder) => {
+          const {id} = folder;
+          childFolderIds.push(id);
+          state.folders[id] = {
+            ...folder,
+            childFolderIds: state.folders[id]?.childFolderIds || [],
+            childFileIds: state.folders[id]?.childFileIds || [],
+          };
+        });
+
+        if (state.folders[parentId]) {
+          state.folders[parentId].childFolderIds = childFolderIds;
+        }
+      })
+      .addCase(fetchDocuments.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      });
   },
 });
 
