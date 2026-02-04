@@ -1,10 +1,10 @@
 import { configureStore } from '@reduxjs/toolkit';
 import authReducer from './authSlice';
-import fileSystemReducer from './fileSystemSlice';
+import documentSystemReducer from './documentSystemSlice';
 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
-    fileSystem: fileSystemReducer,
+    documentSystem: documentSystemReducer,
   },
 });

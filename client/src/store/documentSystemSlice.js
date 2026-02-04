@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 import fileSystemAPI from "@/services/fileSystemService";
 
 const initialState = {
-  folders: {
+  documents: {
     root: {
       id: "root",
       name: "My Drive",
@@ -38,20 +38,46 @@ export const createFolder = createAsyncThunk(
 );
 
 export const fetchDocuments = createAsyncThunk(
-  "folders/all",
+  "documents/all",
   async (parentId, { rejectWithValue }) => {
     try {
       const data = await fileSystemAPI.getAll(parentId);
-      return { folders: data.folders, parentId: parentId || 'root' };
+      return {
+        folders: data.folders,
+        currentFolder: data.currentFolder,
+        breadcrumbs: data.breadcrumbs || [],
+        parentId: parentId || 'root'
+      };
     } catch (err) {
       return rejectWithValue(err?.response?.data?.message || err?.message || "No folders available");
     }
   },
 );
 
+const ensureFolder = (state, id, data) => {
+  state.documents[id] ??= {
+    id,
+    name: "",
+    parentId: "root",
+    childFolderIds: [],
+    childFileIds: [],
+  };
 
-const fileSystemSlice = createSlice({
-  name: "fileSystem",
+  Object.assign(state.documents[id], data);
+};
+
+const linkChildToParent = (state, parentId, childId) => {
+  if (!state.documents[parentId]) return;
+
+  const children = state.documents[parentId].childFolderIds;
+  if (!children.includes(childId)) {
+    children.push(childId);
+  }
+};
+
+
+const documentSystemSlice = createSlice({
+  name: "documentSystem",
   initialState,
   reducers: {
     setCurrentFolder: (state, action) => {
@@ -81,14 +107,14 @@ const fileSystemSlice = createSlice({
       };
 
       state.files[newFileId] = newFile;
-      if (state.folders[parentId]) {
-        state.folders[parentId].childFileIds.push(newFileId);
+      if (state.documents[parentId]) {
+        state.documents[parentId].childFileIds.push(newFileId);
       }
     },
     renameItem: (state, action) => {
       const { id, type, newName } = action.payload;
-      if (type === "folder" && state.folders[id]) {
-        state.folders[id].name = newName;
+      if (type === "folder" && state.documents[id]) {
+        state.documents[id].name = newName;
       } else if (type === "file" && state.files[id]) {
         state.files[id].name = newName;
       }
@@ -97,23 +123,24 @@ const fileSystemSlice = createSlice({
       const { id, type, parentId } = action.payload;
 
       // Remove from parent's children list
-      if (state.folders[parentId]) {
+      if (state.documents[parentId]) {
         if (type === "folder") {
-          state.folders[parentId].childFolderIds = state.folders[
+          state.documents[parentId].childFolderIds = state.documents[
             parentId
           ].childFolderIds.filter((fid) => fid !== id);
           // Recursive delete would be needed here for a real backend,
           // but for client-side state, we might leave orphans or clean them up.
           // Let's just remove the reference for now.
-          delete state.folders[id];
+          delete state.documents[id];
         } else {
-          state.folders[parentId].childFileIds = state.folders[
+          state.documents[parentId].childFileIds = state.documents[
             parentId
           ].childFileIds.filter((fid) => fid !== id);
           delete state.files[id];
         }
       }
     },
+    // fetch documents and files
     // Mock version history
     addFileVersion: (state, action) => {
       const { fileId, versionData } = action.payload;
@@ -134,10 +161,10 @@ const fileSystemSlice = createSlice({
           childFolderIds: [],
           childFileIds: [],
         };
-        state.folders[normalizedFolder.id] = normalizedFolder;
-        if (parent && state.folders[parent]) {
-          if (!state.folders[parent].childFolderIds.includes(normalizedFolder.id)) {
-            state.folders[parent].childFolderIds.push(normalizedFolder.id);
+        state.documents[normalizedFolder.id] = normalizedFolder;
+        if (parent && state.documents[parent]) {
+          if (!state.documents[parent].childFolderIds.includes(normalizedFolder.id)) {
+            state.documents[parent].childFolderIds.push(normalizedFolder.id);
           }
         }
       })
@@ -146,22 +173,73 @@ const fileSystemSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchDocuments.fulfilled, (state, action) => {
-        state.isLoading = false;
-        const { folders, parentId } = action.payload;
 
-        const childFolderIds = [];
-        folders.forEach((folder) => {
-          const {id} = folder;
-          childFolderIds.push(id);
-          state.folders[id] = {
-            ...folder,
-            childFolderIds: state.folders[id]?.childFolderIds || [],
-            childFileIds: state.folders[id]?.childFileIds || [],
-          };
+        /**
+         * we need following structure
+         * 
+         * documents = {
+         *    root: {
+         *      id: "root",
+         *      name: "root",
+         *      parentId: null,
+         *      childFolderIds: ["folderId1", "folderId2"],
+         *      childFileIds: ["fileId1", "fileId2"],
+         *    },
+         *    folderId1: {
+         *      id: "folderId1",
+         *      name: "folder1",
+         *      parentId: "root",
+         *      childFolderIds: ["folderId2", "folderId3"],
+         *      childFileIds: ["fileId1", "fileId2"],
+         *    },
+         *    folderId2: {
+         *      id: "folderId2",
+         *      name: "folder2",
+         *      parentId: "folderId1",
+         *      childFolderIds: ["folderId3", "folderId4"],
+         *      childFileIds: ["fileId3", "fileId4"],
+         *    },
+         *    ...
+         * }
+         */
+
+        state.isLoading = false;
+        const { folders, currentFolder, breadcrumbs, parentId } = action.payload;
+
+        // 1. Breadcrumbs
+        breadcrumbs.forEach(({ id, name, parentId: pid }) => {
+          ensureFolder(state, id, { id, name, parentId: pid });
+          linkChildToParent(state, pid, id);
         });
 
-        if (state.folders[parentId]) {
-          state.folders[parentId].childFolderIds = childFolderIds;
+        // 2. Current folder
+        if (currentFolder) {
+          const { id, parent } = currentFolder;
+          const normalizedParentId = parent || "root";
+
+          ensureFolder(state, id, {
+            ...currentFolder,
+            id,
+            parentId: normalizedParentId,
+          });
+
+          linkChildToParent(state, normalizedParentId, id);
+        }
+
+        // 3. Child folders
+        const childFolderIds = folders.map((folder) => {
+          const normalizedParentId = folder.parent || "root";
+          ensureFolder(state, folder.id, {
+            ...folder,
+            id: folder.id,
+            parentId: normalizedParentId,
+          });
+          return folder.id;
+        });
+
+        // 4. Update parent children list
+        if (state.documents[parentId]) {
+          state.documents[parentId].childFolderIds = childFolderIds;
         }
       })
       .addCase(fetchDocuments.rejected, (state, action) => {
@@ -179,5 +257,5 @@ export const {
   renameItem,
   deleteItem,
   addFileVersion,
-} = fileSystemSlice.actions;
-export default fileSystemSlice.reducer;
+} = documentSystemSlice.actions;
+export default documentSystemSlice.reducer;

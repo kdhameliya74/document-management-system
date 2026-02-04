@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Upload } from 'lucide-react';
-import { addFile } from '@/store/fileSystemSlice';
+import { addFile } from '@/store/documentSystemSlice';
 import Modal from '@/components/common/Modal';
 
 const UploadFileModal = ({ isOpen, onClose, currentFolderId }) => {

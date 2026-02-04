@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { renameItem } from '@/store/fileSystemSlice';
+import { renameItem } from '@/store/documentSystemSlice';
 import Modal from '@/components/common/Modal';
 
 const RenameModal = ({ isOpen, onClose, item, itemType }) => {

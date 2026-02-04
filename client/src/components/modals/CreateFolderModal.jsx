@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Folder, Loader } from "lucide-react";
 import { FOLDER_COLORS, ERROR_MESSAGES } from "@/helpers/constants.js";
 
-import { createFolder } from "@/store/fileSystemSlice";
+import { createFolder } from "@/store/documentSystemSlice";
 import toast from "react-hot-toast";
 import Modal from "@/components/common/Modal";
 
@@ -12,7 +12,7 @@ const CreateFolderModal = ({ isOpen, onClose, currentFolderId }) => {
   const [isPending, startTransition] = useTransition();
   const [errorMessage, setErrorMessage] = useState(null);
   const [selectedColor, setSelectedColor] = useState(FOLDER_COLORS.DEFAULT);
-  const { folders } = useSelector((state) => state.fileSystem);
+  const { documents } = useSelector((state) => state.documentSystem);
   const { user } = useSelector((state) => state.auth);
 
   const dispatch = useDispatch();
@@ -20,15 +20,16 @@ const CreateFolderModal = ({ isOpen, onClose, currentFolderId }) => {
   const handleCreate = () => {
     const sanitizedName = folderName.trim();
     if (sanitizedName) {
-      const currentFolder = folders[currentFolderId];
+      const currentFolder = documents[currentFolderId];
       const isDuplicate = currentFolder?.childFolderIds?.some(
         (folderId) =>
-          folders[folderId]?.name.toLowerCase() === sanitizedName.toLowerCase(),
+          documents[folderId]?.name.toLowerCase() === sanitizedName.toLowerCase(),
       );
 
       if (isDuplicate) {
         setErrorMessage(ERROR_MESSAGES.FOLDER_NAME_DUPLICATE);
       } else {
+        // TODO: refactor this startTransition
         startTransition(async () => {
           try {
             await dispatch(

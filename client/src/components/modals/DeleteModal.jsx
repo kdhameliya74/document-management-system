@@ -1,6 +1,6 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
-import { deleteItem } from '@/store/fileSystemSlice';
+import { deleteItem } from '@/store/documentSystemSlice';
 import Modal from '@/components/common/Modal';
 
 const DeleteModal = ({ isOpen, onClose, item, itemType, currentFolderId }) => {

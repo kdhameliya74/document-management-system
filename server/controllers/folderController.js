@@ -59,19 +59,52 @@ export const createFolder = asyncHandler(async (req, res, next) => {
 });
 
 export const getFolders = asyncHandler(async (req, res, next) => {
-  console.log('I am here')
   const userId = req.user?.id;
   const { parent } = req.body;
 
   const folders = await Folder.find({
     parent: parent || null,
     isTrashed: false,
-    owner: userId
+    owner: userId,
   });
 
-  return res.status(201).json({
+  let currentFolder = null;
+  let breadcrumbs = [];
+
+  if (parent) {
+    currentFolder = await Folder.findOne({
+      _id: parent,
+      owner: userId,
+      isTrashed: false,
+    });
+
+    if (currentFolder) {
+      let tempParentId = currentFolder.parent;
+      while (tempParentId) {
+        const ancestor = await Folder.findOne({
+          _id: tempParentId,
+          owner: userId,
+          isTrashed: false,
+        }).select("_id name parent");
+        
+        if (ancestor) {
+          breadcrumbs.unshift({
+            id: ancestor._id,
+            name: ancestor.name,
+            parentId: ancestor.parent || "root",
+          });
+          tempParentId = ancestor.parent;
+        } else {
+          tempParentId = null;
+        }
+      }
+    }
+  }
+
+  return res.status(200).json({
     success: true,
-    folders
+    folders,
+    currentFolder,
+    breadcrumbs,
   });
-
 });

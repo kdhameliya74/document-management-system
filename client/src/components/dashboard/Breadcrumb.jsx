@@ -7,15 +7,15 @@ import { truncateFolderName } from '@/helpers/utils.js';
 
 const Breadcrumb = ({ currentFolderId }) => {
   const navigate = useNavigate();
-  const { folders } = useSelector((state) => state.fileSystem);
+  const { documents } = useSelector((state) => state.documentSystem);
 
   const getBreadcrumbs = () => {
     const crumbs = [];
     let currentId = currentFolderId;
 
-    while (currentId && folders[currentId]) {
-      crumbs.unshift(folders[currentId]);
-      currentId = folders[currentId].parentId;
+    while (currentId && documents[currentId]) {
+      crumbs.unshift(documents[currentId]);
+      currentId = documents[currentId].parentId;
     }
 
     return crumbs;

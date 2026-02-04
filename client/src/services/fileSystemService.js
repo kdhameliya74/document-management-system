@@ -1,7 +1,7 @@
 import api from "@/utils/api";
 
 const fileSystemAPI = {
-  // create new folder
+  // create new document
   createFolder: async (folder) => {
     const response = await api.post("/folders/create", folder);
     return response.data;
