@@ -1,6 +1,6 @@
-import React from 'react';
-import { X } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React from "react";
+import { X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 const Modal = ({ isOpen, onClose, title, icon: Icon, children }) => {
   if (!isOpen) return null;
@@ -26,9 +26,7 @@ const Modal = ({ isOpen, onClose, title, icon: Icon, children }) => {
                   <Icon className="text-text-muted" />
                 </div>
               )}
-              <h2 className="text-lg font-medium text-text-main">
-                {title}
-              </h2>
+              <h2 className="text-lg font-medium text-text-main">{title}</h2>
             </div>
             <button
               onClick={onClose}
@@ -38,9 +36,7 @@ const Modal = ({ isOpen, onClose, title, icon: Icon, children }) => {
             </button>
           </div>
 
-          <div className="p-6 bg-bg-panel">
-            {children}
-          </div>
+          <div className="p-6 bg-bg-panel">{children}</div>
         </motion.div>
       </div>
     </AnimatePresence>

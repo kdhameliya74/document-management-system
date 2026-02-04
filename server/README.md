@@ -5,11 +5,13 @@ Production-ready backend API with MongoDB, JWT authentication, and comprehensive
 ## 🚀 Quick Start
 
 ### 1. Setup
+
 ```bash
 ./setup.sh
 ```
 
 Or manually:
+
 ```bash
 # Copy environment file
 cp .env.example .env
@@ -22,13 +24,17 @@ mkdir uploads
 ```
 
 ### 2. Configure Environment
+
 Edit `.env` and update:
+
 - `MONGODB_URI` - Your MongoDB connection string
 - `JWT_SECRET` - Generate a secure random string
 - Other settings as needed
 
 ### 3. Start MongoDB
+
 Make sure MongoDB is running:
+
 ```bash
 # Local MongoDB
 mongod
@@ -38,6 +44,7 @@ mongod
 ```
 
 ### 4. Run Server
+
 ```bash
 # Development (with auto-reload)
 npm run dev
@@ -83,32 +90,38 @@ server/
 ## 🔒 Security Features
 
 ✅ **Password Security**
+
 - Bcrypt hashing (12 rounds)
 - Minimum 8 characters
 - Never exposed in responses
 
 ✅ **JWT Authentication**
+
 - Secure token generation
 - HttpOnly cookies
 - Token expiration (7 days)
 - CSRF protection
 
 ✅ **Input Validation**
+
 - Mongoose schema validation
 - NoSQL injection prevention
 - Email format validation
 - String length limits
 
 ✅ **Rate Limiting**
+
 - 100 requests per 15 minutes
 - Prevents brute force attacks
 
 ✅ **Security Headers**
+
 - Helmet.js integration
 - XSS protection
 - Clickjacking prevention
 
 ✅ **CORS**
+
 - Whitelist client origin
 - Credentials support
 
@@ -117,29 +130,35 @@ server/
 ## 📊 Database Schemas
 
 ### User
+
 - Authentication & profile
 - Storage tracking
 - Role-based access
 
 ### Folder
+
 - Hierarchical structure
 - Sharing & permissions
 - Trash functionality
 
 ### File
+
 - Metadata & storage
 - Versioning support
 - Tags & search
 
 ### FileVersion
+
 - Version history
 - Change tracking
 
 ### ActivityLog
+
 - Audit trail
 - Auto-cleanup (90 days)
 
 ### Comment
+
 - File discussions
 - Nested replies
 - Mentions
@@ -151,6 +170,7 @@ See `DOCUMENTATION.md` for complete schema details.
 ## 🌐 API Endpoints
 
 ### Authentication (`/api/auth`)
+
 - `POST /register` - Register user
 - `POST /login` - Login user
 - `GET /me` - Get current user (protected)
@@ -159,6 +179,7 @@ See `DOCUMENTATION.md` for complete schema details.
 - `PUT /updatepassword` - Change password (protected)
 
 ### Health Check
+
 - `GET /api/health` - Server status
 
 See `API_TESTING.md` for testing examples.
@@ -213,6 +234,7 @@ UPLOAD_PATH=./uploads
 ## 🧪 Testing
 
 Test the API:
+
 ```bash
 # Health check
 curl http://localhost:5000/api/health
@@ -267,11 +289,13 @@ npm start
 ## 📦 Dependencies
 
 **Core:**
+
 - express - Web framework
 - mongoose - MongoDB ODM
 - dotenv - Environment variables
 
 **Security:**
+
 - bcryptjs - Password hashing
 - jsonwebtoken - JWT authentication
 - helmet - Security headers
@@ -280,6 +304,7 @@ npm start
 - cookie-parser - Cookie handling
 
 **Utilities:**
+
 - cors - Cross-origin resource sharing
 - multer - File upload handling
 - express-validator - Input validation
@@ -289,16 +314,19 @@ npm start
 ## 🐛 Troubleshooting
 
 **MongoDB Connection Error:**
+
 - Ensure MongoDB is running
 - Check MONGODB_URI in .env
 - Verify network connectivity
 
 **JWT Error:**
+
 - Check JWT_SECRET is set
 - Verify token format
 - Check token expiration
 
 **CORS Error:**
+
 - Verify CLIENT_URL in .env
 - Check origin in request
 

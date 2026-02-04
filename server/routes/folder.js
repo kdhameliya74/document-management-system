@@ -1,11 +1,10 @@
-import express from 'express';
-import { createFolder, getFolders } from '../controllers/folderController.js';
-import { protect } from '../middleware/auth.js';
+import express from "express";
+import { createFolder, getFolders } from "../controllers/folderController.js";
+import { protect } from "../middleware/auth.js";
 
 const router = express.Router();
 
-router.post('/create', protect, createFolder);
-router.post('/all', protect, getFolders);
-
+router.post("/create", protect, createFolder);
+router.post("/all", protect, getFolders);
 
 export default router;

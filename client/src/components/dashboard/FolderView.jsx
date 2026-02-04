@@ -1,20 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import {
-  Plus,
-  Upload,
-  FolderPlus,
-  ChevronDown,
-  Loader
-} from "lucide-react";
+import { Plus, Upload, FolderPlus, ChevronDown, Loader } from "lucide-react";
 
 import ROUTES from "@/utils/routes";
-import {
-  setCurrentFolder,
-  setSelectedId,
-  fetchDocuments,
-} from "@/store/documentSystemSlice";
+import { setCurrentFolder, setSelectedId, fetchDocuments } from "@/store/documentSystemSlice";
 
 import FolderItem from "@/components/dashboard/FolderItem";
 import FileItem from "@/components/dashboard/FileItem";
@@ -32,9 +22,7 @@ const FolderView = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const { documents, files, selectedId, isLoading } = useSelector(
-    (state) => state.documentSystem
-  );
+  const { documents, files, selectedId, isLoading } = useSelector((state) => state.documentSystem);
 
   const currentFolder = documents[folderId];
 
@@ -110,10 +98,8 @@ const FolderView = () => {
   }, []);
 
   const childDocuments =
-    currentFolder?.childFolderIds.map((id) => documents[id]).filter(Boolean) ||
-    [];
-  const childFiles =
-    currentFolder?.childFileIds.map((id) => files[id]).filter(Boolean) || [];
+    currentFolder?.childFolderIds.map((id) => documents[id]).filter(Boolean) || [];
+  const childFiles = currentFolder?.childFileIds.map((id) => files[id]).filter(Boolean) || [];
   const isEmpty = childDocuments.length === 0 && childFiles.length === 0;
 
   const handleNavigate = (id) => {
@@ -133,9 +119,7 @@ const FolderView = () => {
     <div className="relative h-full flex flex-col" onClick={handleClickOutside}>
       <div className="flex items-center justify-between pb-4 border-b border-border-muted -mx-6 px-6">
         <div className="flex items-center gap-4">
-          <h2 className="text-2xl font-medium text-text-main">
-            {currentFolder?.name}
-          </h2>
+          <h2 className="text-2xl font-medium text-text-main">{currentFolder?.name}</h2>
         </div>
 
         <div className="relative" ref={dropdownRef}>
@@ -150,9 +134,7 @@ const FolderView = () => {
             <span>New</span>
             <ChevronDown
               size={14}
-              className={`transition-transform ${
-                showNewDropdown ? "rotate-180" : ""
-              }`}
+              className={`transition-transform ${showNewDropdown ? "rotate-180" : ""}`}
             />
           </button>
 

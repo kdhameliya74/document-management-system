@@ -1,16 +1,16 @@
-import express from 'express';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import helmet from 'helmet';
-import mongoSanitize from 'express-mongo-sanitize';
-import cookieParser from 'cookie-parser';
-import rateLimit from 'express-rate-limit';
-import connectDB from './config/database.js';
-import { errorHandler, notFound } from './middleware/error.js';
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import helmet from "helmet";
+import mongoSanitize from "express-mongo-sanitize";
+import cookieParser from "cookie-parser";
+import rateLimit from "express-rate-limit";
+import connectDB from "./config/database.js";
+import { errorHandler, notFound } from "./middleware/error.js";
 
 // Import routes
-import authRoutes from './routes/auth.js';
-import folderRoutes from './routes/folder.js';
+import authRoutes from "./routes/auth.js";
+import folderRoutes from "./routes/folder.js";
 
 // Load env vars
 dotenv.config();
@@ -29,40 +29,40 @@ app.use(helmet());
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
-  message: 'Too many requests from this IP, please try again later.'
+  message: "Too many requests from this IP, please try again later.",
 });
-app.use('/api/', limiter);
+app.use("/api/", limiter);
 
 // Sanitize data to prevent NoSQL injection
 app.use(mongoSanitize());
 
 // Body parser
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 // Cookie parser
 app.use(cookieParser());
 
 // Enable CORS
 const corsOptions = {
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  origin: process.env.CLIENT_URL || "http://localhost:5173",
   credentials: true,
-  optionsSuccessStatus: 200
+  optionsSuccessStatus: 200,
 };
 app.use(cors(corsOptions));
 
 // Health check route
-app.get('/api/health', (req, res) => {
-  res.json({ 
+app.get("/api/health", (req, res) => {
+  res.json({
     success: true,
-    message: 'Server is running',
-    timestamp: new Date().toISOString()
+    message: "Server is running",
+    timestamp: new Date().toISOString(),
   });
 });
 
 // Mount routes
-app.use('/api/auth', authRoutes);
-app.use('/api/folders', folderRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/folders", folderRoutes);
 
 // Error handling
 app.use(notFound);
@@ -85,7 +85,7 @@ const server = app.listen(PORT, () => {
 });
 
 // Handle unhandled promise rejections
-process.on('unhandledRejection', (err, promise) => {
+process.on("unhandledRejection", (err, _promise) => {
   console.log(`Error: ${err.message}`);
   // Close server & exit process
   server.close(() => process.exit(1));

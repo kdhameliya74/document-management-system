@@ -3,13 +3,7 @@ import { Folder } from "lucide-react";
 import { FOLDER_COLORS } from "@/helpers/constants.js";
 import { truncateFolderName } from "@/helpers/utils.js";
 
-const FolderItem = ({
-  folder,
-  isSelected,
-  onNavigate,
-  onContextMenu,
-}) => {
-  
+const FolderItem = ({ folder, isSelected, onNavigate, onContextMenu }) => {
   const displayName = truncateFolderName(folder.name);
 
   return (

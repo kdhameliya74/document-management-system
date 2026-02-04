@@ -62,69 +62,82 @@
 ## Relationship Details
 
 ### 1. **USER → FOLDER** (One-to-Many)
+
 - One user can own many folders
 - Each folder has one owner
 - Users can also be shared on folders (Many-to-Many via `sharedWith` array)
 
 ### 2. **USER → FILE** (One-to-Many)
+
 - One user can own many files
 - Each file has one owner
 - Users can also be shared on files (Many-to-Many via `sharedWith` array)
 
 ### 3. **FOLDER → FOLDER** (Self-Referencing, Hierarchical)
+
 - Folders can have parent folders
 - Creates a tree structure
 - Root folders have `parent: null`
 
 ### 4. **FOLDER → FILE** (One-to-Many)
+
 - One folder can contain many files
 - Each file belongs to one folder (or root if `folder: null`)
 
 ### 5. **FILE → FILE VERSION** (One-to-Many)
+
 - One file can have many versions
 - Each version belongs to one file
 - Tracks complete version history
 
 ### 6. **FILE → COMMENT** (One-to-Many)
+
 - One file can have many comments
 - Each comment belongs to one file
 
 ### 7. **COMMENT → COMMENT** (Self-Referencing, Nested)
+
 - Comments can have replies (parent-child)
 - Creates threaded discussions
 - Top-level comments have `parentComment: null`
 
 ### 8. **USER → COMMENT** (One-to-Many)
+
 - One user can write many comments
 - Each comment has one author
 
 ### 9. **USER → ACTIVITY LOG** (One-to-Many)
+
 - One user can have many activity logs
 - Each log entry belongs to one user
 
 ### 10. **ACTIVITY LOG → Multiple Entities** (Polymorphic)
+
 - Activity logs can reference Files, Folders, Comments, or FileVersions
 - Uses `targetType` and `target` fields (polymorphic reference)
 
 ## Permission Structure
 
 ### Folder/File Sharing
+
 ```javascript
 sharedWith: [
   {
-    user: ObjectId,           // Reference to User
-    permission: String,       // 'view' | 'edit' | 'admin'
-    sharedAt: Date
-  }
-]
+    user: ObjectId, // Reference to User
+    permission: String, // 'view' | 'edit' | 'admin'
+    sharedAt: Date,
+  },
+];
 ```
 
 ### Permission Levels
+
 1. **view** - Can view and download
 2. **edit** - Can view, download, and modify
 3. **admin** - Can view, download, modify, and manage sharing
 
 ### Access Hierarchy
+
 ```
 Owner (Full Access)
   │
@@ -138,6 +151,7 @@ Owner (Full Access)
 ## Data Flow Examples
 
 ### File Upload Flow
+
 ```
 1. User uploads file
 2. File document created (references User, Folder)
@@ -147,6 +161,7 @@ Owner (Full Access)
 ```
 
 ### Folder Sharing Flow
+
 ```
 1. Owner shares folder
 2. Folder.sharedWith array updated
@@ -155,6 +170,7 @@ Owner (Full Access)
 ```
 
 ### Comment Thread Flow
+
 ```
 1. User adds comment on file
 2. Comment created (references File, User)
@@ -164,6 +180,7 @@ Owner (Full Access)
 ```
 
 ### Version Control Flow
+
 ```
 1. User updates file
 2. Current FileVersion.isCurrent set to false
@@ -175,28 +192,34 @@ Owner (Full Access)
 ## Indexing Strategy
 
 ### User
+
 - `email` (unique) - Fast login lookups
 
 ### Folder
+
 - `owner + parent` - List user's folders in a directory
 - `owner + isTrashed` - Trash management
 - `path` - Path-based queries
 
 ### File
+
 - `owner + folder` - List files in a folder
 - `owner + isTrashed` - Trash management
 - `name + tags` (text) - Full-text search
 - `mimeType` - Filter by file type
 
 ### FileVersion
+
 - `file + versionNumber` - Version history
 - `file + isCurrent` - Get current version
 
 ### Comment
+
 - `file + createdAt` - List comments on a file
 - `parentComment` - Get replies
 
 ### ActivityLog
+
 - `user + createdAt` - User's activity feed
 - `target + createdAt` - Activity on a resource
 - `createdAt` (TTL) - Auto-delete after 90 days
@@ -230,6 +253,7 @@ if (User.storageUsed + newFile.size > User.storageLimit) {
 ## Security Checks
 
 ### Before any operation:
+
 ```javascript
 // 1. Check if user is authenticated
 if (!req.user) throw new Error('Unauthorized');
@@ -246,46 +270,51 @@ await ActivityLog.create({...});
 ## Query Examples
 
 ### Get user's root folders
+
 ```javascript
-Folder.find({ owner: userId, parent: null, isTrashed: false })
+Folder.find({ owner: userId, parent: null, isTrashed: false });
 ```
 
 ### Get files in a folder
+
 ```javascript
-File.find({ owner: userId, folder: folderId, isTrashed: false })
+File.find({ owner: userId, folder: folderId, isTrashed: false });
 ```
 
 ### Get file's current version
+
 ```javascript
-FileVersion.findOne({ file: fileId, isCurrent: true })
+FileVersion.findOne({ file: fileId, isCurrent: true });
 ```
 
 ### Get file's version history
+
 ```javascript
-FileVersion.find({ file: fileId }).sort({ versionNumber: -1 })
+FileVersion.find({ file: fileId }).sort({ versionNumber: -1 });
 ```
 
 ### Get comments on a file
+
 ```javascript
 Comment.find({ file: fileId, isDeleted: false, parentComment: null })
-  .populate('user', 'firstName lastName avatar')
-  .populate('replies')
+  .populate("user", "firstName lastName avatar")
+  .populate("replies");
 ```
 
 ### Get user's recent activity
+
 ```javascript
-ActivityLog.find({ user: userId })
-  .sort({ createdAt: -1 })
-  .limit(20)
+ActivityLog.find({ user: userId }).sort({ createdAt: -1 }).limit(20);
 ```
 
 ### Search files
+
 ```javascript
 File.find({
   owner: userId,
   $text: { $search: searchQuery },
-  isTrashed: false
-})
+  isTrashed: false,
+});
 ```
 
 ## Best Practices Applied

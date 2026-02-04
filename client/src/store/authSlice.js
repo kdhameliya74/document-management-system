@@ -14,68 +14,56 @@ const initialState = {
 | fetchUser (runs on reload)
 |--------------------------------------------------------------------------
 */
-export const fetchUser = createAsyncThunk(
-  "auth/fetchUser",
-  async (_, { rejectWithValue }) => {
-    try {
-      const data = await authAPI.getCurrentUser();
-      return data.user;
-    } catch (err) {
-      return rejectWithValue(err?.message || "Auth failed");
-    }
+export const fetchUser = createAsyncThunk("auth/fetchUser", async (_, { rejectWithValue }) => {
+  try {
+    const data = await authAPI.getCurrentUser();
+    return data.user;
+  } catch (err) {
+    return rejectWithValue(err?.message || "Auth failed");
   }
-);
+});
 
 /*
 |--------------------------------------------------------------------------
 | login
 |--------------------------------------------------------------------------
 */
-export const login = createAsyncThunk(
-  "auth/login",
-  async (credentials, { rejectWithValue }) => {
-    try {
-      const data = await authAPI.login(credentials);
-      return data.user;
-    } catch (err) {
-      return rejectWithValue(err?.message || "Login failed");
-    }
+export const login = createAsyncThunk("auth/login", async (credentials, { rejectWithValue }) => {
+  try {
+    const data = await authAPI.login(credentials);
+    return data.user;
+  } catch (err) {
+    return rejectWithValue(err?.message || "Login failed");
   }
-);
+});
 
 /*
 |--------------------------------------------------------------------------
 | signup
 |--------------------------------------------------------------------------
 */
-export const signup = createAsyncThunk(
-  "auth/signup",
-  async (userData, { rejectWithValue }) => {
-    try {
-      const data = await authAPI.register(userData);
-      return data.user;
-    } catch (err) {
-      return rejectWithValue(err?.message || "Signup failed");
-    }
+export const signup = createAsyncThunk("auth/signup", async (userData, { rejectWithValue }) => {
+  try {
+    const data = await authAPI.register(userData);
+    return data.user;
+  } catch (err) {
+    return rejectWithValue(err?.message || "Signup failed");
   }
-);
+});
 
 /*
 |--------------------------------------------------------------------------
 | logout
 |--------------------------------------------------------------------------
 */
-export const logout = createAsyncThunk(
-  "auth/logout",
-  async (_, { rejectWithValue }) => {
-    try {
-      await authAPI.logout();
-      return null;
-    } catch (err) {
-      return rejectWithValue(err?.message || "Logout failed");
-    }
+export const logout = createAsyncThunk("auth/logout", async (_, { rejectWithValue }) => {
+  try {
+    await authAPI.logout();
+    return null;
+  } catch (err) {
+    return rejectWithValue(err?.message || "Logout failed");
   }
-);
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -135,7 +123,7 @@ const authSlice = createSlice({
         state.error = action.payload; // Always a string now
       })
 
-    /*
+      /*
     |--------------------------------------------------------------------------
     | SIGNUP
     |--------------------------------------------------------------------------
@@ -155,8 +143,8 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      
-    /*
+
+      /*
     |--------------------------------------------------------------------------
     | LOGOUT
     |--------------------------------------------------------------------------

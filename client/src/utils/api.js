@@ -1,12 +1,12 @@
-import axios from 'axios';
-import Cookies from 'js-cookie';
-import ROUTES from '@/utils/routes';
+import axios from "axios";
+import Cookies from "js-cookie";
+import ROUTES from "@/utils/routes";
 
 // Create axios instance
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api",
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
   withCredentials: true, // Important for cookies
 });
@@ -15,16 +15,16 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     // Get token from localStorage (primary) or cookies (fallback)
-    const token = localStorage.getItem('token') || Cookies.get('token');
+    const token = localStorage.getItem("token") || Cookies.get("token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    
+
     return config;
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
 
 // Response interceptor - Handle errors globally
@@ -59,8 +59,7 @@ api.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
-
 
 export default api;

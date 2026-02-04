@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from "react";
 
 const ContextMenu = ({ x, y, items, onClose }) => {
   const menuRef = useRef(null);
@@ -9,35 +9,37 @@ const ContextMenu = ({ x, y, items, onClose }) => {
         onClose();
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [onClose]);
 
   return (
-    <div 
-      className="fixed bg-white rounded-lg border border-slate-100 shadow-lg z-1000 min-w-[180px] animate-in fade-in zoom-in-95 duration-100 overflow-hidden" 
+    <div
+      className="fixed bg-white rounded-lg border border-slate-100 shadow-lg z-1000 min-w-[180px] animate-in fade-in zoom-in-95 duration-100 overflow-hidden"
       style={{ top: y, left: x }}
       ref={menuRef}
     >
       {items.map((item, index) => {
         const Icon = item?.icon || null;
         return (
-        <button 
-          key={index} 
-          className="flex items-center w-full py-2 px-3 text-left text-sm text-slate-900 transition-colors hover:bg-bg-hover hover:text-white cursor-pointer"
-          onClick={() => {
-            item.onClick();
-            onClose();
-          }}
-        >
-          {Icon && <span className="mr-3 flex items-center">
-            <Icon size={16} />
-          </span>}
-          {item.label}
-        </button>
-      )
+          <button
+            key={index}
+            className="flex items-center w-full py-2 px-3 text-left text-sm text-slate-900 transition-colors hover:bg-bg-hover hover:text-white cursor-pointer"
+            onClick={() => {
+              item.onClick();
+              onClose();
+            }}
+          >
+            {Icon && (
+              <span className="mr-3 flex items-center">
+                <Icon size={16} />
+              </span>
+            )}
+            {item.label}
+          </button>
+        );
       })}
     </div>
   );

@@ -1,7 +1,4 @@
-import {
-  FOLDER_MAX_NAME_LENGTH,
-  FILE_MAX_NAME_LENGTH,
-} from "@/helpers/constants.js";
+import { FOLDER_MAX_NAME_LENGTH, FILE_MAX_NAME_LENGTH } from "@/helpers/constants.js";
 
 export const truncateFileName = (name) => {
   const maxLength = FILE_MAX_NAME_LENGTH;
