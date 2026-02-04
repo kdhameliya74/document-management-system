@@ -1,0 +1,11 @@
+export const PERMISSION_LEVELS = {
+  VIEW: 'view',
+  EDIT: 'edit',
+  ADMIN: 'admin'
+};
+
+export const PERMISSION_ARRAY = [
+  PERMISSION_LEVELS.VIEW,
+  PERMISSION_LEVELS.EDIT,
+  PERMISSION_LEVELS.ADMIN
+];

@@ -6,13 +6,15 @@ import {
   Upload,
   FolderPlus,
   ChevronDown,
+  Loader
 } from "lucide-react";
 
 import ROUTES from "@/utils/routes";
 import {
   setCurrentFolder,
   setSelectedId,
-} from "@/store/fileSystemSlice";
+  fetchDocuments,
+} from "@/store/documentSystemSlice";
 
 import FolderItem from "@/components/dashboard/FolderItem";
 import FileItem from "@/components/dashboard/FileItem";
@@ -30,10 +32,11 @@ const FolderView = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const { folders, files, selectedId } = useSelector(
-    (state) => state.fileSystem
+  const { documents, files, selectedId, isLoading } = useSelector(
+    (state) => state.documentSystem
   );
-  const currentFolder = folders[folderId];
+
+  const currentFolder = documents[folderId];
 
   const [showNewDropdown, setShowNewDropdown] = useState(false);
   const dropdownRef = useRef(null);
@@ -88,12 +91,11 @@ const FolderView = () => {
   const ActiveModal = MODALS_MAP[activeModal]?.Component;
 
   useEffect(() => {
-    if (currentFolder) {
-      dispatch(setCurrentFolder(folderId));
-    } else {
-      navigate(ROUTES.DASHBOARD.FOLDER_ROOT);
-    }
-  }, [folderId, currentFolder, dispatch, navigate]);
+    // fetch documents and files
+    const parentId = folderId === "root" ? null : folderId;
+    dispatch(fetchDocuments(parentId));
+    dispatch(setCurrentFolder(folderId));
+  }, [folderId, dispatch]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -107,12 +109,12 @@ const FolderView = () => {
     };
   }, []);
 
-  const childFolders =
-    currentFolder?.childFolderIds.map((id) => folders[id]).filter(Boolean) ||
+  const childDocuments =
+    currentFolder?.childFolderIds.map((id) => documents[id]).filter(Boolean) ||
     [];
   const childFiles =
     currentFolder?.childFileIds.map((id) => files[id]).filter(Boolean) || [];
-  const isEmpty = childFolders.length === 0 && childFiles.length === 0;
+  const isEmpty = childDocuments.length === 0 && childFiles.length === 0;
 
   const handleNavigate = (id) => {
     navigate(ROUTES.DASHBOARD.FOLDER_DYNAMIC(id));
@@ -127,17 +129,12 @@ const FolderView = () => {
     closeContextMenu();
   };
 
-
-
-  if (!currentFolder) return <div>Loading...</div>;
-
   return (
-    <div className="h-full flex flex-col" onClick={handleClickOutside}>
-      {/* Top section */}
+    <div className="relative h-full flex flex-col" onClick={handleClickOutside}>
       <div className="flex items-center justify-between pb-4 border-b border-border-muted -mx-6 px-6">
         <div className="flex items-center gap-4">
           <h2 className="text-2xl font-medium text-text-main">
-            {currentFolder.name}
+            {currentFolder?.name}
           </h2>
         </div>
 
@@ -182,13 +179,18 @@ const FolderView = () => {
       <Breadcrumb currentFolderId={folderId} />
 
       {/* Grid View */}
-      {isEmpty ? (
+      {isLoading ? (
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-2">
+          <Loader size={32} className="animate-spin text-primary" />
+          <div className="text-text-muted">Loading...</div>
+        </div>
+      ) : isEmpty ? (
         <EmptyFolderScreen setActiveModal={setActiveModal} />
       ) : (
         <div className="flex-1 overflow-y-auto -mx-6 px-6">
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-9 gap-6 py-4">
-            {/* Folders */}
-            {childFolders.map((folder) => (
+            {/* Documents */}
+            {childDocuments.map((folder) => (
               <FolderItem
                 key={folder.id}
                 folder={folder}

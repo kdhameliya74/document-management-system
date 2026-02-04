@@ -1,23 +1,23 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { FileText, Folder, Download, Trash2, Share2, Clock, Info, User, X } from 'lucide-react';
-import { deleteItem, setShowDetails } from '@/store/fileSystemSlice';
+import { deleteItem, setShowDetails } from '@/store/documentSystemSlice';
 import { format } from 'date-fns';
 
 const RightSidebar = () => {
   const dispatch = useDispatch();
-  const { folders, files, currentFolderId, selectedId, showDetails } = useSelector((state) => state.fileSystem);
+  const { documents, files, currentFolderId, selectedId, showDetails } = useSelector((state) => state.documentSystem);
   const { user } = useSelector((state) => state.auth);
   
-  const currentFolder = folders[currentFolderId];
-  const selectedItem = selectedId ? (folders[selectedId] || files[selectedId]) : currentFolder;
+  const currentFolder = documents[currentFolderId];
+  const selectedItem = selectedId ? (documents[selectedId] || files[selectedId]) : currentFolder;
   
   const [showDeleteModal, setShowDeleteModal] = React.useState(false);
 
   // Only show if showDetails is true AND we have an item to show
   if (!showDetails || !selectedItem) return null;
 
-  const isFolder = !!folders[selectedItem.id];
+  const isFolder = !!documents[selectedItem.id];
   const type = isFolder ? 'folder' : 'file';
 
   const handleDelete = () => {

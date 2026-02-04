@@ -11,7 +11,7 @@ const Header = () => {
         <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted" />
         <input 
           type="text" 
-          placeholder="Search files, folders..." 
+          placeholder="Search files, documents..." 
           className="w-full py-2 px-4 pl-10 border border-border-muted rounded-xl bg-bg-main text-sm text-text-main transition-all outline-none focus:border-primary focus:ring-4 focus:ring-primary/10"
         />
       </div>

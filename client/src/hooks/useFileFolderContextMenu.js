@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { Trash, Eye, Share, Download, FolderPen } from "lucide-react";
-import { setSelectedId, setShowDetails } from "@/store/fileSystemSlice";
+import { setSelectedId, setShowDetails } from "@/store/documentSystemSlice";
 
 const useFileFolderContextMenu = () => {
   const dispatch = useDispatch();

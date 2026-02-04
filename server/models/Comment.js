@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { COMMENT_VALIDATION } from '../constants/Comment.js';
 
 const commentSchema = new mongoose.Schema({
   file: {
@@ -14,9 +15,9 @@ const commentSchema = new mongoose.Schema({
   },
   content: {
     type: String,
-    required: [true, 'Comment content is required'],
+    required: [true, COMMENT_VALIDATION.CONTENT_REQUIRED],
     trim: true,
-    maxlength: [2000, 'Comment cannot be more than 2000 characters']
+    maxlength: [2000, COMMENT_VALIDATION.CONTENT_MAXLENGTH]
   },
   parentComment: {
     type: mongoose.Schema.Types.ObjectId,
