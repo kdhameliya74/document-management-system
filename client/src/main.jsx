@@ -7,7 +7,7 @@ import { store } from "@/store/store.js";
 
 import { fetchUser } from "@/store/authSlice.js";
 store.dispatch(fetchUser());
-
+console.log("sample");
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <Provider store={store}>
