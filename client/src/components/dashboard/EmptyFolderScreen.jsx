@@ -6,9 +6,7 @@ const EmptyFolderScreen = ({ setActiveModal }) => {
       <div className="w-[120px] h-[120px] bg-bg-panel rounded-full flex items-center justify-center mb-6 text-text-muted/30 border border-border-muted">
         <FolderPlus size={64} className="text-primary/50" />
       </div>
-      <h3 className="text-xl font-normal text-text-main mb-2">
-        This folder is empty
-      </h3>
+      <h3 className="text-xl font-normal text-text-main mb-2">This folder is empty</h3>
       <p>Upload files or create a new folder to get started</p>
       <div className="flex gap-4 mt-6">
         <button

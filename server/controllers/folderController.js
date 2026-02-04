@@ -4,7 +4,7 @@ import Folder from "../models/Folder.js";
 // @desc   Create folder
 // @route  POST /api/folder/create
 // @access Private
-export const createFolder = asyncHandler(async (req, res, next) => {
+export const createFolder = asyncHandler(async (req, res, _next) => {
   const { name, parent, color } = req.body;
   const owner = req.user?.id || req.body.owner;
 
@@ -61,7 +61,7 @@ export const createFolder = asyncHandler(async (req, res, next) => {
 // @desc   Get all folders
 // @route  GET /api/folder/all
 // @access Private
-export const getFolders = asyncHandler(async (req, res, next) => {
+export const getFolders = asyncHandler(async (req, res, _next) => {
   const userId = req.user?.id;
   const { parent } = req.body;
 

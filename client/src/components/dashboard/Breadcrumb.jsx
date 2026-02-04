@@ -1,9 +1,9 @@
-import React from 'react';
-import { ChevronRight, Home } from 'lucide-react';
-import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import ROUTES from '@/utils/routes';
-import { truncateFolderName } from '@/helpers/utils.js';
+import React from "react";
+import { ChevronRight, Home } from "lucide-react";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import ROUTES from "@/utils/routes";
+import { truncateFolderName } from "@/helpers/utils.js";
 
 const Breadcrumb = ({ currentFolderId }) => {
   const navigate = useNavigate();
@@ -25,7 +25,7 @@ const Breadcrumb = ({ currentFolderId }) => {
 
   return (
     <nav className="flex items-center gap-1 text-sm text-text-muted my-2 overflow-x-auto whitespace-nowrap scrollbar-hide">
-      <button 
+      <button
         onClick={() => navigate(ROUTES.DASHBOARD.FOLDER_ROOT)}
         className="p-1 hover:bg-bg-hover hover:text-text-main rounded transition-colors cursor-pointer flex items-center"
       >
@@ -38,9 +38,9 @@ const Breadcrumb = ({ currentFolderId }) => {
           <button
             onClick={() => navigate(ROUTES.DASHBOARD.FOLDER_DYNAMIC(crumb.id))}
             className={`px-2 py-1 rounded transition-colors cursor-pointer max-w-[150px] truncate ${
-              index === crumbs.length - 1 
-                ? 'text-text-main bg-primary/10' 
-                : 'hover:bg-bg-hover hover:text-text-main'
+              index === crumbs.length - 1
+                ? "text-text-main bg-primary/10"
+                : "hover:bg-bg-hover hover:text-text-main"
             }`}
             title={crumb.name}
           >

@@ -46,10 +46,12 @@ export const fetchDocuments = createAsyncThunk(
         folders: data.folders,
         currentFolder: data.currentFolder,
         breadcrumbs: data.breadcrumbs || [],
-        parentId: parentId || 'root'
+        parentId: parentId || "root",
       };
     } catch (err) {
-      return rejectWithValue(err?.response?.data?.message || err?.message || "No folders available");
+      return rejectWithValue(
+        err?.response?.data?.message || err?.message || "No folders available",
+      );
     }
   },
 );
@@ -74,7 +76,6 @@ const linkChildToParent = (state, parentId, childId) => {
     children.push(childId);
   }
 };
-
 
 const documentSystemSlice = createSlice({
   name: "documentSystem",
@@ -133,9 +134,9 @@ const documentSystemSlice = createSlice({
           // Let's just remove the reference for now.
           delete state.documents[id];
         } else {
-          state.documents[parentId].childFileIds = state.documents[
-            parentId
-          ].childFileIds.filter((fid) => fid !== id);
+          state.documents[parentId].childFileIds = state.documents[parentId].childFileIds.filter(
+            (fid) => fid !== id,
+          );
           delete state.files[id];
         }
       }
@@ -173,10 +174,9 @@ const documentSystemSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchDocuments.fulfilled, (state, action) => {
-
         /**
          * we need following structure
-         * 
+         *
          * documents = {
          *    root: {
          *      id: "root",

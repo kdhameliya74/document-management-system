@@ -22,8 +22,7 @@ const CreateFolderModal = ({ isOpen, onClose, currentFolderId }) => {
     if (sanitizedName) {
       const currentFolder = documents[currentFolderId];
       const isDuplicate = currentFolder?.childFolderIds?.some(
-        (folderId) =>
-          documents[folderId]?.name.toLowerCase() === sanitizedName.toLowerCase(),
+        (folderId) => documents[folderId]?.name.toLowerCase() === sanitizedName.toLowerCase(),
       );
 
       if (isDuplicate) {
@@ -40,7 +39,7 @@ const CreateFolderModal = ({ isOpen, onClose, currentFolderId }) => {
                 owner: user?.id || user?._id,
               }),
             ).unwrap();
-            
+
             toast.success("Folder created successfully!");
             handleCancel();
           } catch (err) {
@@ -65,12 +64,7 @@ const CreateFolderModal = ({ isOpen, onClose, currentFolderId }) => {
   };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={handleCancel}
-      title="Create New Folder"
-      icon={Folder}
-    >
+    <Modal isOpen={isOpen} onClose={handleCancel} title="Create New Folder" icon={Folder}>
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-3">
           <label htmlFor="folder_name" className="text-sm text-text-muted px-1">
@@ -90,15 +84,11 @@ const CreateFolderModal = ({ isOpen, onClose, currentFolderId }) => {
                 : "border-border-muted focus:border-primary focus:ring-4 focus:ring-primary/10"
             }`}
           />
-          {errorMessage && (
-            <span className="text-sm text-red-500 px-1">{errorMessage}</span>
-          )}
+          {errorMessage && <span className="text-sm text-red-500 px-1">{errorMessage}</span>}
         </div>
 
         <div className="flex flex-col gap-3">
-          <label className="text-sm text-text-muted px-1">
-            Choose folder Color
-          </label>
+          <label className="text-sm text-text-muted px-1">Choose folder Color</label>
           <div className="grid grid-cols-9 gap-2">
             {Object.values(FOLDER_COLORS).map((color) => (
               <button

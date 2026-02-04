@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { Upload } from 'lucide-react';
-import { addFile } from '@/store/documentSystemSlice';
-import Modal from '@/components/common/Modal';
+import React, { useState } from "react";
+import { useDispatch } from "react-redux";
+import { Upload } from "lucide-react";
+import { addFile } from "@/store/documentSystemSlice";
+import Modal from "@/components/common/Modal";
 
 const UploadFileModal = ({ isOpen, onClose, currentFolderId }) => {
   const [uploadFile, setUploadFile] = useState(null);
@@ -10,13 +10,15 @@ const UploadFileModal = ({ isOpen, onClose, currentFolderId }) => {
 
   const handleUpload = () => {
     if (uploadFile) {
-      dispatch(addFile({
-        name: uploadFile.name,
-        type: uploadFile.type,
-        size: uploadFile.size,
-        parentId: currentFolderId,
-        url: URL.createObjectURL(uploadFile)
-      }));
+      dispatch(
+        addFile({
+          name: uploadFile.name,
+          type: uploadFile.type,
+          size: uploadFile.size,
+          parentId: currentFolderId,
+          url: URL.createObjectURL(uploadFile),
+        }),
+      );
       setUploadFile(null);
       onClose();
     }
@@ -31,8 +33,8 @@ const UploadFileModal = ({ isOpen, onClose, currentFolderId }) => {
     <Modal isOpen={isOpen} onClose={handleClose} title="Upload File">
       <div className="flex flex-col gap-6">
         <div className="border-2 border-dashed border-border-muted rounded-2xl p-10 text-center relative cursor-pointer transition-all hover:border-primary hover:bg-primary/5 group">
-          <input 
-            type="file" 
+          <input
+            type="file"
             onChange={(e) => setUploadFile(e.target.files[0])}
             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
           />
@@ -41,21 +43,23 @@ const UploadFileModal = ({ isOpen, onClose, currentFolderId }) => {
               <Upload size={24} />
             </div>
             <div className="text-text-main font-medium">
-              {uploadFile ? uploadFile.name : 'Click to select or drag file here'}
+              {uploadFile ? uploadFile.name : "Click to select or drag file here"}
             </div>
-            {!uploadFile && <div className="text-text-muted text-sm">Support for all file types</div>}
+            {!uploadFile && (
+              <div className="text-text-muted text-sm">Support for all file types</div>
+            )}
           </div>
         </div>
         <div className="flex justify-end gap-4">
-          <button 
-            onClick={handleClose} 
+          <button
+            onClick={handleClose}
             className="py-2.5 px-5 rounded-xl font-normal text-sm transition-all bg-bg-hover text-text-muted hover:text-text-main cursor-pointer"
           >
             Cancel
           </button>
-          <button 
-            onClick={handleUpload} 
-            disabled={!uploadFile} 
+          <button
+            onClick={handleUpload}
+            disabled={!uploadFile}
             className="py-2.5 px-5 rounded-xl font-medium text-sm transition-all bg-primary text-white hover:bg-primary-hover shadow-lg shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
             Upload File

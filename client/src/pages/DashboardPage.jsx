@@ -1,12 +1,12 @@
-import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import Sidebar from '@/components/layout/Sidebar';
-import Header from '@/components/layout/Header';
-import FolderView from '@/components/dashboard/FolderView';
-import RightSidebar from '@/components/dashboard/RightSidebar';
+import React from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
+import Sidebar from "@/components/layout/Sidebar";
+import Header from "@/components/layout/Header";
+import FolderView from "@/components/dashboard/FolderView";
+import RightSidebar from "@/components/dashboard/RightSidebar";
 
-import TrashPage from '@/pages/TrashPage';
-import ROUTES from '@/utils/routes';
+import TrashPage from "@/pages/TrashPage";
+import ROUTES from "@/utils/routes";
 
 const DashboardPage = () => {
   return (
@@ -17,7 +17,7 @@ const DashboardPage = () => {
         <div className="flex flex-1 overflow-hidden relative">
           <div className="flex-1 overflow-y-auto p-6 relative">
             <Routes>
-              <Route path="/"  element={<Navigate to={ROUTES.DASHBOARD.RELATIVE.ROOT} />} />
+              <Route path="/" element={<Navigate to={ROUTES.DASHBOARD.RELATIVE.ROOT} />} />
               <Route path={ROUTES.DASHBOARD.RELATIVE.FOLDER} element={<FolderView />} />
               <Route path={ROUTES.DASHBOARD.RELATIVE.TRASH} element={<TrashPage />} />
             </Routes>
