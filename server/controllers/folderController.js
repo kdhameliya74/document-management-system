@@ -58,6 +58,9 @@ export const createFolder = asyncHandler(async (req, res, next) => {
   });
 });
 
+// @desc   Get all folders
+// @route  GET /api/folder/all
+// @access Private
 export const getFolders = asyncHandler(async (req, res, next) => {
   const userId = req.user?.id;
   const { parent } = req.body;
@@ -86,7 +89,7 @@ export const getFolders = asyncHandler(async (req, res, next) => {
           owner: userId,
           isTrashed: false,
         }).select("_id name parent");
-        
+
         if (ancestor) {
           breadcrumbs.unshift({
             id: ancestor._id,
