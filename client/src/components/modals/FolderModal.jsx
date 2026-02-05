@@ -1,24 +1,38 @@
-import React, { useState, useTransition } from "react";
+import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Folder, Loader } from "lucide-react";
-import { FOLDER_COLORS, ERROR_MESSAGES } from "@/helpers/constants.js";
+import { Folder, Loader, Edit } from "lucide-react";
+import { FOLDER_COLORS, ERROR_MESSAGES, DOCUMENT_MODES } from "@/helpers/constants.js";
 
-import { createFolder } from "@/store/documentSystemSlice";
+import { createFolder, updateDocument } from "@/store/documentSystemSlice";
 import toast from "react-hot-toast";
 import Modal from "@/components/common/Modal";
 
-const CreateFolderModal = ({ isOpen, onClose, currentFolderId }) => {
-  const [folderName, setFolderName] = useState("");
-  const [isPending, startTransition] = useTransition();
+const FolderModal = ({
+  documentItem,
+  isOpen,
+  onClose,
+  currentFolderId,
+  mode = DOCUMENT_MODES.CREATE,
+}) => {
+  const isCreate = mode === DOCUMENT_MODES.CREATE;
+  const modalProps = {
+    title: isCreate ? "Create New Folder" : "Edit Document",
+    icon: isCreate ? Folder : Edit,
+  };
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [folderName, setFolderName] = useState(documentItem?.name || "");
   const [errorMessage, setErrorMessage] = useState(null);
-  const [selectedColor, setSelectedColor] = useState(FOLDER_COLORS.DEFAULT);
+  const [selectedColor, setSelectedColor] = useState(documentItem?.color || FOLDER_COLORS.DEFAULT);
   const { documents } = useSelector((state) => state.documentSystem);
   const { user } = useSelector((state) => state.auth);
 
   const dispatch = useDispatch();
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
+    setIsLoading(true);
     const sanitizedName = folderName.trim();
+
     if (sanitizedName) {
       const currentFolder = documents[currentFolderId];
       const isDuplicate = currentFolder?.childFolderIds?.some(
@@ -26,26 +40,37 @@ const CreateFolderModal = ({ isOpen, onClose, currentFolderId }) => {
       );
 
       if (isDuplicate) {
+        setIsLoading(false);
         setErrorMessage(ERROR_MESSAGES.FOLDER_NAME_DUPLICATE);
-      } else {
-        // TODO: refactor this startTransition
-        startTransition(async () => {
-          try {
-            await dispatch(
-              createFolder({
-                name: sanitizedName,
-                parent: currentFolderId === "root" ? null : currentFolderId,
-                color: selectedColor,
-                owner: user?.id || user?._id,
-              }),
-            ).unwrap();
+        return;
+      }
 
-            toast.success("Folder created successfully!");
-            handleCancel();
-          } catch (err) {
-            toast.error(err || "Failed to create folder");
-          }
-        });
+      try {
+        const fields = {
+          name: sanitizedName,
+          color: selectedColor,
+        };
+        if (isCreate) {
+          await dispatch(
+            createFolder({
+              ...fields,
+              parent: currentFolderId === "root" ? null : currentFolderId,
+              owner: user?.id || user?._id,
+            }),
+          ).unwrap();
+
+          toast.success("Folder created successfully!");
+        } else {
+          // for edit
+          const data = await dispatch(updateDocument({ ...fields, id: documentItem.id })).unwrap();
+          toast.success(data?.message || "Document updated successfully!");
+        }
+
+        handleCancel();
+      } catch (err) {
+        toast.error(err || "Failed to create/update document");
+      } finally {
+        setIsLoading(false);
       }
     }
   };
@@ -64,7 +89,7 @@ const CreateFolderModal = ({ isOpen, onClose, currentFolderId }) => {
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={handleCancel} title="Create New Folder" icon={Folder}>
+    <Modal isOpen={isOpen} onClose={handleCancel} {...modalProps}>
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-3">
           <label htmlFor="folder_name" className="text-sm text-text-muted px-1">
@@ -115,11 +140,11 @@ const CreateFolderModal = ({ isOpen, onClose, currentFolderId }) => {
           </button>
           <button
             onClick={handleCreate}
-            disabled={isPending || !folderName.trim()}
+            disabled={isLoading || !folderName.trim()}
             className="flex gap-2 py-2.5 px-5 rounded-xl font-medium text-sm transition-all bg-primary text-white hover:bg-primary-hover shadow-lg shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
-            {isPending ? <Loader className="animate-spin" size={18} /> : null}
-            <span>Create</span>
+            {isLoading ? <Loader className="animate-spin" size={18} /> : null}
+            <span>{isCreate ? "Create" : "Update"}</span>
           </button>
         </div>
       </div>
@@ -127,4 +152,4 @@ const CreateFolderModal = ({ isOpen, onClose, currentFolderId }) => {
   );
 };
 
-export default CreateFolderModal;
+export default FolderModal;

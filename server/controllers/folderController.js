@@ -111,3 +111,31 @@ export const getFolders = asyncHandler(async (req, res, _next) => {
     breadcrumbs,
   });
 });
+
+export const updateDocument = asyncHandler(async (req, res, _) => {
+  const { docId } = req.params;
+  const document = await Folder.findById(docId);
+  if (!document) {
+    return res.status(404).json({
+      success: false,
+      message: "Document not found!",
+    });
+  }
+  const allTopLevelFields = Object.keys(Folder.schema.obj);
+  const forbiddenFields = ["owner", "parent", "path", "publicLink", "trashedAt", "sharedWith"];
+  const updates = {};
+  const allowedFields = allTopLevelFields.filter((field) => !forbiddenFields.includes(field));
+
+  allowedFields.forEach((field) => {
+    if (req?.body?.[field]) updates[field] = req.body[field];
+  });
+
+  if (Object.keys(updates).length === 0) {
+    return res.status(400).json({ success: false, message: "No valid fields provided to update" });
+  }
+  await Folder.updateOne({ _id: docId }, { $set: updates });
+  res.status(200).json({
+    success: true,
+    message: "Document updated successfully!",
+  });
+});

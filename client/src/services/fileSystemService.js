@@ -10,6 +10,10 @@ const fileSystemAPI = {
     const response = await api.post("/folders/all", { parent: parentId });
     return response.data;
   },
+  updateDocument: async (docId, payload) => {
+    const response = await api.patch(`/folders/${docId}`, { ...payload });
+    return response.data;
+  },
 };
 
 export default fileSystemAPI;

@@ -37,9 +37,9 @@ const useFileFolderContextMenu = () => {
     if (!contextMenu) return [];
     return [
       {
-        label: "Rename",
+        label: "Edit",
         icon: FolderPen,
-        onClick: () => openModal("rename"),
+        onClick: () => openModal("edit"),
       },
       {
         label: "Delete",

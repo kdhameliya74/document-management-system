@@ -10,12 +10,12 @@ import FolderItem from "@/components/dashboard/FolderItem";
 import FileItem from "@/components/dashboard/FileItem";
 import Breadcrumb from "@/components/dashboard/Breadcrumb";
 import ContextMenu from "@/components/common/ContextMenu";
-import CreateFolderModal from "@/components/modals/CreateFolderModal";
+import FolderModal from "@/components/modals/FolderModal";
 import UploadFileModal from "@/components/modals/UploadFileModal";
-import RenameModal from "@/components/modals/RenameModal";
 import DeleteModal from "@/components/modals/DeleteModal";
 import EmptyFolderScreen from "@/components/dashboard/EmptyFolderScreen";
 import useFileFolderContextMenu from "@/hooks/useFileFolderContextMenu";
+import { DOCUMENT_MODES } from "@/helpers/constants";
 
 const FolderView = () => {
   const { folderId } = useParams();
@@ -42,16 +42,16 @@ const FolderView = () => {
 
   const MODALS_MAP = {
     createFolder: {
-      Component: CreateFolderModal,
+      Component: FolderModal,
       props: { currentFolderId: folderId },
     },
     upload: {
       Component: UploadFileModal,
       props: { currentFolderId: folderId },
     },
-    rename: {
-      Component: RenameModal,
-      props: { item: selectedItem, itemType: selectedItemType },
+    edit: {
+      Component: FolderModal,
+      props: { documentItem: selectedItem, docType: selectedItemType, mode: DOCUMENT_MODES.EDIT },
     },
     delete: {
       Component: DeleteModal,
