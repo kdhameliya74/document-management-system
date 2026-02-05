@@ -1,6 +1,11 @@
 export const FOLDER_MAX_NAME_LENGTH = 20;
 export const FILE_MAX_NAME_LENGTH = 20;
 
+export const DOCUMENT_MODES = Object.freeze({
+  EDIT: "edit",
+  CREATE: "create",
+});
+
 export const FOLDER_COLORS = Object.freeze({
   DEFAULT: "#6366f1",
   RED: "#ef4444",

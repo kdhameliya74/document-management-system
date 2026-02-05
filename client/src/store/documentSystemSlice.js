@@ -56,6 +56,21 @@ export const fetchDocuments = createAsyncThunk(
   },
 );
 
+export const updateDocument = createAsyncThunk(
+  "documents/update",
+  async ({ id, ...rest }, { rejectWithValue }) => {
+    try {
+      const data = await fileSystemAPI.updateDocument(id, rest);
+      return {
+        ...data,
+        document: { id, ...rest },
+      };
+    } catch (err) {
+      return rejectWithValue(err?.response?.data?.message || "Document not updated!");
+    }
+  },
+);
+
 const ensureFolder = (state, id, data) => {
   state.documents[id] ??= {
     id,
@@ -156,7 +171,7 @@ const documentSystemSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(createFolder.fulfilled, (state, action) => {
-        const { parent } = action.payload;
+        const parent = action?.payload?.parent ?? "root";
         const normalizedFolder = {
           ...action.payload,
           childFolderIds: [],
@@ -245,6 +260,12 @@ const documentSystemSlice = createSlice({
       .addCase(fetchDocuments.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
+      })
+      .addCase(updateDocument.fulfilled, (state, action) => {
+        const { document } = action.payload;
+        if (state.documents[document.id]) {
+          state.documents[document.id] = { ...state.documents[document.id], ...document };
+        }
       });
   },
 });
