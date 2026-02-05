@@ -17,7 +17,7 @@ const FolderModal = ({
   const isCreate = mode === DOCUMENT_MODES.CREATE;
   const modalProps = {
     title: isCreate ? "Create New Folder" : "Edit Document",
-    icon: isCreate ? Folder : Edit,
+    icon: isCreate ? <Folder className="text-text-muted" /> : <Edit className="text-text-muted" />,
   };
 
   const [isLoading, setIsLoading] = useState(false);

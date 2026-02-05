@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from "framer-motion";
 
 const Modal = ({ isOpen, onClose, title, icon: Icon, children }) => {
   if (!isOpen) return null;
-
   return (
     <AnimatePresence>
       <div
@@ -23,7 +22,8 @@ const Modal = ({ isOpen, onClose, title, icon: Icon, children }) => {
             <div className="flex items-center gap-3">
               {Icon && (
                 <div className="bg-bg-hover p-2 rounded-full">
-                  <Icon className="text-text-muted" />
+                  {/* <Icon className="text-text-muted" /> */}
+                  {Icon}
                 </div>
               )}
               <h2 className="text-lg font-medium text-text-main">{title}</h2>

@@ -66,7 +66,7 @@ export const updateDocument = createAsyncThunk(
         document: { id, ...rest },
       };
     } catch (err) {
-      return rejectWithValue(err?.response?.data?.message || "Document not updated!");
+      return rejectWithValue(err?.message || "Document not updated!");
     }
   },
 );
