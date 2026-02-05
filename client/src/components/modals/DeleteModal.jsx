@@ -10,7 +10,8 @@ const DeleteModal = ({ isOpen, onClose, onDelete, item, title = "Delete Item" })
       setIsLoading(true);
       await onDelete();
       onClose();
-    } catch (_) {
+    } catch (err) {
+      console.log(err);
       // error handling stays in parent or toast inside onDelete
     } finally {
       setIsLoading(false);
