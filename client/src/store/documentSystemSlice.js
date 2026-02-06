@@ -37,6 +37,11 @@ export const createFolder = createAsyncThunk(
   },
 );
 
+/*
+|--------------------------------------------------------------------------
+| fetchDocuments
+|--------------------------------------------------------------------------
+*/
 export const fetchDocuments = createAsyncThunk(
   "documents/all",
   async (parentId, { rejectWithValue }) => {
@@ -56,6 +61,11 @@ export const fetchDocuments = createAsyncThunk(
   },
 );
 
+/*
+|--------------------------------------------------------------------------
+| updateDocument
+|--------------------------------------------------------------------------
+*/
 export const updateDocument = createAsyncThunk(
   "documents/update",
   async ({ id, ...rest }, { rejectWithValue }) => {
@@ -67,6 +77,26 @@ export const updateDocument = createAsyncThunk(
       };
     } catch (err) {
       return rejectWithValue(err?.message || "Document not updated!");
+    }
+  },
+);
+
+/*
+|--------------------------------------------------------------------------
+| deleteDocument
+|--------------------------------------------------------------------------
+*/
+export const deleteDocument = createAsyncThunk(
+  "documents/delete",
+  async (id, { rejectWithValue }) => {
+    try {
+      const data = await fileSystemAPI.deleteDocument(id);
+      return {
+        ...data,
+        id,
+      };
+    } catch (err) {
+      return rejectWithValue(err?.message || "Failed to move document to trash!");
     }
   },
 );
@@ -265,6 +295,13 @@ const documentSystemSlice = createSlice({
         const { document } = action.payload;
         if (state.documents[document.id]) {
           state.documents[document.id] = { ...state.documents[document.id], ...document };
+        }
+      })
+      .addCase(deleteDocument.fulfilled, (state, action) => {
+        const { id } = action.payload;
+        if (state.documents[id]) {
+          const { [id]: _, ...restDocs } = state.documents;
+          state.documents = { ...restDocs };
         }
       });
   },

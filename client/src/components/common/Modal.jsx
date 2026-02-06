@@ -7,7 +7,7 @@ const Modal = ({ isOpen, onClose, title, icon: Icon, children }) => {
   return (
     <AnimatePresence>
       <div
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[1000]"
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-1000"
         onClick={onClose}
       >
         <motion.div
@@ -20,12 +20,7 @@ const Modal = ({ isOpen, onClose, title, icon: Icon, children }) => {
         >
           <div className="flex items-center justify-between p-5 border-b border-border-muted bg-bg-panel">
             <div className="flex items-center gap-3">
-              {Icon && (
-                <div className="bg-bg-hover p-2 rounded-full">
-                  {/* <Icon className="text-text-muted" /> */}
-                  {Icon}
-                </div>
-              )}
+              {Icon && <div className="bg-bg-hover p-2 rounded-full">{Icon}</div>}
               <h2 className="text-lg font-medium text-text-main">{title}</h2>
             </div>
             <button

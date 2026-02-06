@@ -139,3 +139,35 @@ export const updateDocument = asyncHandler(async (req, res, _) => {
     message: "Document updated successfully!",
   });
 });
+
+export const deleteDocument = asyncHandler(async (req, res, _) => {
+  const { docId } = req.params;
+  const doc = await Folder.findById(docId);
+  if (!doc) {
+    return res.status(404).json({
+      success: false,
+      message: "Document not found!",
+    });
+  }
+
+  // TODO: check special characters
+  // const escapedPath = doc.path.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+  const pathRegex = new RegExp(`^${doc.path}`);
+  const trashedAt = new Date();
+  await Folder.updateMany(
+    {
+      path: { $regex: pathRegex },
+      isTrashed: false, // only update which not trashed already
+      // owner: TODO: Only owner and authorized user can delete
+    },
+    {
+      $set: {
+        isTrashed: true,
+        trashedAt: trashedAt,
+      },
+    },
+  );
+
+  res.status(200).json({ message: "Document moved to trash successfully", success: true });
+});
