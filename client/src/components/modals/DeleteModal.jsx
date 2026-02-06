@@ -1,44 +1,66 @@
-import React from "react";
-import { useDispatch } from "react-redux";
-import { deleteItem } from "@/store/documentSystemSlice";
+import React, { useState } from "react";
 import Modal from "@/components/common/Modal";
+import { Loader, Trash2 } from "lucide-react";
+import toast from "react-hot-toast";
 
-const DeleteModal = ({ isOpen, onClose, item, itemType, currentFolderId }) => {
-  const dispatch = useDispatch();
+const DeleteModal = ({ isOpen, onClose, onDelete, note, item, title = "Move to Trash" }) => {
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleDelete = () => {
-    if (item) {
-      dispatch(
-        deleteItem({
-          id: item.id,
-          type: itemType,
-          parentId: currentFolderId,
-        }),
-      );
+  const handleDelete = async () => {
+    try {
+      setIsLoading(true);
+      const data = await onDelete();
+      if (data?.success) {
+        toast.success(data.message);
+      }
+    } catch (err) {
+      toast.error(err || "Item is not deleted!");
+    } finally {
+      setIsLoading(false);
       onClose();
     }
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Delete Item">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={title}
+      icon={<Trash2 className="text-red-500" />}
+    >
       <div className="flex flex-col gap-6">
-        <p className="text-text-main">
-          Are you sure you want to delete{" "}
-          <span className="font-medium text-primary">"{item?.name}"</span>? This action cannot be
-          undone.
-        </p>
+        <div>
+          <p className="text-text-main">
+            Are you sure you want to move{" "}
+            {item?.name && <span className="font-medium text-red-500">{item?.name} </span>} to
+            trash?
+          </p>
+
+          {note && (
+            <div className="mt-4">
+              <p className="text-xs text-text-muted leading-relaxed">
+                <span className="font-semibold text-text-main">Note:</span> {note}
+              </p>
+            </div>
+          )}
+        </div>
+
         <div className="flex justify-end gap-4">
           <button
             onClick={onClose}
-            className="py-2.5 px-5 rounded-xl font-normal text-sm transition-all bg-bg-hover text-text-muted hover:text-text-main cursor-pointer"
+            disabled={isLoading}
+            className="py-2.5 px-5 cursor-pointer rounded-xl text-sm bg-bg-hover text-text-muted hover:text-text-main disabled:opacity-50"
           >
             Cancel
           </button>
+
           <button
             onClick={handleDelete}
-            className="py-2.5 px-5 rounded-xl font-medium text-sm transition-all bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white cursor-pointer"
+            disabled={isLoading}
+            className="py-2.5 px-5 flex gap-2 cursor-pointer rounded-xl text-sm font-medium bg-red-500 text-white hover:bg-red-500/70 disabled:opacity-70"
           >
-            Delete Item
+            {isLoading ? <Loader className="animate-spin" size={18} /> : null}
+            <span>Move to trash</span>
           </button>
         </div>
       </div>

@@ -112,30 +112,102 @@ export const getFolders = asyncHandler(async (req, res, _next) => {
   });
 });
 
+// export const updateDocument = asyncHandler(async (req, res, _) => {
+//   const { docId } = req.params;
+//   const document = await Folder.findById(docId);
+//   if (!document) {
+//     return res.status(404).json({
+//       success: false,
+//       message: "Document not found!",
+//     });
+//   }
+//   const allTopLevelFields = Object.keys(Folder.schema.obj);
+//   const forbiddenFields = ["owner", "parent", "path", "publicLink", "trashedAt", "sharedWith"];
+//   const updates = {};
+//   const allowedFields = allTopLevelFields.filter((field) => !forbiddenFields.includes(field));
+
+//   allowedFields.forEach((field) => {
+//     if (req?.body?.[field]) updates[field] = req.body[field];
+//   });
+
+//   if (Object.keys(updates).length === 0) {
+//     return res.status(400).json({ success: false, message: "No valid fields provided to update" });
+//   }
+//   await Folder.updateOne({ _id: docId }, { $set: updates });
+//   res.status(200).json({
+//     success: true,
+//     message: "Document updated successfully!",
+//   });
+// });
+
 export const updateDocument = asyncHandler(async (req, res, _) => {
   const { docId } = req.params;
+
   const document = await Folder.findById(docId);
+
   if (!document) {
     return res.status(404).json({
       success: false,
       message: "Document not found!",
     });
   }
+
+  // 2. Define your logic for allowed fields
   const allTopLevelFields = Object.keys(Folder.schema.obj);
   const forbiddenFields = ["owner", "parent", "path", "publicLink", "trashedAt", "sharedWith"];
-  const updates = {};
   const allowedFields = allTopLevelFields.filter((field) => !forbiddenFields.includes(field));
 
+  let isChanged = false;
+
   allowedFields.forEach((field) => {
-    if (req?.body?.[field]) updates[field] = req.body[field];
+    if (req.body[field] !== undefined) {
+      document[field] = req.body[field];
+      isChanged = true;
+    }
   });
 
-  if (Object.keys(updates).length === 0) {
+  if (!isChanged) {
     return res.status(400).json({ success: false, message: "No valid fields provided to update" });
   }
-  await Folder.updateOne({ _id: docId }, { $set: updates });
+
+  //THIS TRIGGERS pre('save')
+  await document.save();
+
   res.status(200).json({
     success: true,
     message: "Document updated successfully!",
+    data: document,
   });
+});
+
+export const deleteDocument = asyncHandler(async (req, res, _) => {
+  const { docId } = req.params;
+  const doc = await Folder.findById(docId);
+  if (!doc) {
+    return res.status(404).json({
+      success: false,
+      message: "Document not found!",
+    });
+  }
+
+  // TODO: check special characters
+  // const escapedPath = doc.path.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+  const pathRegex = new RegExp(`^${doc.path}`);
+  const trashedAt = new Date();
+  await Folder.updateMany(
+    {
+      path: { $regex: pathRegex },
+      isTrashed: false, // only update which not trashed already
+      // owner: TODO: Only owner and authorized user can delete
+    },
+    {
+      $set: {
+        isTrashed: true,
+        trashedAt: trashedAt,
+      },
+    },
+  );
+
+  res.status(200).json({ message: "Document moved to trash successfully", success: true });
 });

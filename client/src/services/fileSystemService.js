@@ -14,6 +14,10 @@ const fileSystemAPI = {
     const response = await api.patch(`/folders/${docId}`, { ...payload });
     return response.data;
   },
+  deleteDocument: async (docId) => {
+    const response = await api.delete(`/folders/${docId}`);
+    return response.data;
+  },
 };
 
 export default fileSystemAPI;

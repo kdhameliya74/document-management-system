@@ -4,7 +4,12 @@ import { useSelector, useDispatch } from "react-redux";
 import { Plus, Upload, FolderPlus, ChevronDown, Loader } from "lucide-react";
 
 import ROUTES from "@/utils/routes";
-import { setCurrentFolder, setSelectedId, fetchDocuments } from "@/store/documentSystemSlice";
+import {
+  setCurrentFolder,
+  setSelectedId,
+  fetchDocuments,
+  deleteDocument,
+} from "@/store/documentSystemSlice";
 
 import FolderItem from "@/components/dashboard/FolderItem";
 import FileItem from "@/components/dashboard/FileItem";
@@ -40,6 +45,7 @@ const FolderView = () => {
     getContextMenuItems,
   } = useFileFolderContextMenu();
 
+  // TODO: Think of different name for `currentFolderId`
   const MODALS_MAP = {
     createFolder: {
       Component: FolderModal,
@@ -51,14 +57,20 @@ const FolderView = () => {
     },
     edit: {
       Component: FolderModal,
-      props: { documentItem: selectedItem, docType: selectedItemType, mode: DOCUMENT_MODES.EDIT },
+      props: {
+        currentFolderId: folderId, // root folder Id
+        documentItem: selectedItem,
+        docType: selectedItemType,
+        mode: DOCUMENT_MODES.EDIT,
+      },
     },
     delete: {
       Component: DeleteModal,
       props: {
         item: selectedItem,
         itemType: selectedItemType,
-        currentFolderId: folderId,
+        note: "You can restore this item from your Trash folder later if you change your mind.",
+        onDelete: async () => await dispatch(deleteDocument(selectedItem.id)).unwrap(),
       },
     },
   };

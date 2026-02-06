@@ -6,8 +6,7 @@ import { logout } from "@/store/authSlice";
 import ROUTES from "@/utils/routes";
 
 const navItemClass = ({ isActive }) =>
-  `
-    flex items-center gap-3 p-2 rounded-lg
+  `flex items-center gap-3 p-2 rounded-lg
     font-medium text-sm transition-all cursor-pointer text-left
     ${
       isActive
