@@ -121,6 +121,43 @@ folderSchema.methods.hasAccess = function (userId, requiredPermission = PERMISSI
   return permissionLevels[sharedUser.permission] >= permissionLevels[requiredPermission];
 };
 
+// A small helper to grab the original path before validation changes it
+folderSchema.post("init", function (doc) {
+  doc._originalPath = doc.path;
+});
+
+function escapeRegex(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+folderSchema.post("save", async function (doc) {
+  if (!doc._originalPath || doc._originalPath === doc.path) return;
+
+  const oldPath = doc._originalPath;
+  const newPath = doc.path;
+
+  const escapedOldPath = escapeRegex(oldPath);
+
+  await doc.constructor.updateMany({ path: { $regex: `^${escapedOldPath}/` } }, [
+    {
+      $set: {
+        path: {
+          $concat: [
+            newPath,
+            {
+              $substrBytes: [
+                "$path",
+                oldPath.length,
+                { $subtract: [{ $strLenBytes: "$path" }, oldPath.length] },
+              ],
+            },
+          ],
+        },
+      },
+    },
+  ]);
+});
+
 const Folder = mongoose.model("Folder", folderSchema);
 
 export default Folder;
