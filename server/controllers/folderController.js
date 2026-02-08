@@ -1,6 +1,56 @@
 import { asyncHandler } from "../middleware/error.js";
 import Folder from "../models/Folder.js";
 
+export const fetchFolderUtils = async (req, filters = {}, topParent = "root") => {
+  const userId = req.user?.id;
+  const { parent } = req.body;
+
+  const folders = await Folder.find({
+    parent: parent || null,
+    owner: userId,
+    ...filters,
+  });
+
+  let currentFolder = null;
+  let breadcrumbs = [];
+
+  if (parent) {
+    currentFolder = await Folder.findOne({
+      _id: parent,
+      owner: userId,
+      ...filters,
+    });
+
+    if (currentFolder) {
+      let tempParentId = currentFolder.parent;
+      while (tempParentId) {
+        const ancestor = await Folder.findOne({
+          _id: tempParentId,
+          owner: userId,
+          ...filters,
+        }).select("_id name parent");
+
+        if (ancestor) {
+          breadcrumbs.unshift({
+            id: ancestor._id,
+            name: ancestor.name,
+            parentId: ancestor.parent || topParent,
+          });
+          tempParentId = ancestor.parent;
+        } else {
+          tempParentId = null;
+        }
+      }
+    }
+  }
+  return {
+    success: true,
+    folders,
+    currentFolder,
+    breadcrumbs,
+  };
+};
+
 // @desc   Create folder
 // @route  POST /api/folder/create
 // @access Private
@@ -62,54 +112,8 @@ export const createFolder = asyncHandler(async (req, res, _next) => {
 // @route  GET /api/folder/all
 // @access Private
 export const getFolders = asyncHandler(async (req, res, _next) => {
-  const userId = req.user?.id;
-  const { parent } = req.body;
-
-  const folders = await Folder.find({
-    parent: parent || null,
-    isTrashed: false,
-    owner: userId,
-  });
-
-  let currentFolder = null;
-  let breadcrumbs = [];
-
-  if (parent) {
-    currentFolder = await Folder.findOne({
-      _id: parent,
-      owner: userId,
-      isTrashed: false,
-    });
-
-    if (currentFolder) {
-      let tempParentId = currentFolder.parent;
-      while (tempParentId) {
-        const ancestor = await Folder.findOne({
-          _id: tempParentId,
-          owner: userId,
-          isTrashed: false,
-        }).select("_id name parent");
-
-        if (ancestor) {
-          breadcrumbs.unshift({
-            id: ancestor._id,
-            name: ancestor.name,
-            parentId: ancestor.parent || "root",
-          });
-          tempParentId = ancestor.parent;
-        } else {
-          tempParentId = null;
-        }
-      }
-    }
-  }
-
-  return res.status(200).json({
-    success: true,
-    folders,
-    currentFolder,
-    breadcrumbs,
-  });
+  const folders = await fetchFolderUtils(req, { isTrashed: false });
+  return res.status(200).json(folders);
 });
 
 // export const updateDocument = asyncHandler(async (req, res, _) => {

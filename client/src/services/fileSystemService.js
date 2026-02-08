@@ -19,7 +19,7 @@ const fileSystemAPI = {
     return response.data;
   },
   getTrash: async (parentId) => {
-    const response = await api.get("/folders/trash", { params: { parent: parentId } });
+    const response = await api.get("/folders/trash", { parent: parentId });
     return response.data;
   },
   restoreDocument: async (docId) => {
