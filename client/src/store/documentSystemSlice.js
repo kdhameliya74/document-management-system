@@ -17,25 +17,8 @@ const initialState = {
       id: "trash",
       name: "Trash",
       parentId: null,
-      childFolderIds: ["69846c175246e6abf7e0e588"],
+      childFolderIds: [],
       childFileIds: [],
-    },
-    "69846c175246e6abf7e0e588": {
-      _id: "69846c175246e6abf7e0e588",
-      name: "old",
-      owner: "693936c0923b61e6df102dd9",
-      parent: null,
-      color: "#f59e0b",
-      isStarred: false,
-      isTrashed: false,
-      trashedAt: null,
-      isPublic: false,
-      sharedWith: [],
-      path: "/images",
-      createdAt: "2026-02-05T10:08:23.864Z",
-      updatedAt: "2026-02-06T10:59:13.784Z",
-      __v: 0,
-      id: "69846c175246e6abf7e0e588",
     },
   },
   files: {},
@@ -123,6 +106,18 @@ export const deleteDocument = createAsyncThunk(
       };
     } catch (err) {
       return rejectWithValue(err?.message || "Failed to move document to trash!");
+    }
+  },
+);
+
+export const getTrashedDocument = createAsyncThunk(
+  "documents/trash",
+  async (parent, { rejectWithValue }) => {
+    try {
+      const data = await fileSystemAPI.getTrash(parent);
+      return data.folders;
+    } catch (err) {
+      return rejectWithValue(err?.message || "Failed to fetch trash documents!");
     }
   },
 );
@@ -329,6 +324,17 @@ const documentSystemSlice = createSlice({
           const { [id]: _, ...restDocs } = state.documents;
           state.documents = { ...restDocs };
         }
+      })
+      .addCase(getTrashedDocument.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(getTrashedDocument.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+      .addCase(getTrashedDocument.fulfilled, (state) => {
+        state.isLoading = false;
       });
   },
 });
