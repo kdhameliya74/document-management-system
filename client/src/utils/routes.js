@@ -12,10 +12,12 @@ const ROUTES = {
     SHARED: "/dashboard/shared",
     FOLDER_DYNAMIC: (folderId) => `/dashboard/folder/${folderId}`,
     TRASH: "/dashboard/trash",
+    TRASH_DYNAMIC: (folderId) => `/dashboard/trash/${folderId}`,
     RELATIVE: {
       ROOT: "folder/root",
       FOLDER: "folder/:folderId",
       TRASH: "trash",
+      TRASH_FOLDER: "trash/:folderId",
     },
   },
 };
