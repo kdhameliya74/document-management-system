@@ -18,6 +18,14 @@ const fileSystemAPI = {
     const response = await api.delete(`/folders/${docId}`);
     return response.data;
   },
+  getTrash: async (parentId) => {
+    const response = await api.get("/folders/trash", { params: { parent: parentId } });
+    return response.data;
+  },
+  restoreDocument: async (docId) => {
+    const response = await api.patch(`/folders/trash/${docId}/restore`);
+    return response.data;
+  },
 };
 
 export default fileSystemAPI;

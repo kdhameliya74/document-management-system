@@ -180,6 +180,9 @@ export const updateDocument = asyncHandler(async (req, res, _) => {
   });
 });
 
+// @desc   Soft delete folder
+// @route  DELETE /api/folder/:docId
+// @access Private
 export const deleteDocument = asyncHandler(async (req, res, _) => {
   const { docId } = req.params;
   const doc = await Folder.findById(docId);
