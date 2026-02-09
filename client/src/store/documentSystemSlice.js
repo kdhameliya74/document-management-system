@@ -19,6 +19,7 @@ const initialState = {
       parentId: null,
       childFolderIds: [],
       childFileIds: [],
+      path: "",
     },
   },
   files: {},
@@ -118,7 +119,6 @@ export const getTrashedDocument = createAsyncThunk(
       return {
         folders: data.folders,
         currentFolder: data.currentFolder,
-        breadcrumbs: data.breadcrumbs || [],
         parentId: parent || "trash",
       };
     } catch (err) {
@@ -346,10 +346,12 @@ const documentSystemSlice = createSlice({
         const { folders, currentFolder, breadcrumbs, parentId } = action.payload;
 
         // 1. Breadcrumbs
-        breadcrumbs.forEach(({ id, name, parentId: pid }) => {
-          ensureFolder(state, id, { id, name, parentId: pid }, topParent);
-          linkChildToParent(state, pid, id, topParent);
-        });
+        if (breadcrumbs) {
+          breadcrumbs.forEach(({ id, name, parentId: pid }) => {
+            ensureFolder(state, id, { id, name, parentId: pid }, topParent);
+            linkChildToParent(state, pid, id, topParent);
+          });
+        }
 
         // 2. Current folder
         if (currentFolder) {
