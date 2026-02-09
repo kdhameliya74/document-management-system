@@ -3,7 +3,7 @@ import Folder from "../models/Folder.js";
 
 export const fetchFolderUtils = async (req, filters = {}, topParent = "root") => {
   const userId = req.user?.id;
-  const { parent } = req.body;
+  const { parent } = req.query;
 
   const folders = await Folder.find({
     parent: parent || null,

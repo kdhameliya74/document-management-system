@@ -115,15 +115,21 @@ export const getTrashedDocument = createAsyncThunk(
   async (parent, { rejectWithValue }) => {
     try {
       const data = await fileSystemAPI.getTrash(parent);
-      return data.folders;
+      return {
+        folders: data.folders,
+        currentFolder: data.currentFolder,
+        breadcrumbs: data.breadcrumbs || [],
+        parentId: parent || "trash",
+      };
     } catch (err) {
       return rejectWithValue(err?.message || "Failed to fetch trash documents!");
     }
   },
 );
 
-const ensureFolder = (state, id, data) => {
-  state.documents[id] ??= {
+const ensureFolder = (state, id, data, topParent = "root") => {
+  const docState = topParent === "root" ? state.documents : state.trashDocuments;
+  docState[id] ??= {
     id,
     name: "",
     parentId: "root",
@@ -131,13 +137,14 @@ const ensureFolder = (state, id, data) => {
     childFileIds: [],
   };
 
-  Object.assign(state.documents[id], data);
+  Object.assign(docState[id], data);
 };
 
-const linkChildToParent = (state, parentId, childId) => {
-  if (!state.documents[parentId]) return;
+const linkChildToParent = (state, parentId, childId, topParent = "root") => {
+  const docState = topParent === "root" ? state.documents : state.trashDocuments;
+  if (!docState[parentId]) return;
 
-  const children = state.documents[parentId].childFolderIds;
+  const children = docState[parentId].childFolderIds;
   if (!children.includes(childId)) {
     children.push(childId);
   }
@@ -333,8 +340,47 @@ const documentSystemSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload;
       })
-      .addCase(getTrashedDocument.fulfilled, (state) => {
+      .addCase(getTrashedDocument.fulfilled, (state, action) => {
         state.isLoading = false;
+        const topParent = "trash";
+        const { folders, currentFolder, breadcrumbs, parentId } = action.payload;
+
+        // 1. Breadcrumbs
+        breadcrumbs.forEach(({ id, name, parentId: pid }) => {
+          ensureFolder(state, id, { id, name, parentId: pid }, topParent);
+          linkChildToParent(state, pid, id, topParent);
+        });
+
+        // 2. Current folder
+        if (currentFolder) {
+          const { id, parent } = currentFolder;
+          const normalizedParentId = parent || topParent;
+          const data = {
+            ...currentFolder,
+            id,
+            parentId: normalizedParentId,
+          };
+          ensureFolder(state, id, data, topParent);
+
+          linkChildToParent(state, normalizedParentId, id, topParent);
+        }
+
+        // 3. Child folders
+        const childFolderIds = folders.map((folder) => {
+          const normalizedParentId = folder.parent || topParent;
+          const data = {
+            ...folder,
+            id: folder.id,
+            parentId: normalizedParentId,
+          };
+          ensureFolder(state, folder.id, data, topParent);
+          return folder.id;
+        });
+
+        // 4. Update parent children list
+        if (state.trashDocuments[parentId]) {
+          state.trashDocuments[parentId].childFolderIds = childFolderIds;
+        }
       });
   },
 });

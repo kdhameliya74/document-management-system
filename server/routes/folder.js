@@ -10,7 +10,7 @@ import { protect } from "../middleware/auth.js";
 const router = express.Router();
 
 router.post("/create", protect, createFolder);
-router.post("/all", protect, getFolders);
+router.get("/all", protect, getFolders);
 router.patch(`/:docId`, protect, updateDocument);
 router.delete("/:docId", protect, deleteDocument);
 

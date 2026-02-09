@@ -29,7 +29,7 @@ const EmptyTrash = ({ onNavigateBack }) => (
 const TrashPage = () => {
   /* -------------------------------- hooks -------------------------------- */
   const navigate = useNavigate();
-  const { folderId } = useParams();
+  const { folderId = "trash" } = useParams();
   const dispatch = useDispatch();
 
   const { trashDocuments, selectedId, isLoading } = useSelector((state) => state.documentSystem);

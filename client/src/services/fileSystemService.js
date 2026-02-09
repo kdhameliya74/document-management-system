@@ -7,7 +7,7 @@ const fileSystemAPI = {
     return response.data;
   },
   getAll: async (parentId) => {
-    const response = await api.post("/folders/all", { parent: parentId });
+    const response = await api.get("/folders/all", { params: { parent: parentId } });
     return response.data;
   },
   updateDocument: async (docId, payload) => {
@@ -19,7 +19,7 @@ const fileSystemAPI = {
     return response.data;
   },
   getTrash: async (parentId) => {
-    const response = await api.get("/folders/trash", { parent: parentId });
+    const response = await api.get("/folders/trash", { params: { parent: parentId } });
     return response.data;
   },
   restoreDocument: async (docId) => {
