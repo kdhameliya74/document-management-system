@@ -20,6 +20,7 @@ const DashboardPage = () => {
               <Route path="/" element={<Navigate to={ROUTES.DASHBOARD.RELATIVE.ROOT} />} />
               <Route path={ROUTES.DASHBOARD.RELATIVE.FOLDER} element={<FolderView />} />
               <Route path={ROUTES.DASHBOARD.RELATIVE.TRASH} element={<TrashPage />} />
+              <Route path={ROUTES.DASHBOARD.RELATIVE.TRASH_FOLDER} element={<TrashPage />} />
             </Routes>
           </div>
           <RightSidebar />

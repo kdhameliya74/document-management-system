@@ -11,6 +11,7 @@ import { errorHandler, notFound } from "./middleware/error.js";
 // Import routes
 import authRoutes from "./routes/auth.js";
 import folderRoutes from "./routes/folder.js";
+import trashRoutes from "./routes/trash.js";
 
 // Load env vars
 dotenv.config();
@@ -63,6 +64,7 @@ app.get("/api/health", (req, res) => {
 // Mount routes
 app.use("/api/auth", authRoutes);
 app.use("/api/folders", folderRoutes);
+app.use("/api/folders", trashRoutes);
 
 // Error handling
 app.use(notFound);
