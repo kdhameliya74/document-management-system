@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
-import { Trash, Eye, Share, Download, FolderPen } from "lucide-react";
+import { Trash, Eye, Share, Download, FolderPen, ArchiveRestore } from "lucide-react";
 import { setSelectedId, setShowDetails } from "@/store/documentSystemSlice";
 
-const useFileFolderContextMenu = () => {
+const useFileFolderContextMenu = (menuFor = "dashbaord", onMenuAction) => {
   const dispatch = useDispatch();
   const [contextMenu, setContextMenu] = useState(null);
   const [activeModal, setActiveModal] = useState(null);
@@ -23,54 +23,82 @@ const useFileFolderContextMenu = () => {
   };
 
   const closeContextMenu = () => setContextMenu(null);
+  const handleClickOutside = () => {
+    dispatch(setSelectedId(null));
+    closeContextMenu();
+  };
 
   const openModal = (modalType) => {
     if (contextMenu) {
-      setSelectedItem(contextMenu.item);
-      setSelectedItemType(contextMenu.type);
+      updateSelection(contextMenu.item);
     }
     setActiveModal(modalType);
     closeContextMenu();
   };
 
+  const onMenuActionHandler = async () => {
+    updateSelection(contextMenu.item);
+
+    if (!onMenuAction) return;
+
+    await onMenuAction(contextMenu.item);
+    updateSelection(null);
+  };
+
+  const updateSelection = (item) => {
+    setSelectedItem(item);
+    setSelectedItemType(item?.type ?? null);
+  };
+
   const getContextMenuItems = () => {
     if (!contextMenu) return [];
-    return [
-      {
-        label: "Edit",
-        icon: FolderPen,
-        onClick: () => openModal("edit"),
-      },
-      {
-        label: "Delete",
-        icon: Trash,
-        onClick: () => openModal("delete"),
-      },
-      {
-        label: "View Details",
-        icon: Eye,
-        onClick: () => {
-          dispatch(setShowDetails(true));
-          closeContextMenu();
+    if (menuFor == "trash") {
+      return [
+        {
+          label: "Restore",
+          icon: ArchiveRestore,
+          onClick: () => onMenuActionHandler(),
         },
-      },
-      {
-        label: "Share",
-        icon: Share,
-        onClick: () => {
-          alert("Share functionality coming soon!");
-          closeContextMenu();
+      ];
+    }
+    if (menuFor === "dashbaord") {
+      return [
+        {
+          label: "Edit",
+          icon: FolderPen,
+          onClick: () => openModal("edit"),
         },
-      },
-      {
-        label: "Download",
-        icon: Download,
-        onClick: () => {
-          alert("Download functionality coming soon!");
-          closeContextMenu();
+        {
+          label: "Delete",
+          icon: Trash,
+          onClick: () => openModal("delete"),
         },
-      },
-    ];
+        {
+          label: "View Details",
+          icon: Eye,
+          onClick: () => {
+            dispatch(setShowDetails(true));
+            closeContextMenu();
+          },
+        },
+        {
+          label: "Share",
+          icon: Share,
+          onClick: () => {
+            alert("Share functionality coming soon!");
+            closeContextMenu();
+          },
+        },
+        {
+          label: "Download",
+          icon: Download,
+          onClick: () => {
+            alert("Download functionality coming soon!");
+            closeContextMenu();
+          },
+        },
+      ];
+    }
   };
 
   return {
@@ -82,6 +110,7 @@ const useFileFolderContextMenu = () => {
     handleContextMenu,
     closeContextMenu,
     getContextMenuItems,
+    handleClickOutside,
   };
 };
 

@@ -1,6 +1,8 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { v4 as uuidv4 } from "uuid";
 import fileSystemAPI from "@/services/fileSystemService";
+import { TRASH_MESSAGES } from "@/helpers/constants";
+import { logError } from "@/helpers/utils";
 
 const initialState = {
   documents: {
@@ -111,6 +113,32 @@ export const deleteDocument = createAsyncThunk(
   },
 );
 
+/*
+|--------------------------------------------------------------------------
+| restoreDocument
+|--------------------------------------------------------------------------
+*/
+export const restoreDocument = createAsyncThunk(
+  "documents/restore",
+  async (id, { rejectWithValue }) => {
+    try {
+      const data = await fileSystemAPI.restoreDocument(id);
+      return {
+        ...data,
+        id,
+      };
+    } catch (err) {
+      logError(err);
+      return rejectWithValue(TRASH_MESSAGES.RESTORE_ERROR);
+    }
+  },
+);
+
+/*
+|--------------------------------------------------------------------------
+| getTrashedDocument
+|--------------------------------------------------------------------------
+*/
 export const getTrashedDocument = createAsyncThunk(
   "documents/trash",
   async (parent, { rejectWithValue }) => {
@@ -122,6 +150,7 @@ export const getTrashedDocument = createAsyncThunk(
         parentId: parent || "trash",
       };
     } catch (err) {
+      logError(err);
       return rejectWithValue(err?.message || "Failed to fetch trash documents!");
     }
   },
@@ -382,6 +411,13 @@ const documentSystemSlice = createSlice({
         // 4. Update parent children list
         if (state.trashDocuments[parentId]) {
           state.trashDocuments[parentId].childFolderIds = childFolderIds;
+        }
+      })
+      .addCase(restoreDocument.fulfilled, (state, action) => {
+        const { id } = action.payload;
+        if (state.trashDocuments[id]) {
+          const { [id]: _, ...restDocs } = state.trashDocuments;
+          state.trashDocuments = { ...restDocs };
         }
       });
   },

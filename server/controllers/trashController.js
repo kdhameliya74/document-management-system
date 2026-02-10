@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import { asyncHandler } from "../middleware/error.js";
 import Folder from "../models/Folder.js";
-import { fetchFolderUtils } from "./folderController.js";
 
 export const getTrashedDocs = asyncHandler(async (req, res) => {
   const { parent } = req.query;
@@ -9,9 +8,26 @@ export const getTrashedDocs = asyncHandler(async (req, res) => {
   const ownerId = new mongoose.Types.ObjectId(userId);
 
   if (parent) {
-    // For nested trashed folders, use fetchFolderUtils with isTrashed: true
-    const result = await fetchFolderUtils(req, { isTrashed: true }, "trash");
-    return res.status(200).json(result);
+    const folders = await Folder.find({
+      parent: parent || null,
+      owner: userId,
+      isTrashed: true,
+    });
+
+    let currentFolder = null;
+
+    if (parent) {
+      currentFolder = await Folder.findOne({
+        _id: parent,
+        owner: userId,
+        isTrashed: true,
+      });
+    }
+    return res.status(200).json({
+      success: true,
+      folders,
+      currentFolder,
+    });
   }
 
   const folders = await Folder.aggregate([
@@ -60,8 +76,29 @@ export const getTrashedDocs = asyncHandler(async (req, res) => {
 });
 
 export const restoreDocument = asyncHandler(async (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: "Document restored successfully",
-  });
+  const { docId } = req.params;
+  const doc = await Folder.findById(docId);
+  if (!doc) {
+    return res.status(404).json({
+      success: false,
+      message: "Document not found!",
+    });
+  }
+  // TODO:
+  const pathRegex = new RegExp(`^${doc.path}`);
+  await Folder.updateMany(
+    {
+      path: { $regex: pathRegex },
+      isTrashed: true, // only update which not trashed already
+      // owner: TODO: Only owner and authorized user can delete
+    },
+    {
+      $set: {
+        isTrashed: false,
+        trashedAt: null,
+      },
+    },
+  );
+
+  res.status(200).json({ message: "Restored", success: true });
 });

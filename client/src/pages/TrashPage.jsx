@@ -4,11 +4,15 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 
 import ROUTES from "@/utils/routes";
-import { setSelectedId, getTrashedDocument } from "@/store/documentSystemSlice";
+import { setSelectedId, getTrashedDocument, restoreDocument } from "@/store/documentSystemSlice";
+import useFileFolderContextMenu from "@/hooks/useFileFolderContextMenu";
+import ContextMenu from "@/components/common/ContextMenu";
 
 import FolderItem from "@/components/dashboard/FolderItem";
 import Loading from "@/components/common/Loading";
 import { truncateFolderName } from "@/helpers/utils.js";
+import toast from "react-hot-toast";
+import { TRASH_MESSAGES } from "@/helpers/constants";
 
 const EmptyTrash = ({ onNavigateBack, folderId }) => (
   <div className="flex-1 flex flex-col items-center justify-center text-slate-500 text-center">
@@ -43,6 +47,27 @@ const TrashPage = () => {
   const dispatch = useDispatch();
 
   const { trashDocuments, selectedId, isLoading } = useSelector((state) => state.documentSystem);
+
+  const restoreHandler = async (item) => {
+    const toastId = toast.loading(TRASH_MESSAGES.RESTORE_LOADING);
+    try {
+      await dispatch(restoreDocument(item.id)).unwrap();
+      toast.success(TRASH_MESSAGES.RESTORE_SUCCESS, {
+        id: toastId,
+      });
+    } catch (err) {
+      toast.error(err, {
+        id: toastId,
+      });
+    }
+  };
+  const {
+    contextMenu,
+    handleClickOutside,
+    handleContextMenu,
+    closeContextMenu,
+    getContextMenuItems,
+  } = useFileFolderContextMenu("trash", restoreHandler);
 
   /* ---------------------------- derived state ----------------------------- */
   const currentFolder = trashDocuments[folderId];
@@ -82,6 +107,7 @@ const TrashPage = () => {
             isSelected={selectedId === folder.id}
             onSelect={handleSelect}
             onNavigate={handleNavigate}
+            onContextMenu={handleContextMenu}
           />
         ))}
       </div>
@@ -89,7 +115,7 @@ const TrashPage = () => {
   );
 
   return (
-    <div className="relative h-full flex flex-col">
+    <div className="relative h-full flex flex-col" onClick={handleClickOutside}>
       <header className="flex items-center justify-between pb-4 border-b border-border-muted -mx-6 px-6">
         <h2 className="text-2xl font-medium text-text-main">Trash</h2>
       </header>
@@ -117,10 +143,14 @@ const TrashPage = () => {
           <span>Trash</span>
         </button>
         {currentPath?.length !== 0 &&
-          currentPath.map((path) => (
+          currentPath.map((path, index) => (
             <div className="flex items-center gap-1" key={path}>
               <ChevronRight size={16} className="text-border shrink-0" />
-              <span className="text-sm">{truncateFolderName(path)}</span>
+              <span
+                className={`text-sm ${index === currentPath.length - 1 ? "text-white border-b" : null}`}
+              >
+                {truncateFolderName(path)}
+              </span>
             </div>
           ))}
       </nav>
@@ -128,6 +158,15 @@ const TrashPage = () => {
       {isLoading && <Loading />}
       {!isLoading && isEmpty && <EmptyTrash onNavigateBack={goBackHome} />}
       {!isLoading && !isEmpty && renderFolders()}
+
+      {contextMenu && (
+        <ContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          items={getContextMenuItems()}
+          onClose={closeContextMenu}
+        />
+      )}
     </div>
   );
 };

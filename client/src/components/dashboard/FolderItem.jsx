@@ -1,5 +1,5 @@
 import React from "react";
-import { Folder } from "lucide-react";
+import { Folder, LoaderCircle } from "lucide-react";
 import { FOLDER_COLORS } from "@/helpers/constants.js";
 import { truncateFolderName } from "@/helpers/utils.js";
 
