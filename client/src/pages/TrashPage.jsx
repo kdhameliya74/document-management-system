@@ -4,13 +4,15 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 
 import ROUTES from "@/utils/routes";
-import { setSelectedId, getTrashedDocument } from "@/store/documentSystemSlice";
+import { setSelectedId, getTrashedDocument, restoreDocument } from "@/store/documentSystemSlice";
 import useFileFolderContextMenu from "@/hooks/useFileFolderContextMenu";
 import ContextMenu from "@/components/common/ContextMenu";
 
 import FolderItem from "@/components/dashboard/FolderItem";
 import Loading from "@/components/common/Loading";
 import { truncateFolderName } from "@/helpers/utils.js";
+import toast from "react-hot-toast";
+import { TRASH_MESSAGES } from "@/helpers/constants";
 
 const EmptyTrash = ({ onNavigateBack, folderId }) => (
   <div className="flex-1 flex flex-col items-center justify-center text-slate-500 text-center">
@@ -46,14 +48,21 @@ const TrashPage = () => {
 
   const { trashDocuments, selectedId, isLoading } = useSelector((state) => state.documentSystem);
 
-  const restoreHandler = () => {
-    console.log("Restore handler", selectedItem);
+  const restoreHandler = async (item) => {
+    const toastId = toast.loading(TRASH_MESSAGES.RESTORE_LOADING);
+    try {
+      await dispatch(restoreDocument(item.id)).unwrap();
+      toast.success(TRASH_MESSAGES.RESTORE_SUCCESS, {
+        id: toastId,
+      });
+    } catch (err) {
+      toast.success(err, {
+        id: toastId,
+      });
+    }
   };
-
   const {
     contextMenu,
-    selectedItem,
-    selectedItemType,
     handleClickOutside,
     handleContextMenu,
     closeContextMenu,

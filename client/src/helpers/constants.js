@@ -22,3 +22,8 @@ export const ERROR_MESSAGES = Object.freeze({
   FOLDER_NAME_REQUIRED: "Folder name is required.",
   FOLDER_NAME_DUPLICATE: "A folder with this name already exists.",
 });
+
+export const TRASH_MESSAGES = Object.freeze({
+  RESTORE_SUCCESS: "Folder restored to its original location.",
+  RESTORE_LOADING: "Restoring folder. This may take a moment…",
+});

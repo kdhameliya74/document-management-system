@@ -111,6 +111,31 @@ export const deleteDocument = createAsyncThunk(
   },
 );
 
+/*
+|--------------------------------------------------------------------------
+| restoreDocument
+|--------------------------------------------------------------------------
+*/
+export const restoreDocument = createAsyncThunk(
+  "documents/restore",
+  async (id, { rejectWithValue }) => {
+    try {
+      const data = await fileSystemAPI.restoreDocument(id);
+      return {
+        ...data,
+        id,
+      };
+    } catch (err) {
+      return rejectWithValue(err?.message || "Failed to restore document!");
+    }
+  },
+);
+
+/*
+|--------------------------------------------------------------------------
+| getTrashedDocument
+|--------------------------------------------------------------------------
+*/
 export const getTrashedDocument = createAsyncThunk(
   "documents/trash",
   async (parent, { rejectWithValue }) => {
@@ -382,6 +407,13 @@ const documentSystemSlice = createSlice({
         // 4. Update parent children list
         if (state.trashDocuments[parentId]) {
           state.trashDocuments[parentId].childFolderIds = childFolderIds;
+        }
+      })
+      .addCase(restoreDocument.fulfilled, (state, action) => {
+        const { id } = action.payload;
+        if (state.trashDocuments[id]) {
+          const { [id]: _, ...restDocs } = state.trashDocuments;
+          state.trashDocuments = { ...restDocs };
         }
       });
   },
