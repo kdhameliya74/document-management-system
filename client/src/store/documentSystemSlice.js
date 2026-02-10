@@ -1,6 +1,8 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { v4 as uuidv4 } from "uuid";
 import fileSystemAPI from "@/services/fileSystemService";
+import { TRASH_MESSAGES } from "@/helpers/constants";
+import { logError } from "@/helpers/utils";
 
 const initialState = {
   documents: {
@@ -126,7 +128,8 @@ export const restoreDocument = createAsyncThunk(
         id,
       };
     } catch (err) {
-      return rejectWithValue(err?.message || "Failed to restore document!");
+      logError(err);
+      return rejectWithValue(TRASH_MESSAGES.RESTORE_ERROR);
     }
   },
 );
@@ -147,6 +150,7 @@ export const getTrashedDocument = createAsyncThunk(
         parentId: parent || "trash",
       };
     } catch (err) {
+      logError(err);
       return rejectWithValue(err?.message || "Failed to fetch trash documents!");
     }
   },

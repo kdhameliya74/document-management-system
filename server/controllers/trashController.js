@@ -76,7 +76,7 @@ export const getTrashedDocs = asyncHandler(async (req, res) => {
 });
 
 export const restoreDocument = asyncHandler(async (req, res) => {
-  res.status(200).json({
+  res.status(404).json({
     success: true,
     message: "Document restored successfully",
   });

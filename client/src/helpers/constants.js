@@ -26,4 +26,5 @@ export const ERROR_MESSAGES = Object.freeze({
 export const TRASH_MESSAGES = Object.freeze({
   RESTORE_SUCCESS: "Folder restored to its original location.",
   RESTORE_LOADING: "Restoring folder. This may take a moment…",
+  RESTORE_ERROR: "Failed to restore document!",
 });

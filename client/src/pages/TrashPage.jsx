@@ -56,7 +56,7 @@ const TrashPage = () => {
         id: toastId,
       });
     } catch (err) {
-      toast.success(err, {
+      toast.error(err, {
         id: toastId,
       });
     }

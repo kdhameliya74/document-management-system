@@ -1,5 +1,11 @@
 import { FOLDER_MAX_NAME_LENGTH, FILE_MAX_NAME_LENGTH } from "@/helpers/constants.js";
 
+export const logError = (err) => {
+  if (import.meta.env.MODE !== "production") {
+    console.error(err);
+  }
+};
+
 export const truncateFileName = (name) => {
   const maxLength = FILE_MAX_NAME_LENGTH;
   if (name.length <= maxLength) return name;
