@@ -76,8 +76,29 @@ export const getTrashedDocs = asyncHandler(async (req, res) => {
 });
 
 export const restoreDocument = asyncHandler(async (req, res) => {
-  res.status(404).json({
-    success: true,
-    message: "Document restored successfully",
-  });
+  const { docId } = req.params;
+  const doc = await Folder.findById(docId);
+  if (!doc) {
+    return res.status(404).json({
+      success: false,
+      message: "Document not found!",
+    });
+  }
+  // TODO:
+  const pathRegex = new RegExp(`^${doc.path}`);
+  await Folder.updateMany(
+    {
+      path: { $regex: pathRegex },
+      isTrashed: true, // only update which not trashed already
+      // owner: TODO: Only owner and authorized user can delete
+    },
+    {
+      $set: {
+        isTrashed: false,
+        trashedAt: null,
+      },
+    },
+  );
+
+  res.status(200).json({ message: "Restored", success: true });
 });
