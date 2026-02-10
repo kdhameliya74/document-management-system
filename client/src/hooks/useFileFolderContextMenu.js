@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
-import { Trash, Eye, Share, Download, FolderPen } from "lucide-react";
+import { Trash, Eye, Share, Download, FolderPen, ArchiveRestore } from "lucide-react";
 import { setSelectedId, setShowDetails } from "@/store/documentSystemSlice";
 
-const useFileFolderContextMenu = () => {
+const useFileFolderContextMenu = (menuFor = "dashbaord", menuAction) => {
   const dispatch = useDispatch();
   const [contextMenu, setContextMenu] = useState(null);
   const [activeModal, setActiveModal] = useState(null);
@@ -23,6 +23,10 @@ const useFileFolderContextMenu = () => {
   };
 
   const closeContextMenu = () => setContextMenu(null);
+  const handleClickOutside = () => {
+    dispatch(setSelectedId(null));
+    closeContextMenu();
+  };
 
   const openModal = (modalType) => {
     if (contextMenu) {
@@ -35,42 +39,57 @@ const useFileFolderContextMenu = () => {
 
   const getContextMenuItems = () => {
     if (!contextMenu) return [];
-    return [
-      {
-        label: "Edit",
-        icon: FolderPen,
-        onClick: () => openModal("edit"),
-      },
-      {
-        label: "Delete",
-        icon: Trash,
-        onClick: () => openModal("delete"),
-      },
-      {
-        label: "View Details",
-        icon: Eye,
-        onClick: () => {
-          dispatch(setShowDetails(true));
-          closeContextMenu();
+    if (menuFor == "trash") {
+      return [
+        {
+          label: "Restore",
+          icon: ArchiveRestore,
+          onClick: async () => {
+            if (menuAction) {
+              await menuAction();
+            }
+          },
         },
-      },
-      {
-        label: "Share",
-        icon: Share,
-        onClick: () => {
-          alert("Share functionality coming soon!");
-          closeContextMenu();
+      ];
+    }
+    if (menuFor === "dashbaord") {
+      return [
+        {
+          label: "Edit",
+          icon: FolderPen,
+          onClick: () => openModal("edit"),
         },
-      },
-      {
-        label: "Download",
-        icon: Download,
-        onClick: () => {
-          alert("Download functionality coming soon!");
-          closeContextMenu();
+        {
+          label: "Delete",
+          icon: Trash,
+          onClick: () => openModal("delete"),
         },
-      },
-    ];
+        {
+          label: "View Details",
+          icon: Eye,
+          onClick: () => {
+            dispatch(setShowDetails(true));
+            closeContextMenu();
+          },
+        },
+        {
+          label: "Share",
+          icon: Share,
+          onClick: () => {
+            alert("Share functionality coming soon!");
+            closeContextMenu();
+          },
+        },
+        {
+          label: "Download",
+          icon: Download,
+          onClick: () => {
+            alert("Download functionality coming soon!");
+            closeContextMenu();
+          },
+        },
+      ];
+    }
   };
 
   return {
@@ -82,6 +101,7 @@ const useFileFolderContextMenu = () => {
     handleContextMenu,
     closeContextMenu,
     getContextMenuItems,
+    handleClickOutside,
   };
 };
 
