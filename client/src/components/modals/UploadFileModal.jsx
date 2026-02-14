@@ -10,6 +10,7 @@ const UploadFileModal = ({ isOpen, onClose, currentFolderId }) => {
 
   const handleUpload = () => {
     if (uploadFile) {
+
       dispatch(
         addFile({
           name: uploadFile.name,
@@ -19,6 +20,7 @@ const UploadFileModal = ({ isOpen, onClose, currentFolderId }) => {
           url: URL.createObjectURL(uploadFile),
         }),
       );
+      console.log("uploadFile", uploadFile, URL.createObjectURL(uploadFile));
       setUploadFile(null);
       onClose();
     }

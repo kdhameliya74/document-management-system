@@ -1,13 +1,6 @@
 import React from "react";
-import { FileText, Image, File, Video } from "lucide-react";
+import FileIcon from "@/components/common/FileIcon";
 import { truncateFileName } from "@/helpers/utils.js";
-
-const getFileIcon = (type) => {
-  if (type.startsWith("image/")) return <Image size={40} className="text-violet-500" />;
-  if (type.startsWith("video/")) return <Video size={40} className="text-red-500" />;
-  if (type === "application/pdf") return <FileText size={40} className="text-orange-500" />;
-  return <File size={40} className="text-slate-500" />;
-};
 
 const FileItem = ({ file, isSelected, onSelect, onContextMenu }) => {
   const displayName = truncateFileName(file.name);
@@ -26,18 +19,15 @@ const FileItem = ({ file, isSelected, onSelect, onContextMenu }) => {
       onContextMenu={(e) => onContextMenu(e, file, "file")}
       title={file.name}
     >
-      <div className="p-2 rounded-xl bg-bg-panel border border-border-muted group-hover:border-primary/30 transition-colors">
-        {React.cloneElement(getFileIcon(file.type), { size: 48, strokeWidth: 1.5 })}
+      <div className="relative p-2 rounded-xl bg-bg-panel border border-border-muted group-hover:border-primary/30 transition-colors">
+        <FileIcon mimeType={file.type} size={48} strokeWidth={1} />
       </div>
       <span
-        className={`text-sm text-center break-all line-clamp-2 px-1 ${
+        className={`text-sm text-center break-all line-clamp-2 px-1 truncate ${
           isSelected ? "text-primary" : "text-text-main"
         }`}
       >
         {displayName}
-      </span>
-      <span className="text-[10px] text-text-muted uppercase tracking-wider">
-        {file.size ? `${(file.size / 1024).toFixed(1)} KB` : "--"}
       </span>
     </div>
   );
