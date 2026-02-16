@@ -41,10 +41,6 @@ const fileSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    storageKey: {
-      type: String,
-      required: true, // Actual file location on disk/cloud
-    },
     currentVersion: {
       type: Number,
       default: 1,
@@ -105,6 +101,38 @@ const fileSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+
+    // NEW S3 FIELDS BELOW
+    storageKey: {
+      type: String,
+      required: true, // Actual file location on disk/cloud
+    },
+    storageProvider: {
+      type: String,
+      enum: ["s3"],
+      default: "s3",
+      required: true,
+    },
+
+    bucket: {
+      type: String,
+      required: true,
+    },
+
+    etag: {
+      type: String,
+    },
+
+    checksum: {
+      type: String,
+    },
+
+    uploadStatus: {
+      type: String,
+      enum: ["pending", "completed", "failed"],
+      default: "pending",
+      index: true,
+    },
   },
   {
     timestamps: true,
@@ -143,9 +171,9 @@ fileSchema.methods.hasAccess = function (userId, requiredPermission = PERMISSION
 };
 
 // Virtual for file URL (to be implemented based on storage solution)
-fileSchema.virtual("url").get(function () {
-  return `/api/files/${this._id}/download`;
-});
+// fileSchema.virtual("url").get(function () {
+//   return `/api/files/${this._id}/download`;
+// });
 
 fileSchema.set("toJSON", { virtuals: true });
 fileSchema.set("toObject", { virtuals: true });
