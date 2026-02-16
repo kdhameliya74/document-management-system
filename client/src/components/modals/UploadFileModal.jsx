@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { Upload, X, Loader2, Check, AlertCircle } from "lucide-react";
 import { addFile } from "@/store/documentSystemSlice";
@@ -69,6 +69,7 @@ const UploadFileModal = ({ isOpen, onClose, currentFolderId }) => {
           prev.map((f) => (f.id === fileObj.id ? { ...f, status: "completed" } : f)),
         );
       } catch (error) {
+        console.error("Upload failed:", error);
         setSelectedFiles((prev) =>
           prev.map((f) => (f.id === fileObj.id ? { ...f, status: "error" } : f)),
         );
@@ -76,7 +77,9 @@ const UploadFileModal = ({ isOpen, onClose, currentFolderId }) => {
     };
 
     const CHUNK_SIZE = 5;
-    const pendingFiles = selectedFiles.filter((f) => f.status === "pending" || f.status === "error");
+    const pendingFiles = selectedFiles.filter(
+      (f) => f.status === "pending" || f.status === "error",
+    );
 
     for (let i = 0; i < pendingFiles.length; i += CHUNK_SIZE) {
       const chunk = pendingFiles.slice(i, i + CHUNK_SIZE);
@@ -111,9 +114,7 @@ const UploadFileModal = ({ isOpen, onClose, currentFolderId }) => {
             <div className="w-12 h-12 rounded-full bg-bg-hover flex items-center justify-center text-text-muted group-hover:text-primary transition-colors">
               <Upload size={24} />
             </div>
-            <div className="text-text-main font-medium">
-              Click to select or drag files here
-            </div>
+            <div className="text-text-main font-medium">Click to select or drag files here</div>
             <div className="text-text-muted text-sm">Support for all file types</div>
           </div>
         </div>
@@ -144,16 +145,21 @@ const UploadFileModal = ({ isOpen, onClose, currentFolderId }) => {
                     {fileObj.status === "uploading" && (
                       <Loader2 size={16} className="text-primary animate-spin" />
                     )}
-                    {fileObj.status === "completed" && <Check size={16} className="text-green-500" />}
-                    {fileObj.status === "error" && <AlertCircle size={16} className="text-red-500" />}
-                    {(fileObj.status === "pending" || fileObj.status === "error") && !isUploading && (
-                      <button
-                        onClick={() => removeFile(fileObj.id)}
-                        className="cursor-pointer text-text-muted hover:text-red-500 transition-colors"
-                      >
-                        <X size={16} />
-                      </button>
+                    {fileObj.status === "completed" && (
+                      <Check size={16} className="text-green-500" />
                     )}
+                    {fileObj.status === "error" && (
+                      <AlertCircle size={16} className="text-red-500" />
+                    )}
+                    {(fileObj.status === "pending" || fileObj.status === "error") &&
+                      !isUploading && (
+                        <button
+                          onClick={() => removeFile(fileObj.id)}
+                          className="cursor-pointer text-text-muted hover:text-red-500 transition-colors"
+                        >
+                          <X size={16} />
+                        </button>
+                      )}
                   </div>
                 </div>
               ))}
