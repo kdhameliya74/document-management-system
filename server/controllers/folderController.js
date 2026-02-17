@@ -1,5 +1,6 @@
 import { asyncHandler } from "../middleware/error.js";
 import Folder from "../models/Folder.js";
+import File from "../models/File.js";
 
 export const fetchFolderUtils = async (req, filters = {}, topParent = "root") => {
   const userId = req.user?.id;
@@ -7,6 +8,12 @@ export const fetchFolderUtils = async (req, filters = {}, topParent = "root") =>
 
   const folders = await Folder.find({
     parent: parent || null,
+    owner: userId,
+    ...filters,
+  });
+
+  const files = await File.find({
+    folder: parent || null,
     owner: userId,
     ...filters,
   });
@@ -46,6 +53,7 @@ export const fetchFolderUtils = async (req, filters = {}, topParent = "root") =>
   return {
     success: true,
     folders,
+    files,
     currentFolder,
     breadcrumbs,
   };
