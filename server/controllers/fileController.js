@@ -9,8 +9,9 @@ import path from "path";
 // @route   POST /api/files/upload-url
 // @access  Private
 export const getPresignedUrl = asyncHandler(async (req, res, next) => {
+    console.log(req.body);
     const { fileName, fileType } = req.body;
-    const userId = req.user.id;
+    const userId = "user-sample-created";
 
     const storageKey = `${userId}/${Date.now()}-${fileName}`;
     const bucket = process.env.AWS_S3_BUCKET;
