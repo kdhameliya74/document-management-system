@@ -30,6 +30,10 @@ const fileSystemAPI = {
     const response = await api.post("/files/upload-urls", files);
     return response.data;
   },
+  confirmUpload: async (fileData) => {
+    const response = await api.post("/files/confirm", fileData);
+    return response.data;
+  },
 };
 
 export default fileSystemAPI;
