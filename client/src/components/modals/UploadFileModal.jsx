@@ -1,9 +1,12 @@
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { Upload, X, Loader2, Check, AlertCircle } from "lucide-react";
-import Modal from "@/components/common/Modal";
 import { fetchDocuments } from "@/store/documentSystemSlice";
-import axios from "axios";
+import Modal from "@/components/common/Modal";
+import fileSystemAPI from "@/services/fileSystemService";
+import { logError, uuidToBase64 } from "@/helpers/utils";
+
+const CHUNK_SIZE = 3;
 
 const UploadFileModal = ({ isOpen, onClose, currentFolderId }) => {
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -35,13 +38,6 @@ const UploadFileModal = ({ isOpen, onClose, currentFolderId }) => {
     );
 
     try {
-      // 1. Get presigned URL
-      const { data: urlData } = await axios.post("/api/files/upload-url", {
-        fileName: fileObj.name,
-        fileType: fileObj.type,
-      });
-
-      const { uploadUrl, storageKey, bucket } = urlData;
 
       // 2. Upload to S3
       await axios.put(uploadUrl, fileObj.file, {
@@ -56,46 +52,48 @@ const UploadFileModal = ({ isOpen, onClose, currentFolderId }) => {
         },
       });
 
-      // 3. Confirm upload and save metadata
-      const { data: confirmData } = await axios.post("/api/files/confirm", {
-        name: fileObj.name,
-        size: fileObj.size,
-        type: fileObj.type,
-        storageKey,
-        bucket,
-        folderId: currentFolderId === "root" ? null : currentFolderId,
-      });
-
-      // Refresh documents list to show the new file
-      dispatch(fetchDocuments(currentFolderId === "root" ? null : currentFolderId));
-
       setSelectedFiles((prev) =>
         prev.map((f) => (f.id === fileObj.id ? { ...f, status: "completed", progress: 100 } : f)),
       );
     } catch (error) {
-      console.error("Upload failed:", error);
-      setSelectedFiles((prev) =>
-        prev.map((f) => (f.id === fileObj.id ? { ...f, status: "error" } : f)),
-      );
+      logError(error);
     }
   };
 
   const handleUpload = async () => {
     if (selectedFiles.length === 0 || isUploading) return;
 
-    setIsUploading(true);
+    const filesObj = selectedFiles.map((file) => ({uid:uuidToBase64(crypto.randomUUID()), fileName: file.name, fileType: file.type }));
 
-    const CHUNK_SIZE = 3; // Concurrent uploads
-    const pendingFiles = selectedFiles.filter(
-      (f) => f.status === "pending" || f.status === "error",
-    );
-
-    for (let i = 0; i < pendingFiles.length; i += CHUNK_SIZE) {
-      const chunk = pendingFiles.slice(i, i + CHUNK_SIZE);
-      await Promise.all(chunk.map((fileObj) => uploadFile(fileObj)));
+    try {
+      setIsUploading(true);
+      const response = await fileSystemAPI.getPresignedUrls(filesObj);
+      if(response?.success){
+        const {successfulUploads, failedUploads} = response?.data;
+        if(successfulUploads) {
+          const filesMetadata = [];
+          for (let i = 0; i < successfulUploads.length; i += CHUNK_SIZE) {
+            const chunk = successfulUploads.slice(i, i + CHUNK_SIZE);
+            await Promise.all(chunk.map((fileObj) => uploadFile(fileObj)));
+          }
+        }
+      }
+    } catch (error) {
+      logError(error)
+    } finally {
+      setIsUploading(false);
     }
 
-    setIsUploading(false);
+
+    // const CHUNK_SIZE = 3; // Concurrent uploads
+    // const pendingFiles = selectedFiles.filter(
+    //   (f) => f.status === "pending" || f.status === "error",
+    // );
+
+    // for (let i = 0; i < pendingFiles.length; i += CHUNK_SIZE) {
+    //   const chunk = pendingFiles.slice(i, i + CHUNK_SIZE);
+    //   await Promise.all(chunk.map((fileObj) => uploadFile(fileObj)));
+    // }
   };
 
   const handleClose = () => {

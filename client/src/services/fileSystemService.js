@@ -26,6 +26,10 @@ const fileSystemAPI = {
     const response = await api.patch(`/folders/trash/${docId}/restore`);
     return response.data;
   },
+  getPresignedUrls: async (files) => {
+    const response = await api.post("/files/upload-urls", files);
+    return response.data;
+  },
 };
 
 export default fileSystemAPI;
