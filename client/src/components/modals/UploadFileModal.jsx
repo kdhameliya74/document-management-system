@@ -18,20 +18,29 @@ const STATUS = {
 const UploadFileModal = ({ isOpen, onClose, currentFolderId }) => {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState({});
   // const dispatch = useDispatch();
 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
-    const newFiles = files.map((file) => ({
-      file,
-      uid: uuidToBase64(crypto.randomUUID()),
-      name: file.name,
-      size: file.size,
-      type: file.type,
-      status: STATUS.PENDING,
-      progress: 0,
-    }));
+    const filesStatus = {};
+    const newFiles = files.map((file) => {
+      const uid = uuidToBase64(crypto.randomUUID());
+      filesStatus[uid] = STATUS.PENDING;
+      return {
+        file,
+        uid,
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        status: STATUS.PENDING,
+        progress: 0,
+      };
+    });
     setSelectedFiles((prev) => [...prev, ...newFiles]);
+    setUploadStatus((prev) => ({ ...prev, ...filesStatus }));
+    console.log("selectedFiles", selectedFiles);
+    console.log("uploadStatus", uploadStatus);
   };
 
   const onUploadProgress = (progressEvent, fileObj) => {
@@ -40,6 +49,7 @@ const UploadFileModal = ({ isOpen, onClose, currentFolderId }) => {
       prev.map((f) => (f.uid === fileObj.uid ? { ...f, progress: percentCompleted } : f)),
     );
   };
+
   const uploadFile = async (uploadInfo, fileObj) => {
     try {
       // 1. Upload to S3
@@ -63,19 +73,14 @@ const UploadFileModal = ({ isOpen, onClose, currentFolderId }) => {
       // const response = await fileSystemAPI.confirmUpload(confirmData);
 
       if (response.status === 200) {
-        setSelectedFiles((prev) =>
-          prev.map((f) => (f.uid === fileObj.uid ? { ...f, status: STATUS.COMPLETED } : f)),
-        );
+        setUploadStatus((prev) => ({ ...prev, [fileObj.uid]: STATUS.COMPLETED }));
         return response.file;
       } else {
         throw new Error("Confirmation failed");
       }
     } catch (error) {
+      setUploadStatus((prev) => ({ ...prev, [fileObj.uid]: STATUS.ERROR }));
       logError(error);
-      setSelectedFiles((prev) =>
-        prev.map((f) => (f.uid === fileObj.uid ? { ...f, status: STATUS.ERROR } : f)),
-      );
-      throw error;
     }
   };
 
@@ -83,9 +88,10 @@ const UploadFileModal = ({ isOpen, onClose, currentFolderId }) => {
     if (selectedFiles.length === 0 || isUploading) return;
 
     const pendingFiles = selectedFiles.filter(
-      (f) => f.status === STATUS.PENDING || f.status === STATUS.ERROR,
+      (f) => uploadStatus[f.uid] === STATUS.PENDING || uploadStatus[f.uid] === STATUS.ERROR,
     );
 
+    console.log("pendingFiles", pendingFiles);
     if (pendingFiles.length === 0) return;
 
     try {
@@ -107,12 +113,13 @@ const UploadFileModal = ({ isOpen, onClose, currentFolderId }) => {
             const chunks = successfulUploads.slice(i, i + CHUNK_SIZE);
 
             // Set current chunk to UPLOADING status
-            setSelectedFiles((prev) =>
-              prev.map((f) => {
-                const file = chunks.find((c) => c.uid === f.uid);
-                return file ? { ...f, status: STATUS.UPLOADING } : f;
-              }),
-            );
+            setUploadStatus((prev) => {
+              const newStatus = { ...prev };
+              chunks.forEach((chunk) => {
+                newStatus[chunk.uid] = STATUS.UPLOADING;
+              });
+              return newStatus;
+            });
 
             await Promise.allSettled(
               chunks.map((uploadInfo) => {
@@ -140,6 +147,7 @@ const UploadFileModal = ({ isOpen, onClose, currentFolderId }) => {
   const handleClose = () => {
     if (isUploading) return;
     setSelectedFiles([]);
+    setUploadStatus({});
     setIsUploading(false);
     onClose();
   };
@@ -190,16 +198,17 @@ const UploadFileModal = ({ isOpen, onClose, currentFolderId }) => {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    {fileObj.status === STATUS.UPLOADING && (
+                    {uploadStatus[fileObj.uid] === STATUS.UPLOADING && (
                       <Loader2 size={16} className="text-primary animate-spin" />
                     )}
-                    {fileObj.status === STATUS.COMPLETED && (
+                    {uploadStatus[fileObj.uid] === STATUS.COMPLETED && (
                       <Check size={16} className="text-green-500" />
                     )}
-                    {fileObj.status === STATUS.ERROR && (
+                    {uploadStatus[fileObj.uid] === STATUS.ERROR && (
                       <AlertCircle size={16} className="text-red-500" />
                     )}
-                    {(fileObj.status === STATUS.PENDING || fileObj.status === STATUS.ERROR) &&
+                    {(uploadStatus[fileObj.uid] === STATUS.PENDING ||
+                      uploadStatus[fileObj.uid] === STATUS.ERROR) &&
                       !isUploading && (
                         <button
                           onClick={() => removeFile(fileObj.uid)}
