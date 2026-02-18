@@ -16,7 +16,6 @@ export const getPresignedUrls = asyncHandler(async (req, res) => {
   }
 
   const userId = req.user.id;
-  const filesUrls = [];
   const date = Date.now();
 
   const bucket = process.env.AWS_S3_BUCKET;
@@ -42,13 +41,13 @@ export const getPresignedUrls = asyncHandler(async (req, res) => {
         fileName: file.fileName,
         uid: file.uid,
       };
-    })
+    }),
   );
 
   const success = [];
   const failed = [];
 
-  results.forEach((result, index) => {
+  results.forEach((result) => {
     if (result.status === "fulfilled") success.push(result.value);
     else failed.push(result.reason);
   });

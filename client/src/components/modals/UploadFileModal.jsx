@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { useDispatch } from "react-redux";
+// import { useDispatch } from "react-redux";
 import axios from "axios";
 import { Upload, X, Loader2, Check, AlertCircle } from "lucide-react";
-import { fetchDocuments } from "@/store/documentSystemSlice";
+// import { fetchDocuments } from "@/store/documentSystemSlice";
 import Modal from "@/components/common/Modal";
 import fileSystemAPI from "@/services/fileSystemService";
 import { logError, uuidToBase64 } from "@/helpers/utils";
@@ -15,16 +15,10 @@ const STATUS = {
   ERROR: "error",
 };
 
-const onUploadProgress = (progressEvent, fileObj) => {
-  const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-  setSelectedFiles((prev) =>
-    prev.map((f) => (f.uid === fileObj.uid ? { ...f, progress: percentCompleted } : f))
-  );
-}
 const UploadFileModal = ({ isOpen, onClose, currentFolderId }) => {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
@@ -40,7 +34,13 @@ const UploadFileModal = ({ isOpen, onClose, currentFolderId }) => {
     setSelectedFiles((prev) => [...prev, ...newFiles]);
   };
 
-  const uploadFile = async (uploadInfo, fileObj, folderId) => {
+  const onUploadProgress = (progressEvent, fileObj) => {
+    const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+    setSelectedFiles((prev) =>
+      prev.map((f) => (f.uid === fileObj.uid ? { ...f, progress: percentCompleted } : f)),
+    );
+  };
+  const uploadFile = async (uploadInfo, fileObj) => {
     try {
       // 1. Upload to S3
       const response = await axios.put(uploadInfo.uploadUrl, fileObj.file, {
@@ -51,20 +51,20 @@ const UploadFileModal = ({ isOpen, onClose, currentFolderId }) => {
       });
 
       // // 2. Confirm Upload to Backend
-      const confirmData = {
-        name: fileObj.name,
-        size: fileObj.size,
-        type: fileObj.type,
-        storageKey: uploadInfo.storageKey,
-        bucket: "dms-s3-bucket-developer", // This should ideally come from env or response
-        folderId: folderId === "root" ? null : folderId,
-      };
+      // const confirmData = {
+      //   name: fileObj.name,
+      //   size: fileObj.size,
+      //   type: fileObj.type,
+      //   storageKey: uploadInfo.storageKey,
+      //   bucket: "dms-s3-bucket-developer", // This should ideally come from env or response
+      //   folderId: folderId === "root" ? null : folderId,
+      // };
 
       // const response = await fileSystemAPI.confirmUpload(confirmData);
 
       if (response.status === 200) {
         setSelectedFiles((prev) =>
-          prev.map((f) => (f.uid === fileObj.uid ? { ...f, status: STATUS.COMPLETED } : f))
+          prev.map((f) => (f.uid === fileObj.uid ? { ...f, status: STATUS.COMPLETED } : f)),
         );
         return response.file;
       } else {
@@ -73,7 +73,7 @@ const UploadFileModal = ({ isOpen, onClose, currentFolderId }) => {
     } catch (error) {
       logError(error);
       setSelectedFiles((prev) =>
-        prev.map((f) => (f.uid === fileObj.uid ? { ...f, status: STATUS.ERROR } : f))
+        prev.map((f) => (f.uid === fileObj.uid ? { ...f, status: STATUS.ERROR } : f)),
       );
       throw error;
     }
@@ -83,7 +83,7 @@ const UploadFileModal = ({ isOpen, onClose, currentFolderId }) => {
     if (selectedFiles.length === 0 || isUploading) return;
 
     const pendingFiles = selectedFiles.filter(
-      (f) => f.status === STATUS.PENDING || f.status === STATUS.ERROR
+      (f) => f.status === STATUS.PENDING || f.status === STATUS.ERROR,
     );
 
     if (pendingFiles.length === 0) return;
@@ -109,16 +109,16 @@ const UploadFileModal = ({ isOpen, onClose, currentFolderId }) => {
             // Set current chunk to UPLOADING status
             setSelectedFiles((prev) =>
               prev.map((f) => {
-                const file = chunks.find((c) => c.uid === f.uid)
+                const file = chunks.find((c) => c.uid === f.uid);
                 return file ? { ...f, status: STATUS.UPLOADING } : f;
-              })
+              }),
             );
 
             await Promise.allSettled(
               chunks.map((uploadInfo) => {
                 const fileObj = pendingFiles.find((f) => f.uid === uploadInfo.uid);
                 return uploadFile(uploadInfo, fileObj, currentFolderId);
-              })
+              }),
             );
           }
 

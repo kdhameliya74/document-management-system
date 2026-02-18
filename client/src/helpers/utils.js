@@ -33,7 +33,10 @@ export const truncateFolderName = (name) => {
 };
 
 export const uuidToBase64 = (uuid) => {
-  const hex = uuid.replace(/-/g, '');
-  const bytes = new Uint8Array(hex.match(/.{1,2}/g).map(h => parseInt(h, 16)));
-  return btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').slice(0, 12);
-}
+  const hex = uuid.replace(/-/g, "");
+  const bytes = new Uint8Array(hex.match(/.{1,2}/g).map((h) => parseInt(h, 16)));
+  return btoa(String.fromCharCode(...bytes))
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .slice(0, 12);
+};
