@@ -1,8 +1,7 @@
 import React, { useState } from "react";
-// import { useDispatch } from "react-redux";
-import axios from "axios";
+import { useDispatch } from "react-redux";
 import { Upload, X, Loader2, Check, AlertCircle } from "lucide-react";
-// import { fetchDocuments } from "@/store/documentSystemSlice";
+import { uploadFileMeta } from "@/store/documentSystemSlice";
 import Modal from "@/components/common/Modal";
 import fileSystemAPI from "@/services/fileSystemService";
 import { logError, uuidToBase64 } from "@/helpers/utils";
@@ -18,79 +17,62 @@ const STATUS = {
 const UploadFileModal = ({ isOpen, onClose, currentFolderId }) => {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
-  // const dispatch = useDispatch();
+  const [uploadStatus, setUploadStatus] = useState({});
+  const dispatch = useDispatch();
 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
-    const newFiles = files.map((file) => ({
-      file,
-      uid: uuidToBase64(crypto.randomUUID()),
-      name: file.name,
-      size: file.size,
-      type: file.type,
-      status: STATUS.PENDING,
-      progress: 0,
-    }));
+    const filesStatus = {};
+    const newFiles = files.map((file) => {
+      const uid = uuidToBase64(crypto.randomUUID());
+      filesStatus[uid] = STATUS.PENDING;
+      return {
+        file,
+        uid,
+        name: file.name,
+        size: file.size,
+        mimeType: file.type,
+      };
+    });
     setSelectedFiles((prev) => [...prev, ...newFiles]);
+    setUploadStatus((prev) => ({ ...prev, ...filesStatus }));
   };
 
-  const onUploadProgress = (progressEvent, fileObj) => {
-    const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-    setSelectedFiles((prev) =>
-      prev.map((f) => (f.uid === fileObj.uid ? { ...f, progress: percentCompleted } : f)),
-    );
-  };
   const uploadFile = async (uploadInfo, fileObj) => {
     try {
-      // 1. Upload to S3
-      const response = await axios.put(uploadInfo.uploadUrl, fileObj.file, {
-        headers: {
-          "Content-Type": fileObj.type,
-        },
-        onUploadProgress: (progressEvent) => onUploadProgress(progressEvent, fileObj),
-      });
-
-      // // 2. Confirm Upload to Backend
-      // const confirmData = {
-      //   name: fileObj.name,
-      //   size: fileObj.size,
-      //   type: fileObj.type,
-      //   storageKey: uploadInfo.storageKey,
-      //   bucket: "dms-s3-bucket-developer", // This should ideally come from env or response
-      //   folderId: folderId === "root" ? null : folderId,
-      // };
-
-      // const response = await fileSystemAPI.confirmUpload(confirmData);
-
+      const response = await fileSystemAPI.uploadFileOnS3(uploadInfo.uploadUrl, fileObj.file);
       if (response.status === 200) {
-        setSelectedFiles((prev) =>
-          prev.map((f) => (f.uid === fileObj.uid ? { ...f, status: STATUS.COMPLETED } : f)),
-        );
-        return response.file;
+        const fileMeta = {
+          name: fileObj.name,
+          originalName: fileObj.name,
+          size: fileObj.size,
+          storageKey: uploadInfo.storageKey,
+          bucket: uploadInfo.bucket,
+          folderId: currentFolderId === "root" ? null : currentFolderId,
+          extension: fileObj.name.split(".").pop(),
+          mimeType: fileObj.mimeType,
+          uploadStatus: STATUS.COMPLETED,
+        };
+        await dispatch(uploadFileMeta(fileMeta)).unwrap();
+        setUploadStatus((prev) => ({ ...prev, [fileObj.uid]: STATUS.COMPLETED }));
       } else {
-        throw new Error("Confirmation failed");
+        throw new Error("Upload failed");
       }
     } catch (error) {
+      setUploadStatus((prev) => ({ ...prev, [fileObj.uid]: STATUS.ERROR }));
       logError(error);
-      setSelectedFiles((prev) =>
-        prev.map((f) => (f.uid === fileObj.uid ? { ...f, status: STATUS.ERROR } : f)),
-      );
-      throw error;
     }
   };
 
   const handleUpload = async () => {
     if (selectedFiles.length === 0 || isUploading) return;
-
     const pendingFiles = selectedFiles.filter(
-      (f) => f.status === STATUS.PENDING || f.status === STATUS.ERROR,
+      (f) => uploadStatus[f.uid] === STATUS.PENDING || uploadStatus[f.uid] === STATUS.ERROR,
     );
-
     if (pendingFiles.length === 0) return;
 
     try {
       setIsUploading(true);
-
       const filesToGetUrls = pendingFiles.map((f) => ({
         uid: f.uid,
         fileName: f.name,
@@ -100,19 +82,26 @@ const UploadFileModal = ({ isOpen, onClose, currentFolderId }) => {
       const response = await fileSystemAPI.getPresignedUrls(filesToGetUrls);
 
       if (response?.success) {
-        const { successfulUploads } = response;
+        const { successfulUploads, failedUploads = [] } = response;
 
-        if (successfulUploads) {
+        if (failedUploads.length > 0) {
+          failedUploads.forEach((f) => {
+            setUploadStatus((prev) => ({ ...prev, [f.uid]: STATUS.ERROR }));
+          });
+        }
+
+        if (successfulUploads.length > 0) {
           for (let i = 0; i < successfulUploads.length; i += CHUNK_SIZE) {
             const chunks = successfulUploads.slice(i, i + CHUNK_SIZE);
 
             // Set current chunk to UPLOADING status
-            setSelectedFiles((prev) =>
-              prev.map((f) => {
-                const file = chunks.find((c) => c.uid === f.uid);
-                return file ? { ...f, status: STATUS.UPLOADING } : f;
-              }),
-            );
+            setUploadStatus((prev) => {
+              const newStatus = { ...prev };
+              chunks.forEach((chunk) => {
+                newStatus[chunk.uid] = STATUS.UPLOADING;
+              });
+              return newStatus;
+            });
 
             await Promise.allSettled(
               chunks.map((uploadInfo) => {
@@ -140,11 +129,14 @@ const UploadFileModal = ({ isOpen, onClose, currentFolderId }) => {
   const handleClose = () => {
     if (isUploading) return;
     setSelectedFiles([]);
+    setUploadStatus({});
     setIsUploading(false);
     onClose();
   };
 
-  const completedCount = selectedFiles.filter((f) => f.status === STATUS.COMPLETED).length;
+  const completedCount = selectedFiles.filter(
+    (f) => uploadStatus[f.uid] === STATUS.COMPLETED,
+  ).length;
   const totalCount = selectedFiles.length;
 
   return (
@@ -190,16 +182,17 @@ const UploadFileModal = ({ isOpen, onClose, currentFolderId }) => {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    {fileObj.status === STATUS.UPLOADING && (
+                    {uploadStatus[fileObj.uid] === STATUS.UPLOADING && (
                       <Loader2 size={16} className="text-primary animate-spin" />
                     )}
-                    {fileObj.status === STATUS.COMPLETED && (
+                    {uploadStatus[fileObj.uid] === STATUS.COMPLETED && (
                       <Check size={16} className="text-green-500" />
                     )}
-                    {fileObj.status === STATUS.ERROR && (
+                    {uploadStatus[fileObj.uid] === STATUS.ERROR && (
                       <AlertCircle size={16} className="text-red-500" />
                     )}
-                    {(fileObj.status === STATUS.PENDING || fileObj.status === STATUS.ERROR) &&
+                    {(uploadStatus[fileObj.uid] === STATUS.PENDING ||
+                      uploadStatus[fileObj.uid] === STATUS.ERROR) &&
                       !isUploading && (
                         <button
                           onClick={() => removeFile(fileObj.uid)}

@@ -28,3 +28,9 @@ export const TRASH_MESSAGES = Object.freeze({
   RESTORE_LOADING: "Restoring folder. This may take a moment…",
   RESTORE_ERROR: "Failed to restore document!",
 });
+
+export const FILE_UPLOAD_MESSAGES = Object.freeze({
+  UPLOAD_SUCCESS: "File uploaded successfully.",
+  UPLOAD_LOADING: "Uploading file. This may take a moment…",
+  UPLOAD_FAILED: "Failed to save file details",
+});

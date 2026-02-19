@@ -6,13 +6,13 @@ import mongoSanitize from "express-mongo-sanitize";
 import cookieParser from "cookie-parser";
 import rateLimit from "express-rate-limit";
 import connectDB from "./config/database.js";
-import { errorHandler, notFound } from "./middleware/error.js";
+import { errorHandler, notFound } from "./middlewares/error.middleware.js";
 
 // Import routes
-import authRoutes from "./routes/auth.js";
-import folderRoutes from "./routes/folder.js";
-import trashRoutes from "./routes/trash.js";
-import fileRoutes from "./routes/file.js";
+import authRoutes from "./routes/auth.route.js";
+import folderRoutes from "./routes/folder.route.js";
+import trashRoutes from "./routes/trash.route.js";
+import fileRoutes from "./routes/file.route.js";
 
 // Load env vars
 dotenv.config();

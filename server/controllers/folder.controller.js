@@ -1,6 +1,6 @@
-import { asyncHandler } from "../middleware/error.js";
-import Folder from "../models/Folder.js";
-import File from "../models/File.js";
+import { asyncHandler } from "../middlewares/error.middleware.js";
+import Folder from "../models/Folder.model.js";
+import File from "../models/File.model.js";
 
 export const fetchFolderUtils = async (req, filters = {}, topParent = "root") => {
   const userId = req.user?.id;

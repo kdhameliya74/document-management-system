@@ -1,16 +1,15 @@
-import User from "../models/User.js";
-import { asyncHandler } from "../middleware/error.js";
+import User from "../models/User.model.js";
+import { asyncHandler } from "../middlewares/error.middleware.js";
+import { isProduction } from "../utils/helper.util.js";
 
 // Helper function to send token response
-const isProduction = process.env.NODE_ENV === "production";
-
 const sendTokenResponse = (user, statusCode, res) => {
   const token = user.generateAuthToken();
 
   const options = {
     expires: new Date(Date.now() + parseInt(process.env.JWT_COOKIE_EXPIRE) * 24 * 60 * 60 * 1000),
     httpOnly: true,
-    secure: isProduction, // HTTPS in production
+    secure: isProduction,
     sameSite: "strict",
   };
 

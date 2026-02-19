@@ -20,7 +20,7 @@ const FileItem = ({ file, isSelected, onSelect, onContextMenu }) => {
       title={file.name}
     >
       <div className="relative p-2 rounded-xl bg-bg-panel border border-border-muted group-hover:border-primary/30 transition-colors">
-        <FileIcon mimeType={file.type} size={48} strokeWidth={1} />
+        <FileIcon mimeType={file.mimeType} size={48} strokeWidth={1} />
       </div>
       <span
         className={`text-sm text-center break-all line-clamp-2 px-1 truncate ${

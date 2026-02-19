@@ -1,6 +1,6 @@
 import express from "express";
-import { getTrashedDocs, restoreDocument } from "../controllers/trashController.js";
-import { protect } from "../middleware/auth.js";
+import { getTrashedDocs, restoreDocument } from "../controllers/trash.controller.js";
+import { protect } from "../middlewares/auth.moddleware.js";
 
 const router = express.Router();
 

@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
-import { asyncHandler } from "../middleware/error.js";
-import Folder from "../models/Folder.js";
+import { asyncHandler } from "../middlewares/error.middleware.js";
+import Folder from "../models/Folder.model.js";
 
 export const getTrashedDocs = asyncHandler(async (req, res) => {
   const { parent } = req.query;

@@ -10,6 +10,10 @@ const folderSchema = new mongoose.Schema(
       trim: true,
       maxlength: [255, FOLDER_VALIDATION.NAME_MAXLENGTH],
     },
+    docType: {
+      type: String,
+      default: "folder",
+    },
     owner: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

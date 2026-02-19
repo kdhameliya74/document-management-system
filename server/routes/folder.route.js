@@ -4,8 +4,8 @@ import {
   getFolders,
   deleteDocument,
   updateDocument,
-} from "../controllers/folderController.js";
-import { protect } from "../middleware/auth.js";
+} from "../controllers/folder.controller.js";
+import { protect } from "../middlewares/auth.moddleware.js";
 
 const router = express.Router();
 

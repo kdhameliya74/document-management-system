@@ -1,6 +1,6 @@
 import express from "express";
-import { getPresignedUrls, confirmUpload } from "../controllers/fileController.js";
-import { protect } from "../middleware/auth.js";
+import { getPresignedUrls, confirmUpload } from "../controllers/file.controller.js";
+import { protect } from "../middlewares/auth.moddleware.js";
 
 const router = express.Router();
 

@@ -35,7 +35,7 @@ const FolderModal = ({
 
     if (sanitizedName) {
       const currentFolder = documents[currentFolderId];
-      const isDuplicate = currentFolder?.childFolderIds?.some(
+      const isDuplicate = currentFolder?.childDocuments?.some(
         (folderId) => documents[folderId]?.name.toLowerCase() === sanitizedName.toLowerCase(),
       );
 
