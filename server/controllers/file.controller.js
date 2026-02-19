@@ -52,8 +52,8 @@ export const getPresignedUrls = asyncHandler(async (req, res) => {
     if (result.status === "fulfilled") success.push(result.value);
     else {
       // TODO: send failed ids
-      failed.push(result)
-    };
+      failed.push(result);
+    }
   });
 
   res.status(200).json({
@@ -67,11 +67,20 @@ export const getPresignedUrls = asyncHandler(async (req, res) => {
 // @route   POST /api/files/confirm
 // @access  Private
 export const confirmUpload = asyncHandler(async (req, res) => {
-  const { name, size, type, storageKey, bucket, folderId, originalName, mimeType, extension } = req.body;
+  const { name, size, type, storageKey, bucket, folderId, originalName, mimeType, extension } =
+    req.body;
   const userId = req.user.id;
 
   const file = await File.create({
-    name, size, type, storageKey, bucket, folderId, originalName, mimeType, extension,
+    name,
+    size,
+    type,
+    storageKey,
+    bucket,
+    folderId,
+    originalName,
+    mimeType,
+    extension,
     owner: userId,
   });
 

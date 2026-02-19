@@ -1,7 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { v4 as uuidv4 } from "uuid";
 import fileSystemAPI from "@/services/fileSystemService";
-import { TRASH_MESSAGES } from "@/helpers/constants";
+import { TRASH_MESSAGES, FILE_UPLOAD_MESSAGES } from "@/helpers/constants";
 import { logError } from "@/helpers/utils";
 
 const initialState = {
@@ -41,9 +40,10 @@ export const uploadFileMeta = createAsyncThunk(
       const data = await fileSystemAPI.confirmUpload(file);
       return {
         ...file,
-        ...data?.file || {},
-      }
+        ...(data?.file || {}),
+      };
     } catch (err) {
+      logError(err);
       return rejectWithValue(FILE_UPLOAD_MESSAGES.UPLOAD_FAILED);
     }
   },
@@ -448,8 +448,7 @@ const documentSystemSlice = createSlice({
         if (state.documents[parentId]) {
           state.documents[parentId].childDocuments.push(id);
         }
-      })
-      ;
+      });
   },
 });
 

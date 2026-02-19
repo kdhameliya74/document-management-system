@@ -12,7 +12,7 @@ const folderSchema = new mongoose.Schema(
     },
     docType: {
       type: String,
-      default: "folder"
+      default: "folder",
     },
     owner: {
       type: mongoose.Schema.Types.ObjectId,

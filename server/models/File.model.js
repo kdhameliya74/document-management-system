@@ -21,7 +21,7 @@ const fileSchema = new mongoose.Schema(
     },
     docType: {
       type: String,
-      default: "file"
+      default: "file",
     },
     mimeType: {
       type: String,
@@ -169,12 +169,6 @@ fileSchema.methods.hasAccess = function (userId, requiredPermission = PERMISSION
 // fileSchema.virtual("url").get(function () {
 //   return `/api/files/${this._id}/download`;
 // });
-
-fileSchema.pre("validate", async function (next) {
-  if (this.isNew || this.isModified("parent") || this.isModified("name")) {
-
-  }
-})
 
 fileSchema.pre("validate", async function (next) {
   if (this.isNew || this.isModified("folder") || this.isModified("name")) {

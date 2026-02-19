@@ -134,7 +134,9 @@ const UploadFileModal = ({ isOpen, onClose, currentFolderId }) => {
     onClose();
   };
 
-  const completedCount = selectedFiles.filter((f) => uploadStatus[f.uid] === STATUS.COMPLETED).length;
+  const completedCount = selectedFiles.filter(
+    (f) => uploadStatus[f.uid] === STATUS.COMPLETED,
+  ).length;
   const totalCount = selectedFiles.length;
 
   return (
