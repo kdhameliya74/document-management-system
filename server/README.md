@@ -69,14 +69,17 @@ server/
 │   ├── auth.js              # JWT verification & authorization
 │   └── error.js             # Error handling
 ├── models/
-│   ├── User.js              # User schema
-│   ├── Folder.js            # Folder schema
-│   ├── File.js              # File schema
-│   ├── FileVersion.js       # File version schema
-│   ├── ActivityLog.js       # Activity tracking
-│   └── Comment.js           # Comment schema
+│   ├── User.model.js              # User schema
+│   ├── Folder.model.js            # Folder schema
+│   ├── File.model.js              # File schema
+│   ├── FileVersion.model.js       # File version schema
+│   ├── ActivityLog.model.js       # Activity tracking
+│   └── Comment.model.js           # Comment schema
 ├── routes/
-│   └── auth.js              # Auth routes
+│   └── auth.route.js              # Auth routes
+│   └── folder.route.js            # Folder routes
+│   └── trash.route.js             # Trash routes
+│   └── file.route.js              # File routes
 ├── uploads/                 # File storage (gitignored)
 ├── index.js                 # Server entry point
 ├── .env.example             # Environment template

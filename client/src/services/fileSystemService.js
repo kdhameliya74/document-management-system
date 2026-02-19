@@ -1,4 +1,5 @@
 import api from "@/utils/api";
+import axios from "axios";
 
 const fileSystemAPI = {
   // create new document
@@ -33,6 +34,14 @@ const fileSystemAPI = {
   confirmUpload: async (fileData) => {
     const response = await api.post("/files/confirm", fileData);
     return response.data;
+  },
+  uploadFileOnS3: async (url, file) => {
+    const response = await axios.put(url, file, {
+      headers: {
+        "Content-Type": file.type,
+      },
+    });
+    return response;
   },
 };
 

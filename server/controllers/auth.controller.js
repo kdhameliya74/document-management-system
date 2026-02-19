@@ -1,5 +1,5 @@
-import User from "../models/User.js";
-import { asyncHandler } from "../middleware/error.js";
+import User from "../models/User.model.js";
+import { asyncHandler } from "../middlewares/error.middleware.js";
 
 // Helper function to send token response
 const isProduction = process.env.NODE_ENV === "production";

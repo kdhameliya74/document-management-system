@@ -1,9 +1,11 @@
 import path from "path";
+import s3Client from "../config/s3.js";
+import File from "../models/File.model.js";
+
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import s3Client from "../config/s3.js";
-import File from "../models/File.js";
-import { asyncHandler } from "../middleware/error.js";
+import { asyncHandler } from "../middlewares/error.middleware.js";
+import { FILE_STATUS } from "../constants/File.js";
 
 // @desc    Get presigned URL for upload
 // @route   POST /api/files/upload-urls
@@ -80,12 +82,12 @@ export const confirmUpload = asyncHandler(async (req, res) => {
     storageKey,
     bucket,
     storageProvider: "s3",
-    uploadStatus: "completed",
+    uploadStatus: FILE_STATUS.COMPLETED,
   });
 
   res.status(201).json({
     success: true,
-    message: "File record created successfully",
+    message: "Recorded",
     file,
   });
 });

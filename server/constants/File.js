@@ -1,3 +1,9 @@
+export const FILE_STATUS = {
+  PENDING: "pending",
+  COMPLETED: "completed",
+  ERROR: "error",
+};
+
 export const FILE_VALIDATION = {
   NAME_REQUIRED: "Please provide file name",
   NAME_MAXLENGTH: "File name cannot be more than 255 characters",
