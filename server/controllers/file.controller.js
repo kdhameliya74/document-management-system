@@ -2,6 +2,7 @@ import path from "path";
 import s3Client from "../config/s3.js";
 import File from "../models/File.model.js";
 
+import { shortId, environment } from "../utils/helper.util.js";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { asyncHandler } from "../middlewares/error.middleware.js";
@@ -18,14 +19,13 @@ export const getPresignedUrls = asyncHandler(async (req, res) => {
   }
 
   const userId = req.user.id;
-  const date = Date.now();
 
   const bucket = process.env.AWS_S3_BUCKET;
+  const fixedKey = `${environment}/users/${userId}/`;
 
   const results = await Promise.allSettled(
     files.map(async (file) => {
-      const safeFileName = file.fileName.replace(/[^a-zA-Z0-9.-]/g, "_");
-      const storageKey = `${userId}/${date}-${file.uid}-${safeFileName}`;
+      const storageKey = `${fixedKey}${shortId(16)}.${file.fileType}`;
 
       const command = new PutObjectCommand({
         Bucket: bucket,
