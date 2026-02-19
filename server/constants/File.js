@@ -1,7 +1,7 @@
-export const FILE_STATUS = {
+export const FILE_UPLOAD_STATUS = {
   PENDING: "pending",
   COMPLETED: "completed",
-  ERROR: "error",
+  FAILED: "failed",
 };
 
 export const FILE_VALIDATION = {

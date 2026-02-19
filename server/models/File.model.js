@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { FILE_VALIDATION } from "../constants/File.js";
+import { FILE_VALIDATION, FILE_UPLOAD_STATUS } from "../constants/File.js";
 import { PERMISSION_LEVELS, PERMISSION_ARRAY } from "../constants/Shared.js";
 
 const fileSchema = new mongoose.Schema(
@@ -32,7 +32,7 @@ const fileSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    folder: {
+    folderId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Folder",
       default: null, // null means root
@@ -118,19 +118,10 @@ const fileSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-
-    etag: {
-      type: String,
-    },
-
-    checksum: {
-      type: String,
-    },
-
     uploadStatus: {
       type: String,
-      enum: ["pending", "completed", "failed"],
-      default: "pending",
+      enum: [FILE_UPLOAD_STATUS.PENDING, FILE_UPLOAD_STATUS.COMPLETED, FILE_UPLOAD_STATUS.FAILED],
+      default: FILE_UPLOAD_STATUS.PENDING,
       index: true,
     },
   },
@@ -174,6 +165,28 @@ fileSchema.methods.hasAccess = function (userId, requiredPermission = PERMISSION
 // fileSchema.virtual("url").get(function () {
 //   return `/api/files/${this._id}/download`;
 // });
+
+fileSchema.pre("validate", async function (next) {
+  if (this.isNew || this.isModified("parent") || this.isModified("name")) {
+
+  }
+})
+
+fileSchema.pre("validate", async function (next) {
+  if (this.isNew || this.isModified("folder") || this.isModified("name")) {
+    if (this.folder) {
+      const parentFolder = await mongoose.model("Folder").findById(this.folder);
+      if (parentFolder) {
+        this.path = `${parentFolder.path}/${this.name}`;
+      } else {
+        this.path = `/${this.name}`;
+      }
+    } else {
+      this.path = `/${this.name}`;
+    }
+  }
+  next();
+});
 
 fileSchema.set("toJSON", { virtuals: true });
 fileSchema.set("toObject", { virtuals: true });

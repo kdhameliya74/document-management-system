@@ -1,8 +1,7 @@
 import React, { useState } from "react";
-// import { useDispatch } from "react-redux";
-import axios from "axios";
+import { useDispatch } from "react-redux";
 import { Upload, X, Loader2, Check, AlertCircle } from "lucide-react";
-// import { fetchDocuments } from "@/store/documentSystemSlice";
+import { uploadFileMeta } from "@/store/documentSystemSlice";
 import Modal from "@/components/common/Modal";
 import fileSystemAPI from "@/services/fileSystemService";
 import { logError, uuidToBase64 } from "@/helpers/utils";
@@ -19,7 +18,7 @@ const UploadFileModal = ({ isOpen, onClose, currentFolderId }) => {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState({});
-  // const dispatch = useDispatch();
+  const dispatch = useDispatch();
 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
@@ -32,9 +31,7 @@ const UploadFileModal = ({ isOpen, onClose, currentFolderId }) => {
         uid,
         name: file.name,
         size: file.size,
-        type: file.type,
-        status: STATUS.PENDING,
-        progress: 0,
+        mimeType: file.type,
       };
     });
     setSelectedFiles((prev) => [...prev, ...newFiles]);
@@ -45,6 +42,18 @@ const UploadFileModal = ({ isOpen, onClose, currentFolderId }) => {
     try {
       const response = await fileSystemAPI.uploadFileOnS3(uploadInfo.uploadUrl, fileObj.file);
       if (response.status === 200) {
+        const fileMeta = {
+          name: fileObj.name,
+          originalName: fileObj.name,
+          size: fileObj.size,
+          storageKey: uploadInfo.storageKey,
+          bucket: uploadInfo.bucket,
+          folderId: currentFolderId === "root" ? null : currentFolderId,
+          extension: fileObj.name.split(".").pop(),
+          mimeType: fileObj.mimeType,
+          uploadStatus: STATUS.COMPLETED,
+        };
+        await dispatch(uploadFileMeta(fileMeta)).unwrap();
         setUploadStatus((prev) => ({ ...prev, [fileObj.uid]: STATUS.COMPLETED }));
       } else {
         throw new Error("Upload failed");

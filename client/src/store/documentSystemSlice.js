@@ -34,6 +34,26 @@ const initialState = {
 
 /*
 |--------------------------------------------------------------------------
+| uploadFileMeta
+|--------------------------------------------------------------------------
+*/
+export const uploadFileMeta = createAsyncThunk(
+  "file/uploadFile",
+  async (file, { rejectWithValue }) => {
+    try {
+      const data = await fileSystemAPI.confirmUpload(file);
+      return {
+        ...file,
+        ...data?.file || {},
+      }
+    } catch (err) {
+      return rejectWithValue(FILE_UPLOAD_MESSAGES.UPLOAD_FAILED);
+    }
+  },
+);
+
+/*
+|--------------------------------------------------------------------------
 | createFolder
 |--------------------------------------------------------------------------
 */
@@ -195,25 +215,25 @@ const documentSystemSlice = createSlice({
     setShowDetails: (state, action) => {
       state.showDetails = action.payload;
     },
-    addFile: (state, action) => {
-      const { name, type, size, parentId, url } = action.payload;
-      const newFileId = uuidv4();
-      const newFile = {
-        id: newFileId,
-        name,
-        type,
-        size,
-        url, // In a real app, this would be the S3 URL or similar
-        parentId,
-        createdAt: new Date().toISOString(),
-        versions: [], // For version history
-      };
+    // addFile: (state, action) => {
+    //   const { name, type, size, parentId, url } = action.payload;
+    //   const newFileId = uuidv4();
+    //   const newFile = {
+    //     id: newFileId,
+    //     name,
+    //     type,
+    //     size,
+    //     url, // In a real app, this would be the S3 URL or similar
+    //     parentId,
+    //     createdAt: new Date().toISOString(),
+    //     versions: [], // For version history
+    //   };
 
-      state.files[newFileId] = newFile;
-      if (state.documents[parentId]) {
-        state.documents[parentId].childFileIds.push(newFileId);
-      }
-    },
+    //   state.files[newFileId] = newFile;
+    //   if (state.documents[parentId]) {
+    //     state.documents[parentId].childFileIds.push(newFileId);
+    //   }
+    // },
     renameItem: (state, action) => {
       const { id, type, newName } = action.payload;
       if (type === "folder" && state.documents[id]) {
@@ -419,7 +439,20 @@ const documentSystemSlice = createSlice({
           const { [id]: _, ...restDocs } = state.trashDocuments;
           state.trashDocuments = { ...restDocs };
         }
-      });
+      })
+      .addCase(uploadFileMeta.fulfilled, (state, action) => {
+        const { id, folderId } = action.payload;
+        const parentId = folderId ?? "root";
+        state.files[id] = {
+          id,
+          ...action.payload,
+          parentId,
+        };
+        if (state.documents[parentId]) {
+          state.documents[parentId].childFileIds.push(id);
+        }
+      })
+      ;
   },
 });
 

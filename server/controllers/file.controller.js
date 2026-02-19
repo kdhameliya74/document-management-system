@@ -1,4 +1,3 @@
-import path from "path";
 import s3Client from "../config/s3.js";
 import File from "../models/File.model.js";
 
@@ -6,7 +5,6 @@ import { shortId, environment } from "../utils/helper.util.js";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { asyncHandler } from "../middlewares/error.middleware.js";
-import { FILE_STATUS } from "../constants/File.js";
 
 // @desc    Get presigned URL for upload
 // @route   POST /api/files/upload-urls
@@ -25,8 +23,8 @@ export const getPresignedUrls = asyncHandler(async (req, res) => {
 
   const results = await Promise.allSettled(
     files.map(async (file) => {
-      const storageKey = `${fixedKey}${shortId(16)}.${file.fileType}`;
-
+      const extension = file.fileName.split(".").pop();
+      const storageKey = `${fixedKey}${shortId(16)}.${extension}`;
       const command = new PutObjectCommand({
         Bucket: bucket,
         Key: storageKey,
@@ -38,6 +36,7 @@ export const getPresignedUrls = asyncHandler(async (req, res) => {
       });
 
       return {
+        bucket,
         uploadUrl,
         storageKey,
         fileName: file.fileName,
@@ -51,7 +50,10 @@ export const getPresignedUrls = asyncHandler(async (req, res) => {
 
   results.forEach((result) => {
     if (result.status === "fulfilled") success.push(result.value);
-    else failed.push(result.reason);
+    else {
+      // TODO: send failed ids
+      failed.push(result)
+    };
   });
 
   res.status(200).json({
@@ -65,24 +67,12 @@ export const getPresignedUrls = asyncHandler(async (req, res) => {
 // @route   POST /api/files/confirm
 // @access  Private
 export const confirmUpload = asyncHandler(async (req, res) => {
-  const { name, size, type, storageKey, bucket, folderId } = req.body;
+  const { name, size, type, storageKey, bucket, folderId, originalName, mimeType, extension } = req.body;
   const userId = req.user.id;
 
-  const extension = path.extname(name).toLowerCase();
-
   const file = await File.create({
-    name,
-    originalName: name,
-    extension: extension.replace(".", ""),
-    mimeType: type,
-    size,
+    name, size, type, storageKey, bucket, folderId, originalName, mimeType, extension,
     owner: userId,
-    folder: folderId || null,
-    path: storageKey, // For now using storageKey as path, or construct a meaningful path if needed
-    storageKey,
-    bucket,
-    storageProvider: "s3",
-    uploadStatus: FILE_STATUS.COMPLETED,
   });
 
   res.status(201).json({
