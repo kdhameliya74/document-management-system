@@ -19,6 +19,10 @@ const fileSchema = new mongoose.Schema(
       required: true,
       lowercase: true,
     },
+    docType: {
+      type: String,
+      default: "file"
+    },
     mimeType: {
       type: String,
       required: true,

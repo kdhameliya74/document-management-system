@@ -110,9 +110,9 @@ const FolderView = () => {
   }, []);
 
   const childDocuments =
-    currentFolder?.childFolderIds.map((id) => documents[id]).filter(Boolean) || [];
-  const childFiles = currentFolder?.childFileIds.map((id) => files[id]).filter(Boolean) || [];
-  const isEmpty = childDocuments.length === 0 && childFiles.length === 0;
+    currentFolder?.childDocuments.map((id) => documents[id]).filter(Boolean) || [];
+  
+  const isEmpty = childDocuments.length === 0;
 
   const handleNavigate = (id) => {
     navigate(ROUTES.DASHBOARD.FOLDER_DYNAMIC(id));
@@ -184,26 +184,21 @@ const FolderView = () => {
         <div className="flex-1 overflow-y-auto -mx-6 px-6">
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-9 gap-6 py-4">
             {/* Documents */}
-            {childDocuments.map((folder) => (
+            {childDocuments.map((document) => document.docType === "folder" ? (
               <FolderItem
-                key={folder.id}
-                folder={folder}
-                isSelected={selectedId === folder.id}
+                key={document.id}
+                folder={document}
+                isSelected={selectedId === document.id}
                 onNavigate={handleNavigate}
                 onContextMenu={handleContextMenu}
               />
-            ))}
-
-            {/* Files */}
-            {childFiles.map((file) => (
-              <FileItem
-                key={file.id}
-                file={file}
-                isSelected={selectedId === file.id}
+            ): <FileItem
+                key={document.id}
+                file={document}
+                isSelected={selectedId === document.id}
                 onSelect={handleSelect}
                 onContextMenu={handleContextMenu}
-              />
-            ))}
+              />)}
           </div>
         </div>
       )}

@@ -10,8 +10,7 @@ const initialState = {
       id: "root",
       name: "My Drive",
       parentId: null,
-      childFolderIds: [],
-      childFileIds: [],
+      childDocuments: [],
     },
   },
   trashDocuments: {
@@ -19,12 +18,10 @@ const initialState = {
       id: "trash",
       name: "Trash",
       parentId: null,
-      childFolderIds: [],
-      childFileIds: [],
+      childDocuments: [],
       path: "",
     },
   },
-  files: {},
   currentFolderId: "root",
   selectedId: null,
   showDetails: false,
@@ -182,7 +179,7 @@ const ensureFolder = (state, id, data, topParent = "root") => {
     id,
     name: "",
     parentId: "root",
-    childFolderIds: [],
+    childDocuments: [],
     childFileIds: [],
   };
 
@@ -193,7 +190,7 @@ const linkChildToParent = (state, parentId, childId, topParent = "root") => {
   const docState = topParent === "root" ? state.documents : state.trashDocuments;
   if (!docState[parentId]) return;
 
-  const children = docState[parentId].childFolderIds;
+  const children = docState[parentId].childDocuments;
   if (!children.includes(childId)) {
     children.push(childId);
   }
@@ -248,9 +245,9 @@ const documentSystemSlice = createSlice({
       // Remove from parent's children list
       if (state.documents[parentId]) {
         if (type === "folder") {
-          state.documents[parentId].childFolderIds = state.documents[
+          state.documents[parentId].childDocuments = state.documents[
             parentId
-          ].childFolderIds.filter((fid) => fid !== id);
+          ].childDocuments.filter((fid) => fid !== id);
           // Recursive delete would be needed here for a real backend,
           // but for client-side state, we might leave orphans or clean them up.
           // Let's just remove the reference for now.
@@ -281,13 +278,13 @@ const documentSystemSlice = createSlice({
         const parent = action?.payload?.parent ?? "root";
         const normalizedFolder = {
           ...action.payload,
-          childFolderIds: [],
+          childDocuments: [],
           childFileIds: [],
         };
         state.documents[normalizedFolder.id] = normalizedFolder;
         if (parent && state.documents[parent]) {
-          if (!state.documents[parent].childFolderIds.includes(normalizedFolder.id)) {
-            state.documents[parent].childFolderIds.push(normalizedFolder.id);
+          if (!state.documents[parent].childDocuments.includes(normalizedFolder.id)) {
+            state.documents[parent].childDocuments.push(normalizedFolder.id);
           }
         }
       })
@@ -304,21 +301,21 @@ const documentSystemSlice = createSlice({
          *      id: "root",
          *      name: "root",
          *      parentId: null,
-         *      childFolderIds: ["folderId1", "folderId2"],
+         *      childDocuments: ["folderId1", "folderId2"],
          *      childFileIds: ["fileId1", "fileId2"],
          *    },
          *    folderId1: {
          *      id: "folderId1",
          *      name: "folder1",
          *      parentId: "root",
-         *      childFolderIds: ["folderId2", "folderId3"],
+         *      childDocuments: ["folderId2", "folderId3"],
          *      childFileIds: ["fileId1", "fileId2"],
          *    },
          *    folderId2: {
          *      id: "folderId2",
          *      name: "folder2",
          *      parentId: "folderId1",
-         *      childFolderIds: ["folderId3", "folderId4"],
+         *      childDocuments: ["folderId3", "folderId4"],
          *      childFileIds: ["fileId3", "fileId4"],
          *    },
          *    ...
@@ -349,7 +346,7 @@ const documentSystemSlice = createSlice({
         }
 
         // 3. Child folders
-        const childFolderIds = folders.map((folder) => {
+        const childDocuments = folders.map((folder) => {
           const normalizedParentId = folder.parent || "root";
           ensureFolder(state, folder.id, {
             ...folder,
@@ -361,7 +358,7 @@ const documentSystemSlice = createSlice({
 
         // 4. Update parent children list
         if (state.documents[parentId]) {
-          state.documents[parentId].childFolderIds = childFolderIds;
+          state.documents[parentId].childDocuments = childDocuments;
         }
       })
       .addCase(fetchDocuments.rejected, (state, action) => {
@@ -417,7 +414,7 @@ const documentSystemSlice = createSlice({
         }
 
         // 3. Child folders
-        const childFolderIds = folders.map((folder) => {
+        const childDocuments = folders.map((folder) => {
           const normalizedParentId = folder.parent || topParent;
           const data = {
             ...folder,
@@ -430,7 +427,7 @@ const documentSystemSlice = createSlice({
 
         // 4. Update parent children list
         if (state.trashDocuments[parentId]) {
-          state.trashDocuments[parentId].childFolderIds = childFolderIds;
+          state.trashDocuments[parentId].childDocuments = childDocuments;
         }
       })
       .addCase(restoreDocument.fulfilled, (state, action) => {
@@ -443,13 +440,13 @@ const documentSystemSlice = createSlice({
       .addCase(uploadFileMeta.fulfilled, (state, action) => {
         const { id, folderId } = action.payload;
         const parentId = folderId ?? "root";
-        state.files[id] = {
+        state.documents[id] = {
           id,
           ...action.payload,
           parentId,
         };
         if (state.documents[parentId]) {
-          state.documents[parentId].childFileIds.push(id);
+          state.documents[parentId].childDocuments.push(id);
         }
       })
       ;

@@ -74,8 +74,8 @@ const TrashPage = () => {
   const currentPath = currentFolder ? currentFolder?.path?.split("/")?.filter(Boolean) : [];
 
   const childDocuments = useMemo(() => {
-    if (!currentFolder?.childFolderIds) return [];
-    return currentFolder.childFolderIds.map((id) => trashDocuments[id]).filter(Boolean);
+    if (!currentFolder?.childDocuments) return [];
+    return currentFolder.childDocuments.map((id) => trashDocuments[id]).filter(Boolean);
   }, [currentFolder, trashDocuments]);
 
   const isEmpty = childDocuments.length === 0;
