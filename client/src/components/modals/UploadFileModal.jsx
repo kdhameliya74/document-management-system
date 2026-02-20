@@ -110,9 +110,6 @@ const UploadFileModal = ({ isOpen, onClose, currentFolderId }) => {
               }),
             );
           }
-
-          // // Refresh documents after all uploads in this batch are done
-          // dispatch(fetchDocuments(currentFolderId));
         }
       }
     } catch (error) {

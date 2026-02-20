@@ -61,7 +61,7 @@ const FolderView = () => {
         currentFolderId: folderId, // root folder Id
         documentItem: selectedItem,
         docType: selectedItemType,
-        mode: DOCUMENT_MODES.EDIT,
+        mode: DOCUMENT_MODES.UPDATE,
       },
     },
     delete: {

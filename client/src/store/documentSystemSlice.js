@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import fileSystemAPI from "@/services/fileSystemService";
-import { TRASH_MESSAGES, FILE_UPLOAD_MESSAGES } from "@/helpers/constants";
+import { TRASH_MESSAGES, FILE_MESSAGES } from "@/helpers/constants";
 import { logError } from "@/helpers/utils";
 
 const initialState = {
@@ -44,7 +44,7 @@ export const uploadFileMeta = createAsyncThunk(
       };
     } catch (err) {
       logError(err);
-      return rejectWithValue(FILE_UPLOAD_MESSAGES.UPLOAD_FAILED);
+      return rejectWithValue(FILE_MESSAGES.UPLOAD_FAILED);
     }
   },
 );
@@ -78,6 +78,7 @@ export const fetchDocuments = createAsyncThunk(
       const data = await fileSystemAPI.getAll(parentId);
       return {
         folders: data.folders,
+        files: data.files,
         currentFolder: data.currentFolder,
         breadcrumbs: data.breadcrumbs || [],
         parentId: parentId || "root",
@@ -99,7 +100,14 @@ export const updateDocument = createAsyncThunk(
   "documents/update",
   async ({ id, ...rest }, { rejectWithValue }) => {
     try {
-      const data = await fileSystemAPI.updateDocument(id, rest);
+      if (rest.docType === "folder") {
+        const data = await fileSystemAPI.updateDocument(id, rest);
+        return {
+          ...data,
+          document: { id, ...rest },
+        };
+      }
+      const data = await fileSystemAPI.updateFile(id, rest);
       return {
         ...data,
         document: { id, ...rest },
@@ -173,14 +181,13 @@ export const getTrashedDocument = createAsyncThunk(
   },
 );
 
-const ensureFolder = (state, id, data, topParent = "root") => {
+const ensureDocument = (state, id, data, topParent = "root") => {
   const docState = topParent === "root" ? state.documents : state.trashDocuments;
   docState[id] ??= {
     id,
     name: "",
     parentId: "root",
     childDocuments: [],
-    childFileIds: [],
   };
 
   Object.assign(docState[id], data);
@@ -323,11 +330,11 @@ const documentSystemSlice = createSlice({
          */
 
         state.isLoading = false;
-        const { folders, currentFolder, breadcrumbs, parentId } = action.payload;
+        const { folders, files, currentFolder, breadcrumbs, parentId } = action.payload;
 
         // 1. Breadcrumbs
         breadcrumbs.forEach(({ id, name, parentId: pid }) => {
-          ensureFolder(state, id, { id, name, parentId: pid });
+          ensureDocument(state, id, { id, name, parentId: pid });
           linkChildToParent(state, pid, id);
         });
 
@@ -336,7 +343,7 @@ const documentSystemSlice = createSlice({
           const { id, parent } = currentFolder;
           const normalizedParentId = parent || "root";
 
-          ensureFolder(state, id, {
+          ensureDocument(state, id, {
             ...currentFolder,
             id,
             parentId: normalizedParentId,
@@ -346,14 +353,14 @@ const documentSystemSlice = createSlice({
         }
 
         // 3. Child folders
-        const childDocuments = folders.map((folder) => {
-          const normalizedParentId = folder.parent || "root";
-          ensureFolder(state, folder.id, {
-            ...folder,
-            id: folder.id,
-            parentId: normalizedParentId,
+        const childDocuments = [...folders, ...files].map((doc) => {
+          const normalizedParentId = doc.docType === "folder" ? doc.parent : doc.folderId;
+          ensureDocument(state, doc.id, {
+            ...doc,
+            id: doc.id,
+            parentId: normalizedParentId || "root",
           });
-          return folder.id;
+          return doc.id;
         });
 
         // 4. Update parent children list
@@ -394,7 +401,7 @@ const documentSystemSlice = createSlice({
         // 1. Breadcrumbs
         if (breadcrumbs) {
           breadcrumbs.forEach(({ id, name, parentId: pid }) => {
-            ensureFolder(state, id, { id, name, parentId: pid }, topParent);
+            ensureDocument(state, id, { id, name, parentId: pid }, topParent);
             linkChildToParent(state, pid, id, topParent);
           });
         }
@@ -408,7 +415,7 @@ const documentSystemSlice = createSlice({
             id,
             parentId: normalizedParentId,
           };
-          ensureFolder(state, id, data, topParent);
+          ensureDocument(state, id, data, topParent);
 
           linkChildToParent(state, normalizedParentId, id, topParent);
         }
@@ -421,7 +428,7 @@ const documentSystemSlice = createSlice({
             id: folder.id,
             parentId: normalizedParentId,
           };
-          ensureFolder(state, folder.id, data, topParent);
+          ensureDocument(state, folder.id, data, topParent);
           return folder.id;
         });
 

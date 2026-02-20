@@ -67,8 +67,18 @@ export const getPresignedUrls = asyncHandler(async (req, res) => {
 // @route   POST /api/files/confirm
 // @access  Private
 export const confirmUpload = asyncHandler(async (req, res) => {
-  const { name, size, type, storageKey, bucket, folderId, originalName, mimeType, extension } =
-    req.body;
+  const {
+    name,
+    size,
+    type,
+    storageKey,
+    bucket,
+    folderId,
+    originalName,
+    mimeType,
+    extension,
+    uploadStatus,
+  } = req.body;
   const userId = req.user.id;
 
   const file = await File.create({
@@ -81,6 +91,7 @@ export const confirmUpload = asyncHandler(async (req, res) => {
     originalName,
     mimeType,
     extension,
+    uploadStatus,
     owner: userId,
   });
 
@@ -88,5 +99,41 @@ export const confirmUpload = asyncHandler(async (req, res) => {
     success: true,
     message: "Recorded",
     file,
+  });
+});
+
+export const updateFile = asyncHandler(async (req, res, _) => {
+  const { docId } = req.params;
+
+  const document = await File.findById(docId);
+
+  if (!document) {
+    return res.status(404).json({
+      success: false,
+      message: "Document not found!",
+    });
+  }
+
+  const allowedFields = ["name"];
+  let isChanged = false;
+
+  allowedFields.forEach((field) => {
+    if (req.body[field] !== undefined) {
+      document[field] = req.body[field];
+      isChanged = true;
+    }
+  });
+
+  if (!isChanged) {
+    return res.status(400).json({ success: false, message: "No valid fields provided to update" });
+  }
+
+  //THIS TRIGGERS pre('save')
+  await document.save();
+
+  res.status(200).json({
+    success: true,
+    message: "Document updated successfully!",
+    data: document,
   });
 });

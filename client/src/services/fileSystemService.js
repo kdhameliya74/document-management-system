@@ -43,6 +43,10 @@ const fileSystemAPI = {
     });
     return response;
   },
+  updateFile: async (docId, payload) => {
+    const response = await api.patch(`/files/${docId}`, { ...payload });
+    return response.data;
+  },
 };
 
 export default fileSystemAPI;
