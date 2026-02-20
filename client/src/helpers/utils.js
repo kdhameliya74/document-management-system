@@ -1,4 +1,8 @@
-import { FOLDER_MAX_NAME_LENGTH, FILE_MAX_NAME_LENGTH, DOCUMENT_MODES } from "@/helpers/constants.js";
+import {
+  FOLDER_MAX_NAME_LENGTH,
+  FILE_MAX_NAME_LENGTH,
+  DOCUMENT_MODES,
+} from "@/helpers/constants.js";
 
 export const logError = (err) => {
   if (import.meta.env.MODE !== "production") {

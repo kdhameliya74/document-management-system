@@ -15,7 +15,6 @@ const FolderModal = ({
   currentFolderId,
   mode = DOCUMENT_MODES.CREATE,
 }) => {
-  
   const { isCreate, isUpdate, isFolder, isFile } = getDocumentFlags(mode, documentItem?.docType);
   const parentFolderId = currentFolderId === "root" ? null : currentFolderId;
 
@@ -38,73 +37,72 @@ const FolderModal = ({
 
   const dispatch = useDispatch();
 
-const isDuplicateName = (name) => {
-  const sanitized = name.trim().toLowerCase();
-  const currentFolder = documents[currentFolderId];
+  const isDuplicateName = (name) => {
+    const sanitized = name.trim().toLowerCase();
+    const currentFolder = documents[currentFolderId];
 
-  return currentFolder?.childDocuments?.some(
-    (docId) => documents[docId]?.name.toLowerCase() === sanitized
-  );
-};
-
-const saveFolder = async () => {
-  const fields = {
-    name: folderName.trim(),
-    color: selectedColor,
-    docType: documentItem.docType,
+    return currentFolder?.childDocuments?.some(
+      (docId) => documents[docId]?.name.toLowerCase() === sanitized,
+    );
   };
 
-  if (isCreate) {
-    await dispatch(
-      createFolder({
-        ...fields,
-        parent: parentFolderId,
-        owner: user?.id || user?._id,
-      })
-    ).unwrap();
-  } else {
-    await dispatch(updateDocument({ ...fields, id: documentItem.id })).unwrap();
-  }
-};
+  const saveFolder = async () => {
+    const fields = {
+      name: folderName.trim(),
+      color: selectedColor,
+      docType: documentItem.docType,
+    };
 
-const saveFile = async () => {
-  const fields = {
-    name:`${folderName.trim()}.${extension}`,
-    docType: documentItem.docType,
-  };
-
-  await dispatch(updateDocument({ ...fields, id: documentItem.id })).unwrap();
-};
-
-const handleSave = async () => {
-  setIsLoading(true);
-  setErrorMessage("");
-
-  try {
-    const sanitizedName = folderName.trim();
-    if (!sanitizedName) return;
-
-    if (isDuplicateName(sanitizedName)) {
-      setErrorMessage(FOLDER_MESSAGES.NAME_DUPLICATE);
-      return;
-    }
-
-    if (isFolder) {
-      await saveFolder();
-      toast.success(isCreate ? FOLDER_MESSAGES.CREATE_SUCCESS : FOLDER_MESSAGES.UPDATE_SUCCESS);
+    if (isCreate) {
+      await dispatch(
+        createFolder({
+          ...fields,
+          parent: parentFolderId,
+          owner: user?.id || user?._id,
+        }),
+      ).unwrap();
     } else {
-      await saveFile();
-      toast.success(FOLDER_MESSAGES.UPDATE_SUCCESS);
+      await dispatch(updateDocument({ ...fields, id: documentItem.id })).unwrap();
     }
-    handleCancel();
-  } catch (err) {
-    toast.error(FOLDER_MESSAGES.DOCUMENT_SAVE_FAILED);
-    logError(err);
-  } finally {
-    setIsLoading(false);
-  }
-};
+  };
 
+  const saveFile = async () => {
+    const fields = {
+      name: `${folderName.trim()}.${extension}`,
+      docType: documentItem.docType,
+    };
+
+    await dispatch(updateDocument({ ...fields, id: documentItem.id })).unwrap();
+  };
+
+  const handleSave = async () => {
+    setIsLoading(true);
+    setErrorMessage("");
+
+    try {
+      const sanitizedName = folderName.trim();
+      if (!sanitizedName) return;
+
+      if (isDuplicateName(sanitizedName)) {
+        setErrorMessage(FOLDER_MESSAGES.NAME_DUPLICATE);
+        return;
+      }
+
+      if (isFolder) {
+        await saveFolder();
+        toast.success(isCreate ? FOLDER_MESSAGES.CREATE_SUCCESS : FOLDER_MESSAGES.UPDATE_SUCCESS);
+      } else {
+        await saveFile();
+        toast.success(FOLDER_MESSAGES.UPDATE_SUCCESS);
+      }
+      handleCancel();
+    } catch (err) {
+      toast.error(FOLDER_MESSAGES.DOCUMENT_SAVE_FAILED);
+      logError(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleCancel = () => {
     setFolderName("");

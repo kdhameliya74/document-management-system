@@ -100,7 +100,7 @@ export const updateDocument = createAsyncThunk(
   "documents/update",
   async ({ id, ...rest }, { rejectWithValue }) => {
     try {
-      if (rest.docType === 'folder') {
+      if (rest.docType === "folder") {
         const data = await fileSystemAPI.updateDocument(id, rest);
         return {
           ...data,
