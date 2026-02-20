@@ -165,15 +165,10 @@ fileSchema.methods.hasAccess = function (userId, requiredPermission = PERMISSION
   return permissionLevels[sharedUser.permission] >= permissionLevels[requiredPermission];
 };
 
-// Virtual for file URL (to be implemented based on storage solution)
-// fileSchema.virtual("url").get(function () {
-//   return `/api/files/${this._id}/download`;
-// });
-
 fileSchema.pre("validate", async function (next) {
-  if (this.isNew || this.isModified("folder") || this.isModified("name")) {
-    if (this.folder) {
-      const parentFolder = await mongoose.model("Folder").findById(this.folder);
+  if (this.isNew || this.isModified("folderId") || this.isModified("name")) {
+    if (this.folderId) {
+      const parentFolder = await mongoose.model("Folder").findById(this.folderId);
       if (parentFolder) {
         this.path = `${parentFolder.path}/${this.name}`;
       } else {

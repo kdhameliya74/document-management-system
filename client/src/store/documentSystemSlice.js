@@ -100,7 +100,14 @@ export const updateDocument = createAsyncThunk(
   "documents/update",
   async ({ id, ...rest }, { rejectWithValue }) => {
     try {
-      const data = await fileSystemAPI.updateDocument(id, rest);
+      if (rest.docType === 'folder') {
+        const data = await fileSystemAPI.updateDocument(id, rest);
+        return {
+          ...data,
+          document: { id, ...rest },
+        };
+      }
+      const data = await fileSystemAPI.updateFile(id, rest);
       return {
         ...data,
         document: { id, ...rest },
@@ -180,7 +187,7 @@ const ensureDocument = (state, id, data, topParent = "root") => {
     id,
     name: "",
     parentId: "root",
-    childDocuments: []
+    childDocuments: [],
   };
 
   Object.assign(docState[id], data);

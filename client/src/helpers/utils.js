@@ -1,4 +1,4 @@
-import { FOLDER_MAX_NAME_LENGTH, FILE_MAX_NAME_LENGTH } from "@/helpers/constants.js";
+import { FOLDER_MAX_NAME_LENGTH, FILE_MAX_NAME_LENGTH, DOCUMENT_MODES } from "@/helpers/constants.js";
 
 export const logError = (err) => {
   if (import.meta.env.MODE !== "production") {
@@ -40,3 +40,20 @@ export const uuidToBase64 = (uuid) => {
     .replace(/\//g, "_")
     .slice(0, 12);
 };
+
+export const getBaseName = (fileName) => {
+  const lastDot = fileName.lastIndexOf(".");
+  return lastDot > 0 ? fileName.substring(0, lastDot) : fileName;
+};
+
+export const getFileExtension = (fileName) => {
+  const lastDot = fileName.lastIndexOf(".");
+  return lastDot > 0 ? fileName.substring(lastDot + 1) : null;
+};
+
+export const getDocumentFlags = (mode, docType) => ({
+  isCreate: mode === DOCUMENT_MODES.CREATE,
+  isUpdate: mode === DOCUMENT_MODES.UPDATE,
+  isFolder: docType === "folder",
+  isFile: docType === "file",
+});

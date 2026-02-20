@@ -2,7 +2,7 @@ export const FOLDER_MAX_NAME_LENGTH = 20;
 export const FILE_MAX_NAME_LENGTH = 20;
 
 export const DOCUMENT_MODES = Object.freeze({
-  EDIT: "edit",
+  UPDATE: "update",
   CREATE: "create",
 });
 
@@ -25,7 +25,7 @@ export const FOLDER_MESSAGES = Object.freeze({
   UPDATE_TITLE: "Update Document",
   UPDATE_SUCCESS: "Document updated successfully!",
   CREATE_SUCCESS: "Document created successfully!",
-  DOCUMENT_SAVE_FAILED: "Failed to create/update document"
+  DOCUMENT_SAVE_FAILED: "Failed to create/update document",
 });
 
 export const TRASH_MESSAGES = Object.freeze({
