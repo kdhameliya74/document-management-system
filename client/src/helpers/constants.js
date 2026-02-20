@@ -18,18 +18,23 @@ export const FOLDER_COLORS = Object.freeze({
   SLATE: "#64748b",
 });
 
-export const ERROR_MESSAGES = Object.freeze({
-  FOLDER_NAME_REQUIRED: "Folder name is required.",
-  FOLDER_NAME_DUPLICATE: "A folder with this name already exists.",
+export const FOLDER_MESSAGES = Object.freeze({
+  NAME_REQUIRED: "Folder name is required.",
+  NAME_DUPLICATE: "A folder with this name already exists.",
+  CREATE_TITLE: "New Document",
+  UPDATE_TITLE: "Update Document",
+  UPDATE_SUCCESS: "Document updated successfully!",
+  CREATE_SUCCESS: "Document created successfully!",
+  DOCUMENT_SAVE_FAILED: "Failed to create/update document"
 });
 
 export const TRASH_MESSAGES = Object.freeze({
-  RESTORE_SUCCESS: "Folder restored to its original location.",
-  RESTORE_LOADING: "Restoring folder. This may take a moment…",
+  RESTORE_SUCCESS: "Document restored to its original location.",
+  RESTORE_LOADING: "Restoring document. This may take a moment…",
   RESTORE_ERROR: "Failed to restore document!",
 });
 
-export const FILE_UPLOAD_MESSAGES = Object.freeze({
+export const FILE_MESSAGES = Object.freeze({
   UPLOAD_SUCCESS: "File uploaded successfully.",
   UPLOAD_LOADING: "Uploading file. This may take a moment…",
   UPLOAD_FAILED: "Failed to save file details",

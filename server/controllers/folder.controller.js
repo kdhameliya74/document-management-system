@@ -13,7 +13,7 @@ export const fetchFolderUtils = async (req, filters = {}, topParent = "root") =>
   });
 
   const files = await File.find({
-    folder: parent || null,
+    folderId: parent || null,
     owner: userId,
     ...filters,
   });

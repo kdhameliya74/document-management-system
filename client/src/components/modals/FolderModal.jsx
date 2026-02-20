@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Folder, Loader, Edit } from "lucide-react";
-import { FOLDER_COLORS, ERROR_MESSAGES, DOCUMENT_MODES } from "@/helpers/constants.js";
+import { FOLDER_COLORS, FOLDER_MESSAGES, DOCUMENT_MODES } from "@/helpers/constants.js";
 
 import { createFolder, updateDocument } from "@/store/documentSystemSlice";
 import toast from "react-hot-toast";
@@ -16,7 +16,7 @@ const FolderModal = ({
 }) => {
   const isCreate = mode === DOCUMENT_MODES.CREATE;
   const modalProps = {
-    title: isCreate ? "Create New Folder" : "Edit Document",
+    title: isCreate ? FOLDER_MESSAGES.CREATE_TITLE : FOLDER_MESSAGES.UPDATE_TITLE,
     icon: isCreate ? <Folder className="text-text-muted" /> : <Edit className="text-text-muted" />,
   };
 
@@ -29,7 +29,7 @@ const FolderModal = ({
 
   const dispatch = useDispatch();
 
-  const handleCreate = async () => {
+  const handleSave = async () => {
     setIsLoading(true);
     const sanitizedName = folderName.trim();
 
@@ -41,7 +41,7 @@ const FolderModal = ({
 
       if (isDuplicate) {
         setIsLoading(false);
-        setErrorMessage(ERROR_MESSAGES.FOLDER_NAME_DUPLICATE);
+        setErrorMessage(FOLDER_MESSAGES.NAME_DUPLICATE);
         return;
       }
 
@@ -59,16 +59,16 @@ const FolderModal = ({
             }),
           ).unwrap();
 
-          toast.success("Folder created successfully!");
+          toast.success(FOLDER_MESSAGES.CREATE_SUCCESS);
         } else {
           // for edit
-          const data = await dispatch(updateDocument({ ...fields, id: documentItem.id })).unwrap();
-          toast.success(data?.message || "Document updated successfully!");
+          await dispatch(updateDocument({ ...fields, id: documentItem.id })).unwrap();
+          toast.success(FOLDER_MESSAGES.UPDATE_SUCCESS);
         }
 
         handleCancel();
       } catch (err) {
-        toast.error(err || "Failed to create/update document");
+        toast.error(FOLDER_MESSAGES.DOCUMENT_SAVE_FAILED);
       } finally {
         setIsLoading(false);
       }
@@ -84,7 +84,7 @@ const FolderModal = ({
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && folderName.trim()) {
-      handleCreate();
+      handleSave();
     }
   };
 
@@ -112,7 +112,7 @@ const FolderModal = ({
           {errorMessage && <span className="text-sm text-red-500 px-1">{errorMessage}</span>}
         </div>
 
-        <div className="flex flex-col gap-3">
+        {documentItem?.docType === "folder" && (<div className="flex flex-col gap-3">
           <label className="text-sm text-text-muted px-1">Choose folder Color</label>
           <div className="grid grid-cols-9 gap-2">
             {Object.values(FOLDER_COLORS).map((color) => (
@@ -129,7 +129,7 @@ const FolderModal = ({
               />
             ))}
           </div>
-        </div>
+        </div>)}
 
         <div className="flex justify-end gap-4 mt-2">
           <button
@@ -139,12 +139,12 @@ const FolderModal = ({
             Cancel
           </button>
           <button
-            onClick={handleCreate}
+            onClick={handleSave}
             disabled={isLoading || !folderName.trim()}
             className="flex gap-2 py-2.5 px-5 rounded-xl font-medium text-sm transition-all bg-primary text-white hover:bg-primary-hover shadow-lg shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
             {isLoading ? <Loader className="animate-spin" size={18} /> : null}
-            <span>{isCreate ? "Create" : "Update"}</span>
+            <span>{"Save"}</span>
           </button>
         </div>
       </div>

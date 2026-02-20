@@ -67,7 +67,7 @@ export const getPresignedUrls = asyncHandler(async (req, res) => {
 // @route   POST /api/files/confirm
 // @access  Private
 export const confirmUpload = asyncHandler(async (req, res) => {
-  const { name, size, type, storageKey, bucket, folderId, originalName, mimeType, extension } =
+  const { name, size, type, storageKey, bucket, folderId, originalName, mimeType, extension, uploadStatus } =
     req.body;
   const userId = req.user.id;
 
@@ -81,6 +81,7 @@ export const confirmUpload = asyncHandler(async (req, res) => {
     originalName,
     mimeType,
     extension,
+    uploadStatus,
     owner: userId,
   });
 
