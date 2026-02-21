@@ -1,0 +1,262 @@
+import mongoose from "mongoose";
+import { FILE_VALIDATION, FILE_UPLOAD_STATUS } from "../constants/File.js";
+
+import {
+    DOC_TYPES,
+    DOC_TYPES_ARRAY,
+    PERMISSION_LEVELS,
+    PERMISSION_ARRAY,
+} from "../constants/Shared.js";
+
+const documentSchema = new mongoose.Schema(
+    {
+        // ─── Discriminator ──────────────────────────────────────────────────────
+        docType: {
+            type: String,
+            required: true,
+            enum: DOC_TYPES_ARRAY,
+            index: true,
+        },
+
+        // ─── Common fields ───────────────────────────────────────────────────────
+        name: {
+            type: String,
+            required: [true, FILE_VALIDATION.NAME_REQUIRED],
+            trim: true,
+            maxlength: [255, FILE_VALIDATION.NAME_MAXLENGTH],
+        },
+        owner: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            required: true,
+        },
+        /**
+         * For folders: parent folder ObjectId (null = root)
+         * For files:   parent folder ObjectId (null = root) — same semantic as folderId
+         */
+        parentId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Document",
+            default: null,
+        },
+        /** Materialized path for efficient subtree queries and breadcrumbs */
+        path: {
+            type: String,
+            required: true,
+        },
+        isStarred: {
+            type: Boolean,
+            default: false,
+        },
+        isTrashed: {
+            type: Boolean,
+            default: false,
+        },
+        trashedAt: {
+            type: Date,
+            default: null,
+        },
+        tags: [
+            {
+                type: String,
+                trim: true,
+            },
+        ],
+        description: {
+            type: String,
+            maxlength: [1000, FILE_VALIDATION.DESCRIPTION_MAXLENGTH],
+        },
+        sharedWith: [
+            {
+                user: {
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: "User",
+                },
+                permission: {
+                    type: String,
+                    enum: PERMISSION_ARRAY,
+                    default: PERMISSION_LEVELS.VIEW,
+                },
+                sharedAt: {
+                    type: Date,
+                    default: Date.now,
+                },
+            },
+        ],
+        isPublic: {
+            type: Boolean,
+            default: false,
+        },
+        publicLink: {
+            type: String,
+            unique: true,
+            sparse: true,
+        },
+
+        // ─── Folder-only fields ──────────────────────────────────────────────────
+        /** UI colour accent for folders */
+        color: {
+            type: String,
+            default: null,
+        },
+
+        // ─── File-only fields ────────────────────────────────────────────────────
+        originalName: {
+            type: String,
+        },
+        extension: {
+            type: String,
+            lowercase: true,
+        },
+        mimeType: {
+            type: String,
+        },
+        /** File size in bytes */
+        size: {
+            type: Number,
+        },
+        currentVersion: {
+            type: Number,
+            default: 1,
+        },
+        downloadCount: {
+            type: Number,
+            default: 0,
+        },
+        lastAccessedAt: {
+            type: Date,
+            default: null,
+        },
+        storageKey: {
+            type: String, // Actual object key on S3
+        },
+        storageProvider: {
+            type: String,
+            enum: ["s3"],
+            default: "s3",
+        },
+        bucket: {
+            type: String,
+        },
+        uploadStatus: {
+            type: String,
+            enum: [
+                FILE_UPLOAD_STATUS.PENDING,
+                FILE_UPLOAD_STATUS.COMPLETED,
+                FILE_UPLOAD_STATUS.FAILED,
+            ],
+            default: FILE_UPLOAD_STATUS.PENDING,
+        },
+    },
+    {
+        timestamps: true,
+        toJSON: { virtuals: true },
+        toObject: { virtuals: true },
+    },
+);
+
+// ─── Indexes (compound, scalable) ──────────────────────────────────────────
+// Primary browse: list children of a folder, scoped to owner, not trashed
+documentSchema.index({ owner: 1, parent: 1, isTrashed: 1 });
+
+// Browse filtered by type (folders-only list for sidebar etc.)
+documentSchema.index({ owner: 1, parent: 1, docType: 1, isTrashed: 1 });
+
+// Trash view: top-level trashed items for owner
+documentSchema.index({ owner: 1, isTrashed: 1, docType: 1 });
+
+// Starred view
+documentSchema.index({ owner: 1, isStarred: 1, isTrashed: 1 });
+
+// Path-prefix operations (cascade rename/delete on subtree)
+documentSchema.index({ path: 1 });
+
+// Full-text search across name and tags
+documentSchema.index({ name: "text", tags: "text" });
+
+// Upload pipeline status checks
+documentSchema.index({ uploadStatus: 1 });
+
+// Recent documents
+documentSchema.index({ owner: 1, updatedAt: -1 });
+
+// ─── Virtuals ────────────────────────────────────────────────────────────────
+documentSchema.virtual("isFolder").get(function () {
+    return this.docType === DOC_TYPES.FOLDER;
+});
+
+documentSchema.virtual("isFile").get(function () {
+    return this.docType === DOC_TYPES.FILE;
+});
+
+// ─── Access control helper ───────────────────────────────────────────────────
+documentSchema.methods.hasAccess = function (userId, requiredPermission = PERMISSION_LEVELS.VIEW) {
+    if (this.owner.toString() === userId.toString()) return true;
+    if (this.isPublic && requiredPermission === PERMISSION_LEVELS.VIEW) return true;
+
+    const sharedUser = this.sharedWith.find(
+        (share) => share.user.toString() === userId.toString(),
+    );
+    if (!sharedUser) return false;
+
+    const permissionRank = {
+        [PERMISSION_LEVELS.VIEW]: 1,
+        [PERMISSION_LEVELS.EDIT]: 2,
+        [PERMISSION_LEVELS.ADMIN]: 3,
+    };
+    return permissionRank[sharedUser.permission] >= permissionRank[requiredPermission];
+};
+
+// ─── Path computation (pre-validate) ─────────────────────────────────────────
+documentSchema.pre("validate", async function (next) {
+    if (this.isNew || this.isModified("parent") || this.isModified("name")) {
+        if (this.parent) {
+            const parentDoc = await mongoose.model("Document").findById(this.parent);
+            this.path = parentDoc ? `${parentDoc.path}/${this.name}` : `/${this.name}`;
+        } else {
+            this.path = `/${this.name}`;
+        }
+    }
+    next();
+});
+
+// ─── Cascade path update on rename / reparent (post-save) ────────────────────
+documentSchema.post("init", function (doc) {
+    doc._originalPath = doc.path;
+});
+
+function escapeRegex(str) {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+documentSchema.post("save", async function (doc) {
+    if (!doc._originalPath || doc._originalPath === doc.path) return;
+
+    const oldPath = doc._originalPath;
+    const newPath = doc.path;
+    const escapedOldPath = escapeRegex(oldPath);
+
+    // Update all descendants in the same collection
+    await doc.constructor.updateMany({ path: { $regex: `^${escapedOldPath}/` } }, [
+        {
+            $set: {
+                path: {
+                    $concat: [
+                        newPath,
+                        {
+                            $substrBytes: [
+                                "$path",
+                                oldPath.length,
+                                { $subtract: [{ $strLenBytes: "$path" }, oldPath.length] },
+                            ],
+                        },
+                    ],
+                },
+            },
+        },
+    ]);
+});
+
+const Document = mongoose.model("Document", documentSchema);
+
+export default Document;
