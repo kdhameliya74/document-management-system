@@ -8,9 +8,9 @@ import {
     PERMISSION_ARRAY,
 } from "../constants/Shared.js";
 
+
 const documentSchema = new mongoose.Schema(
     {
-        // ─── Discriminator ──────────────────────────────────────────────────────
         docType: {
             type: String,
             required: true,
@@ -18,7 +18,6 @@ const documentSchema = new mongoose.Schema(
             index: true,
         },
 
-        // ─── Common fields ───────────────────────────────────────────────────────
         name: {
             type: String,
             required: [true, FILE_VALIDATION.NAME_REQUIRED],
@@ -30,10 +29,7 @@ const documentSchema = new mongoose.Schema(
             ref: "User",
             required: true,
         },
-        /**
-         * For folders: parent folder ObjectId (null = root)
-         * For files:   parent folder ObjectId (null = root) — same semantic as folderId
-         */
+        /** Parent folder ID */
         parentId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Document",
@@ -92,75 +88,21 @@ const documentSchema = new mongoose.Schema(
             unique: true,
             sparse: true,
         },
-
-        // ─── Folder-only fields ──────────────────────────────────────────────────
-        /** UI colour accent for folders */
-        color: {
-            type: String,
-            default: null,
-        },
-
-        // ─── File-only fields ────────────────────────────────────────────────────
-        originalName: {
-            type: String,
-        },
-        extension: {
-            type: String,
-            lowercase: true,
-        },
-        mimeType: {
-            type: String,
-        },
-        /** File size in bytes */
-        size: {
-            type: Number,
-        },
-        currentVersion: {
-            type: Number,
-            default: 1,
-        },
-        downloadCount: {
-            type: Number,
-            default: 0,
-        },
-        lastAccessedAt: {
-            type: Date,
-            default: null,
-        },
-        storageKey: {
-            type: String, // Actual object key on S3
-        },
-        storageProvider: {
-            type: String,
-            enum: ["s3"],
-            default: "s3",
-        },
-        bucket: {
-            type: String,
-        },
-        uploadStatus: {
-            type: String,
-            enum: [
-                FILE_UPLOAD_STATUS.PENDING,
-                FILE_UPLOAD_STATUS.COMPLETED,
-                FILE_UPLOAD_STATUS.FAILED,
-            ],
-            default: FILE_UPLOAD_STATUS.PENDING,
-        },
     },
     {
         timestamps: true,
         toJSON: { virtuals: true },
         toObject: { virtuals: true },
+        discriminatorKey: "docType",
     },
 );
 
 // ─── Indexes (compound, scalable) ──────────────────────────────────────────
 // Primary browse: list children of a folder, scoped to owner, not trashed
-documentSchema.index({ owner: 1, parent: 1, isTrashed: 1 });
+documentSchema.index({ owner: 1, parentId: 1, isTrashed: 1 });
 
 // Browse filtered by type (folders-only list for sidebar etc.)
-documentSchema.index({ owner: 1, parent: 1, docType: 1, isTrashed: 1 });
+documentSchema.index({ owner: 1, parentId: 1, docType: 1, isTrashed: 1 });
 
 // Trash view: top-level trashed items for owner
 documentSchema.index({ owner: 1, isTrashed: 1, docType: 1 });
@@ -179,15 +121,6 @@ documentSchema.index({ uploadStatus: 1 });
 
 // Recent documents
 documentSchema.index({ owner: 1, updatedAt: -1 });
-
-// ─── Virtuals ────────────────────────────────────────────────────────────────
-documentSchema.virtual("isFolder").get(function () {
-    return this.docType === DOC_TYPES.FOLDER;
-});
-
-documentSchema.virtual("isFile").get(function () {
-    return this.docType === DOC_TYPES.FILE;
-});
 
 // ─── Access control helper ───────────────────────────────────────────────────
 documentSchema.methods.hasAccess = function (userId, requiredPermission = PERMISSION_LEVELS.VIEW) {
@@ -208,19 +141,21 @@ documentSchema.methods.hasAccess = function (userId, requiredPermission = PERMIS
 };
 
 // ─── Path computation (pre-validate) ─────────────────────────────────────────
-documentSchema.pre("validate", async function (next) {
-    if (this.isNew || this.isModified("parent") || this.isModified("name")) {
-        if (this.parent) {
-            const parentDoc = await mongoose.model("Document").findById(this.parent);
-            this.path = parentDoc ? `${parentDoc.path}/${this.name}` : `/${this.name}`;
+documentSchema.pre("validate", async function () {
+    if (this.isNew || this.isModified("parentId") || this.isModified("name")) {
+        if (this.parentId) {
+            const parentDoc = await this.constructor.findById(this.parentId);
+
+            this.path = parentDoc
+                ? `${parentDoc.path}/${this.name}`
+                : `/${this.name}`;
         } else {
             this.path = `/${this.name}`;
         }
     }
-    next();
 });
 
-// ─── Cascade path update on rename / reparent (post-save) ────────────────────
+// ─── Cascade path update on rename / re (post-save) ────────────────────
 documentSchema.post("init", function (doc) {
     doc._originalPath = doc.path;
 });
@@ -258,5 +193,67 @@ documentSchema.post("save", async function (doc) {
 });
 
 const Document = mongoose.model("Document", documentSchema);
+const Folder = Document.discriminator(
+    DOC_TYPES.FOLDER,
+    new mongoose.Schema({
+        color: {
+            type: String,
+            default: null,
+        },
+    }),
+);
 
+const File = Document.discriminator(
+    DOC_TYPES.FILE,
+    new mongoose.Schema({
+        originalName: {
+            type: String,
+        },
+        extension: {
+            type: String,
+            lowercase: true,
+        },
+        mimeType: {
+            type: String,
+        },
+        size: {
+            type: Number,
+        },
+        currentVersion: {
+            type: Number,
+            default: 1,
+        },
+        downloadCount: {
+            type: Number,
+            default: 0,
+        },
+        lastAccessedAt: {
+            type: Date,
+            default: null,
+        },
+        storageKey: {
+            type: String, // Actual object key on S3
+        },
+        storageProvider: {
+            type: String,
+            enum: ["s3"],
+            default: "s3",
+        },
+        bucket: {
+            type: String,
+        },
+        uploadStatus: {
+            type: String,
+            enum: [
+                FILE_UPLOAD_STATUS.PENDING,
+                FILE_UPLOAD_STATUS.COMPLETED,
+                FILE_UPLOAD_STATUS.FAILED,
+            ],
+            default: FILE_UPLOAD_STATUS.PENDING,
+        },
+    }),
+);
+
+
+export { Folder, File };
 export default Document;

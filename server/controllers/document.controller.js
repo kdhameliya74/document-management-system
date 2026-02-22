@@ -25,16 +25,16 @@ async function buildBreadcrumbs(parentId, userId) {
             _id: tempParentId,
             owner: userId,
             isTrashed: false,
-        }).select("_id name parent");
+        }).select("_id name parentId");
 
         if (!ancestor) break;
 
         breadcrumbs.unshift({
             id: ancestor._id,
             name: ancestor.name,
-            parentId: ancestor.parent || "root",
+            parentId: ancestor.parentId || "root",
         });
-        tempParentId = ancestor.parent;
+        tempParentId = ancestor.parentId;
     }
     return breadcrumbs;
 }
@@ -42,27 +42,27 @@ async function buildBreadcrumbs(parentId, userId) {
 // ─── Controllers ─────────────────────────────────────────────────────────────
 
 // @desc    List documents inside a folder (folders + files)
-// @route   GET /api/documents?parent=<id>
+// @route   GET /api/documents?parentId=<id>
 // @access  Private
 export const listDocuments = asyncHandler(async (req, res) => {
     const userId = req.user.id;
-    const { parent = null } = req.query;
+    const { parentId = null } = req.query;
 
     const baseFilter = {
         owner: userId,
-        parent: parent || null,
+        parentId: parentId || null,
         isTrashed: false,
     };
 
     const [items, currentFolder] = await Promise.all([
         Document.find(baseFilter).sort({ docType: -1, name: 1 }), // folders first
-        parent
-            ? Document.findOne({ _id: parent, owner: userId, isTrashed: false })
+        parentId
+            ? Document.findOne({ _id: parentId, owner: userId, isTrashed: false })
             : Promise.resolve(null),
     ]);
 
     const breadcrumbs = currentFolder
-        ? await buildBreadcrumbs(currentFolder.parent, userId)
+        ? await buildBreadcrumbs(currentFolder.parentId, userId)
         : [];
 
     // Add current folder itself at the end of breadcrumbs if we're inside one
@@ -70,7 +70,7 @@ export const listDocuments = asyncHandler(async (req, res) => {
         breadcrumbs.push({
             id: currentFolder._id,
             name: currentFolder.name,
-            parentId: currentFolder.parent || "root",
+            parentId: currentFolder.parentId || "root",
         });
     }
 
@@ -91,7 +91,7 @@ export const listDocuments = asyncHandler(async (req, res) => {
 // @route   POST /api/documents/folders
 // @access  Private
 export const createFolder = asyncHandler(async (req, res) => {
-    const { name, parent, color } = req.body;
+    const { name, parentId, color } = req.body;
     const owner = req.user.id;
 
     if (!name) {
@@ -99,9 +99,9 @@ export const createFolder = asyncHandler(async (req, res) => {
     }
 
     // Validate parent exists and belongs to owner
-    if (parent) {
+    if (parentId) {
         const parentFolder = await Document.findOne({
-            _id: parent,
+            _id: parentId,
             owner,
             docType: DOC_TYPES.FOLDER,
             isTrashed: false,
@@ -117,7 +117,7 @@ export const createFolder = asyncHandler(async (req, res) => {
     // Prevent duplicate names in same location
     const duplicate = await Document.findOne({
         name,
-        parent: parent || null,
+        parentId: parentId || null,
         owner,
         docType: DOC_TYPES.FOLDER,
         isTrashed: false,
@@ -132,17 +132,14 @@ export const createFolder = asyncHandler(async (req, res) => {
     const folder = await Document.create({
         docType: DOC_TYPES.FOLDER,
         name,
-        parent: parent || null,
+        parentId: parentId || null,
         color: color || null,
         owner,
     });
-
     return res.status(201).json({ success: true, message: "Folder created successfully", folder });
 });
 
-// @desc    Get a single document by ID
 // @route   GET /api/documents/:id
-// @access  Private
 export const getDocumentById = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const userId = req.user.id;
@@ -155,9 +152,7 @@ export const getDocumentById = asyncHandler(async (req, res) => {
     return res.status(200).json({ success: true, document: doc });
 });
 
-// @desc    Update a document (rename, recolor, star, etc.)
 // @route   PATCH /api/documents/:id
-// @access  Private
 export const updateDocument = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const userId = req.user.id;
@@ -198,9 +193,7 @@ export const updateDocument = asyncHandler(async (req, res) => {
     });
 });
 
-// @desc    Soft-delete a document (move to trash; cascades into children)
 // @route   DELETE /api/documents/:id
-// @access  Private
 export const trashDocument = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const userId = req.user.id;
@@ -222,9 +215,7 @@ export const trashDocument = asyncHandler(async (req, res) => {
     return res.status(200).json({ success: true, message: "Document moved to trash successfully" });
 });
 
-// @desc    List top-level trashed documents
 // @route   GET /api/documents/trash
-// @access  Private
 export const listTrash = asyncHandler(async (req, res) => {
     const userId = req.user.id;
     const ownerId = new mongoose.Types.ObjectId(userId);
@@ -236,7 +227,7 @@ export const listTrash = asyncHandler(async (req, res) => {
         {
             $lookup: {
                 from: "documents",
-                localField: "parent",
+                localField: "parentId",
                 foreignField: "_id",
                 as: "parentInfo",
             },
@@ -244,7 +235,7 @@ export const listTrash = asyncHandler(async (req, res) => {
         { $unwind: { path: "$parentInfo", preserveNullAndEmptyArrays: true } },
         {
             $match: {
-                $or: [{ parent: null }, { "parentInfo.isTrashed": false }],
+                $or: [{ parentId: null }, { "parentInfo.isTrashed": false }],
             },
         },
         { $addFields: { id: "$_id" } },
@@ -257,9 +248,7 @@ export const listTrash = asyncHandler(async (req, res) => {
     return res.status(200).json({ success: true, items: trashedItems, folders, files });
 });
 
-// @desc    Restore a document from trash (cascades into children)
 // @route   PATCH /api/documents/:id/restore
-// @access  Private
 export const restoreDocument = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const userId = req.user.id;
@@ -279,9 +268,7 @@ export const restoreDocument = asyncHandler(async (req, res) => {
     return res.status(200).json({ success: true, message: "Document restored successfully" });
 });
 
-// @desc    Get presigned S3 URLs for direct client-side upload
 // @route   POST /api/documents/upload-urls
-// @access  Private
 export const getPresignedUrls = asyncHandler(async (req, res) => {
     const files = req.body;
 
@@ -318,9 +305,7 @@ export const getPresignedUrls = asyncHandler(async (req, res) => {
     return res.status(200).json({ success: true, successfulUploads, failedUploads });
 });
 
-// @desc    Confirm S3 upload and create file document record
 // @route   POST /api/documents/upload-confirm
-// @access  Private
 export const confirmUpload = asyncHandler(async (req, res) => {
     const {
         name,
@@ -330,7 +315,7 @@ export const confirmUpload = asyncHandler(async (req, res) => {
         size,
         storageKey,
         bucket,
-        parent,          // folder the file lives in (was `folderId`)
+        parentId,          // folder the file lives in
         uploadStatus,
     } = req.body;
 
@@ -346,7 +331,7 @@ export const confirmUpload = asyncHandler(async (req, res) => {
         storageKey,
         bucket,
         storageProvider: "s3",
-        parent: parent || null,
+        parentId: parentId || null,
         uploadStatus: uploadStatus || FILE_UPLOAD_STATUS.COMPLETED,
         owner,
     });

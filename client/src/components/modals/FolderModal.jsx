@@ -46,27 +46,30 @@ const FolderModal = ({
     );
   };
 
-  const saveFolder = async () => {
+  const saveNewFolder = async () => {
+    const fields = {
+      name: folderName.trim(),
+      color: selectedColor,
+    };
+
+    await dispatch(
+      createFolder({
+        ...fields,
+        parentId: parentFolderId,
+      }),
+    ).unwrap();
+  };
+
+  const updateFolder = async () => {
     const fields = {
       name: folderName.trim(),
       color: selectedColor,
       docType: documentItem.docType,
     };
-
-    if (isCreate) {
-      await dispatch(
-        createFolder({
-          ...fields,
-          parent: parentFolderId,
-          owner: user?.id || user?._id,
-        }),
-      ).unwrap();
-    } else {
       await dispatch(updateDocument({ ...fields, id: documentItem.id })).unwrap();
-    }
   };
 
-  const saveFile = async () => {
+  const updateFile = async () => {
     const fields = {
       name: `${folderName.trim()}.${extension}`,
       docType: documentItem.docType,
@@ -88,11 +91,18 @@ const FolderModal = ({
         return;
       }
 
-      if (isFolder) {
-        await saveFolder();
-        toast.success(isCreate ? FOLDER_MESSAGES.CREATE_SUCCESS : FOLDER_MESSAGES.UPDATE_SUCCESS);
+
+      if (isCreate) {
+        console.log("craete folder")
+        await saveNewFolder();
+        toast.success(FOLDER_MESSAGES.CREATE_SUCCESS);
       } else {
-        await saveFile();
+        if (isFolder) {
+          console.log("update folder")
+          await updateFolder();
+        } else {
+          await updateFile();
+        }
         toast.success(FOLDER_MESSAGES.UPDATE_SUCCESS);
       }
       handleCancel();
