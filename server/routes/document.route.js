@@ -1,15 +1,15 @@
 import express from "express";
 import { protect } from "../middlewares/auth.moddleware.js";
 import {
-    listDocuments,
-    createFolder,
-    getDocumentById,
-    updateDocument,
-    trashDocument,
-    listTrash,
-    restoreDocument,
-    getPresignedUrls,
-    confirmUpload,
+  listDocuments,
+  createFolder,
+  getDocumentById,
+  updateDocument,
+  trashDocument,
+  listTrash,
+  restoreDocument,
+  getPresignedUrls,
+  confirmUpload,
 } from "../controllers/document.controller.js";
 
 const router = express.Router();

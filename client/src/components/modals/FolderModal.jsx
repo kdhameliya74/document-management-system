@@ -33,7 +33,6 @@ const FolderModal = ({
   const [errorMessage, setErrorMessage] = useState(null);
   const [selectedColor, setSelectedColor] = useState(documentItem?.color || FOLDER_COLORS.DEFAULT);
   const { documents } = useSelector((state) => state.documentSystem);
-  const { user } = useSelector((state) => state.auth);
 
   const dispatch = useDispatch();
 
@@ -66,7 +65,7 @@ const FolderModal = ({
       color: selectedColor,
       docType: documentItem.docType,
     };
-      await dispatch(updateDocument({ ...fields, id: documentItem.id })).unwrap();
+    await dispatch(updateDocument({ ...fields, id: documentItem.id })).unwrap();
   };
 
   const updateFile = async () => {
@@ -91,14 +90,13 @@ const FolderModal = ({
         return;
       }
 
-
       if (isCreate) {
-        console.log("craete folder")
+        console.log("craete folder");
         await saveNewFolder();
         toast.success(FOLDER_MESSAGES.CREATE_SUCCESS);
       } else {
         if (isFolder) {
-          console.log("update folder")
+          console.log("update folder");
           await updateFolder();
         } else {
           await updateFile();
