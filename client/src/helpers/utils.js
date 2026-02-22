@@ -55,9 +55,14 @@ export const getFileExtension = (fileName) => {
   return lastDot > 0 ? fileName.substring(lastDot + 1) : null;
 };
 
-export const getDocumentFlags = (mode, docType) => ({
-  isCreate: mode === DOCUMENT_MODES.CREATE,
-  isUpdate: mode === DOCUMENT_MODES.UPDATE,
-  isFolder: docType === "folder",
-  isFile: docType === "file",
-});
+export const getDocumentFlags = (mode, docType) => {
+  const isCreate = mode === DOCUMENT_MODES.CREATE;
+  const isUpdate = mode === DOCUMENT_MODES.UPDATE;
+
+  return {
+    isCreate,
+    isUpdate,
+    isFolder: isUpdate && docType === "folder",
+    isFile: isUpdate && docType === "file",
+  };
+};
