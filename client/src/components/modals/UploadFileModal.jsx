@@ -43,7 +43,7 @@ const UploadFileModal = ({ isOpen, onClose, currentFolderId }) => {
     setUploadStatus((prev) => ({ ...prev, ...filesStatus }));
   };
 
-const isDuplicateName = (name) => {
+  const isDuplicateName = (name) => {
     const sanitized = name.trim().toLowerCase();
     return currentDocument?.childDocuments?.some(
       (docId) => documents[docId]?.name.toLowerCase() === sanitized,
@@ -169,7 +169,8 @@ const isDuplicateName = (name) => {
         </div>
 
         {selectedFiles.length > 0 && (
-          <div className="flex flex-col gap-3">error
+          <div className="flex flex-col gap-3">
+            error
             <div className="flex justify-between items-center text-sm">
               <span className="text-text-main font-medium">Files to upload</span>
               <span className="text-text-muted">
@@ -204,13 +205,13 @@ const isDuplicateName = (name) => {
                       <AlertCircle size={16} className="text-red-500" />
                     )}
                     {REMOVABLE_STATUSES.includes(uploadStatus[fileObj.uid]) && !isUploading && (
-                        <button
-                          onClick={() => removeFile(fileObj.uid)}
-                          className="cursor-pointer text-text-muted hover:text-red-500 transition-colors"
-                        >
-                          <X size={16} />
-                        </button>
-                      )}
+                      <button
+                        onClick={() => removeFile(fileObj.uid)}
+                        className="cursor-pointer text-text-muted hover:text-red-500 transition-colors"
+                      >
+                        <X size={16} />
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}

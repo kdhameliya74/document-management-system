@@ -235,8 +235,8 @@ export const listTrash = asyncHandler(async (req, res) => {
     return res.status(200).json({
       success: true,
       currentFolder,
-      folders: trashedItems.filter(d => d.docType === DOC_TYPES.FOLDER),
-      files: trashedItems.filter(d => d.docType === DOC_TYPES.FILE),
+      folders: trashedItems.filter((d) => d.docType === DOC_TYPES.FOLDER),
+      files: trashedItems.filter((d) => d.docType === DOC_TYPES.FILE),
     });
   }
 
@@ -246,16 +246,16 @@ export const listTrash = asyncHandler(async (req, res) => {
     isTrashed: true,
   });
 
-  const trashedIds = new Set(trashedItems.map(d => d._id.toString()));
+  const trashedIds = new Set(trashedItems.map((d) => d._id.toString()));
 
-  const rootTrash = trashedItems.filter(d =>
-    !d.parentId || !trashedIds.has(d.parentId.toString())
+  const rootTrash = trashedItems.filter(
+    (d) => !d.parentId || !trashedIds.has(d.parentId.toString()),
   );
 
   return res.status(200).json({
     success: true,
-    folders: rootTrash.filter(d => d.docType === DOC_TYPES.FOLDER),
-    files: rootTrash.filter(d => d.docType === DOC_TYPES.FILE),
+    folders: rootTrash.filter((d) => d.docType === DOC_TYPES.FOLDER),
+    files: rootTrash.filter((d) => d.docType === DOC_TYPES.FILE),
   });
 });
 

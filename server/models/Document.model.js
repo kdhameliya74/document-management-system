@@ -96,7 +96,6 @@ const documentSchema = new mongoose.Schema(
   },
 );
 
-
 // ─── Indexes (compound, scalable) ──────────────────────────────────────────
 // Primary browse: list children of a folder, scoped to owner, not trashed
 documentSchema.index({ owner: 1, parentId: 1, isTrashed: 1 });
@@ -149,7 +148,6 @@ documentSchema.pre("validate", async function () {
     }
   }
 });
-
 
 // ─── Cascade path update on rename / re (post-save) ────────────────────
 documentSchema.post("init", function (doc) {

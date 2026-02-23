@@ -223,7 +223,7 @@ const documentSystemSlice = createSlice({
     },
     // fetch documents and files
     // Mock version history
-    addFileVersion: (state, action) => { },
+    addFileVersion: () => {},
   },
   extraReducers: (builder) => {
     builder
@@ -307,7 +307,6 @@ const documentSystemSlice = createSlice({
           });
           return doc.id;
         });
-
 
         // 4. Update parent children list
         if (state.documents[parentId]) {
