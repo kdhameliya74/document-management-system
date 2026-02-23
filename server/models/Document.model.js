@@ -142,7 +142,7 @@ documentSchema.methods.hasAccess = function (userId, requiredPermission = PERMIS
 documentSchema.pre("validate", async function () {
   if (this.isNew || this.isModified("parentId") || this.isModified("name")) {
     if (this.parentId) {
-      const parentDoc = await mongoose.model("Document").findById(this.parentId);
+      const parentDoc = await this.model("Document").findById(this.parentId);
       this.path = parentDoc ? `${parentDoc.path}/${this.name}` : `/${this.name}`;
     } else {
       this.path = `/${this.name}`;
