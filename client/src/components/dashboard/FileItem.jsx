@@ -23,7 +23,7 @@ const FileItem = ({ file, isSelected, onSelect, onContextMenu }) => {
         <FileIcon mimeType={file.mimeType} size={48} strokeWidth={1} />
       </div>
       <span
-        className={`text-sm text-center break-all line-clamp-2 px-1 truncate ${
+        className={`text-sm text-center break-all line-clamp-2 px-1 truncate select-none ${
           isSelected ? "text-primary" : "text-text-main"
         }`}
       >

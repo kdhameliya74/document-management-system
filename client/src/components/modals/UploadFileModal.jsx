@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Upload, X, Loader2, Check, AlertCircle } from "lucide-react";
 import { uploadFileMeta } from "@/store/documentSystemSlice";
 import Modal from "@/components/common/Modal";
@@ -12,12 +12,17 @@ const STATUS = {
   UPLOADING: "uploading",
   COMPLETED: "completed",
   ERROR: "error",
+  DUPLICATE: "duplicate",
 };
+
+const REMOVABLE_STATUSES = [STATUS.PENDING, STATUS.DUPLICATE, STATUS.ERROR];
 
 const UploadFileModal = ({ isOpen, onClose, currentFolderId }) => {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState({});
+  const { documents } = useSelector((state) => state.documentSystem);
+  const currentDocument = documents[currentFolderId];
   const dispatch = useDispatch();
 
   const handleFileChange = (e) => {
@@ -25,7 +30,7 @@ const UploadFileModal = ({ isOpen, onClose, currentFolderId }) => {
     const filesStatus = {};
     const newFiles = files.map((file) => {
       const uid = uuidToBase64(crypto.randomUUID());
-      filesStatus[uid] = STATUS.PENDING;
+      filesStatus[uid] = isDuplicateName(file.name) ? STATUS.DUPLICATE : STATUS.PENDING;
       return {
         file,
         uid,
@@ -36,6 +41,13 @@ const UploadFileModal = ({ isOpen, onClose, currentFolderId }) => {
     });
     setSelectedFiles((prev) => [...prev, ...newFiles]);
     setUploadStatus((prev) => ({ ...prev, ...filesStatus }));
+  };
+
+const isDuplicateName = (name) => {
+    const sanitized = name.trim().toLowerCase();
+    return currentDocument?.childDocuments?.some(
+      (docId) => documents[docId]?.name.toLowerCase() === sanitized,
+    );
   };
 
   const uploadFile = async (uploadInfo, fileObj) => {
@@ -157,7 +169,7 @@ const UploadFileModal = ({ isOpen, onClose, currentFolderId }) => {
         </div>
 
         {selectedFiles.length > 0 && (
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-3">error
             <div className="flex justify-between items-center text-sm">
               <span className="text-text-main font-medium">Files to upload</span>
               <span className="text-text-muted">
@@ -168,11 +180,14 @@ const UploadFileModal = ({ isOpen, onClose, currentFolderId }) => {
               {selectedFiles.map((fileObj) => (
                 <div
                   key={fileObj.uid}
-                  className="flex gap-2 items-center justify-between p-3 bg-bg-hover rounded-xl border border-border-muted"
+                  className={`flex gap-2 items-center justify-between p-3 bg-bg-hover rounded-xl border ${uploadStatus[fileObj.uid] === STATUS.DUPLICATE ? "border-red-300 bg-red-300/10" : "border-border-muted"}`}
                 >
                   <div className="flex-1 flex items-center gap-3 min-w-0">
                     <div className="flex-1 text-text-main truncate text-sm font-medium">
                       {fileObj.name}
+                      {uploadStatus[fileObj.uid] === STATUS.DUPLICATE && (
+                        <span className="text-red-500 ml-2"> (Duplicate)</span>
+                      )}
                     </div>
                     <div className="text-text-muted text-xs whitespace-nowrap">
                       {(fileObj.size / 1024).toFixed(1)} KB
@@ -188,9 +203,7 @@ const UploadFileModal = ({ isOpen, onClose, currentFolderId }) => {
                     {uploadStatus[fileObj.uid] === STATUS.ERROR && (
                       <AlertCircle size={16} className="text-red-500" />
                     )}
-                    {(uploadStatus[fileObj.uid] === STATUS.PENDING ||
-                      uploadStatus[fileObj.uid] === STATUS.ERROR) &&
-                      !isUploading && (
+                    {REMOVABLE_STATUSES.includes(uploadStatus[fileObj.uid]) && !isUploading && (
                         <button
                           onClick={() => removeFile(fileObj.uid)}
                           className="cursor-pointer text-text-muted hover:text-red-500 transition-colors"
