@@ -22,8 +22,8 @@ const fileSystemAPI = {
     return response.data;
   },
 
-  getTrash: async () => {
-    const response = await api.get("/documents/trash");
+  getTrash: async (parentId) => {
+    const response = await api.get("/documents/trash", { params: { parentId } });
     return response.data;
   },
 

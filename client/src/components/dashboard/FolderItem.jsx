@@ -27,7 +27,7 @@ const FolderItem = ({ folder, isSelected, onNavigate, onContextMenu }) => {
         />
       </div>
       <span
-        className={`text-sm text-center break-all line-clamp-2 px-1 ${
+        className={`text-sm text-center break-all line-clamp-2 px-1 select-none ${
           isSelected ? "text-primary" : "text-text-main"
         }`}
       >
