@@ -6,13 +6,13 @@ import { format } from "date-fns";
 
 const RightSidebar = () => {
   const dispatch = useDispatch();
-  const { documents, files, currentFolderId, selectedId, showDetails } = useSelector(
+  const { documents, currentFolderId, selectedId, showDetails } = useSelector(
     (state) => state.documentSystem,
   );
   const { user } = useSelector((state) => state.auth);
 
   const currentFolder = documents[currentFolderId];
-  const selectedItem = selectedId ? documents[selectedId] || files[selectedId] : currentFolder;
+  const selectedItem = selectedId ? documents[selectedId] : currentFolder;
 
   const [showDeleteModal, setShowDeleteModal] = React.useState(false);
 

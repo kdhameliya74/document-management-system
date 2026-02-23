@@ -63,7 +63,6 @@ const FolderModal = ({
     const fields = {
       name: folderName.trim(),
       color: selectedColor,
-      docType: documentItem.docType,
     };
     await dispatch(updateDocument({ ...fields, id: documentItem.id })).unwrap();
   };
@@ -71,7 +70,6 @@ const FolderModal = ({
   const updateFile = async () => {
     const fields = {
       name: `${folderName.trim()}.${extension}`,
-      docType: documentItem.docType,
     };
 
     await dispatch(updateDocument({ ...fields, id: documentItem.id })).unwrap();

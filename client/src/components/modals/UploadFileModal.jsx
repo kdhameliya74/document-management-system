@@ -48,7 +48,7 @@ const UploadFileModal = ({ isOpen, onClose, currentFolderId }) => {
           size: fileObj.size,
           storageKey: uploadInfo.storageKey,
           bucket: uploadInfo.bucket,
-          folderId: currentFolderId === "root" ? null : currentFolderId,
+          parentId: currentFolderId === "root" ? null : currentFolderId,
           extension: fileObj.name.split(".").pop(),
           mimeType: fileObj.mimeType,
           uploadStatus: STATUS.COMPLETED,

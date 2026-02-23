@@ -77,9 +77,8 @@ export const listDocuments = asyncHandler(async (req, res) => {
 
   return res.status(200).json({
     success: true,
-    items, // unified list sorted folders-first
-    folders, // convenience split
-    files, // convenience split
+    folders,
+    files,
     currentFolder,
     breadcrumbs,
   });
@@ -215,35 +214,49 @@ export const trashDocument = asyncHandler(async (req, res) => {
 
 // @route   GET /api/documents/trash
 export const listTrash = asyncHandler(async (req, res) => {
-  const userId = req.user.id;
-  const ownerId = new mongoose.Types.ObjectId(userId);
+  const ownerId = new mongoose.Types.ObjectId(req.user.id);
+  const { parentId } = req.query;
 
-  // Only return "root" trash items — items whose parent is either null
-  // or whose parent is NOT also trashed (prevents double-listing nested items)
-  const trashedItems = await Document.aggregate([
-    { $match: { owner: ownerId, isTrashed: true } },
-    {
-      $lookup: {
-        from: "documents",
-        localField: "parentId",
-        foreignField: "_id",
-        as: "parentInfo",
-      },
-    },
-    { $unwind: { path: "$parentInfo", preserveNullAndEmptyArrays: true } },
-    {
-      $match: {
-        $or: [{ parentId: null }, { "parentInfo.isTrashed": false }],
-      },
-    },
-    { $addFields: { id: "$_id" } },
-    { $project: { parentInfo: 0 } },
-  ]);
+  if (parentId) {
+    const [trashedItems, currentFolder] = await Promise.all([
+      Document.find({
+        parentId,
+        owner: ownerId,
+        isTrashed: true,
+      }),
 
-  const folders = trashedItems.filter((d) => d.docType === DOC_TYPES.FOLDER);
-  const files = trashedItems.filter((d) => d.docType === DOC_TYPES.FILE);
+      Document.findOne({
+        _id: parentId,
+        owner: ownerId,
+        isTrashed: true,
+      }),
+    ]);
 
-  return res.status(200).json({ success: true, items: trashedItems, folders, files });
+    return res.status(200).json({
+      success: true,
+      currentFolder,
+      folders: trashedItems.filter(d => d.docType === DOC_TYPES.FOLDER),
+      files: trashedItems.filter(d => d.docType === DOC_TYPES.FILE),
+    });
+  }
+
+  // Root trash
+  const trashedItems = await Document.find({
+    owner: ownerId,
+    isTrashed: true,
+  });
+
+  const trashedIds = new Set(trashedItems.map(d => d._id.toString()));
+
+  const rootTrash = trashedItems.filter(d =>
+    !d.parentId || !trashedIds.has(d.parentId.toString())
+  );
+
+  return res.status(200).json({
+    success: true,
+    folders: rootTrash.filter(d => d.docType === DOC_TYPES.FOLDER),
+    files: rootTrash.filter(d => d.docType === DOC_TYPES.FILE),
+  });
 });
 
 // @route   PATCH /api/documents/:id/restore

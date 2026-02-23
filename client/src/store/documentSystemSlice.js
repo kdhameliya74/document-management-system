@@ -100,14 +100,7 @@ export const updateDocument = createAsyncThunk(
   "documents/update",
   async ({ id, ...rest }, { rejectWithValue }) => {
     try {
-      if (rest.docType === "folder") {
-        const data = await fileSystemAPI.updateDocument(id, rest);
-        return {
-          ...data,
-          document: { id, ...rest },
-        };
-      }
-      const data = await fileSystemAPI.updateFile(id, rest);
+      const data = await fileSystemAPI.updateDocument(id, rest);
       return {
         ...data,
         document: { id, ...rest },
@@ -166,13 +159,14 @@ export const restoreDocument = createAsyncThunk(
 */
 export const getTrashedDocument = createAsyncThunk(
   "documents/trash",
-  async (parent, { rejectWithValue }) => {
+  async (parentId, { rejectWithValue }) => {
     try {
-      const data = await fileSystemAPI.getTrash(parent);
+      const data = await fileSystemAPI.getTrash(parentId);
       return {
         folders: data.folders,
+        files: data.files,
         currentFolder: data.currentFolder,
-        parentId: parent || "trash",
+        parentId: parentId || "trash",
       };
     } catch (err) {
       logError(err);
@@ -186,7 +180,7 @@ const ensureDocument = (state, id, data, topParent = "root") => {
   docState[id] ??= {
     id,
     name: "",
-    parentId: "root",
+    parentId: topParent,
     childDocuments: [],
   };
 
@@ -219,25 +213,6 @@ const documentSystemSlice = createSlice({
     setShowDetails: (state, action) => {
       state.showDetails = action.payload;
     },
-    // addFile: (state, action) => {
-    //   const { name, type, size, parentId, url } = action.payload;
-    //   const newFileId = uuidv4();
-    //   const newFile = {
-    //     id: newFileId,
-    //     name,
-    //     type,
-    //     size,
-    //     url, // In a real app, this would be the S3 URL or similar
-    //     parentId,
-    //     createdAt: new Date().toISOString(),
-    //     versions: [], // For version history
-    //   };
-
-    //   state.files[newFileId] = newFile;
-    //   if (state.documents[parentId]) {
-    //     state.documents[parentId].childFileIds.push(newFileId);
-    //   }
-    // },
     renameItem: (state, action) => {
       const { id, type, newName } = action.payload;
       if (type === "folder" && state.documents[id]) {
@@ -246,38 +221,9 @@ const documentSystemSlice = createSlice({
         state.files[id].name = newName;
       }
     },
-    deleteItem: (state, action) => {
-      const { id, type, parentId } = action.payload;
-
-      // Remove from parent's children list
-      if (state.documents[parentId]) {
-        if (type === "folder") {
-          state.documents[parentId].childDocuments = state.documents[
-            parentId
-          ].childDocuments.filter((fid) => fid !== id);
-          // Recursive delete would be needed here for a real backend,
-          // but for client-side state, we might leave orphans or clean them up.
-          // Let's just remove the reference for now.
-          delete state.documents[id];
-        } else {
-          state.documents[parentId].childFileIds = state.documents[parentId].childFileIds.filter(
-            (fid) => fid !== id,
-          );
-          delete state.files[id];
-        }
-      }
-    },
     // fetch documents and files
     // Mock version history
-    addFileVersion: (state, action) => {
-      const { fileId, versionData } = action.payload;
-      if (state.files[fileId]) {
-        state.files[fileId].versions.push({
-          ...versionData,
-          timestamp: new Date().toISOString(),
-        });
-      }
-    },
+    addFileVersion: (state, action) => { },
   },
   extraReducers: (builder) => {
     builder
@@ -396,20 +342,12 @@ const documentSystemSlice = createSlice({
       .addCase(getTrashedDocument.fulfilled, (state, action) => {
         state.isLoading = false;
         const topParent = "trash";
-        const { folders, currentFolder, breadcrumbs, parentId } = action.payload;
-
-        // 1. Breadcrumbs
-        if (breadcrumbs) {
-          breadcrumbs.forEach(({ id, name, parentId: pid }) => {
-            ensureDocument(state, id, { id, name, parentId: pid }, topParent);
-            linkChildToParent(state, pid, id, topParent);
-          });
-        }
+        const { folders, files, currentFolder, parentId } = action.payload;
 
         // 2. Current folder
         if (currentFolder) {
-          const { id, parent } = currentFolder;
-          const normalizedParentId = parent || topParent;
+          const { id, parentId } = currentFolder;
+          const normalizedParentId = parentId || topParent;
           const data = {
             ...currentFolder,
             id,
@@ -421,18 +359,17 @@ const documentSystemSlice = createSlice({
         }
 
         // 3. Child folders
-        const childDocuments = folders.map((folder) => {
-          const normalizedParentId = folder.parent || topParent;
+        const childDocuments = [...folders, ...files].map((doc) => {
+          const normalizedParentId = doc.parentId || topParent;
           const data = {
-            ...folder,
-            id: folder.id,
+            ...doc,
+            id: doc.id,
             parentId: normalizedParentId,
           };
-          ensureDocument(state, folder.id, data, topParent);
-          return folder.id;
+          ensureDocument(state, doc.id, data, topParent);
+          return doc.id;
         });
 
-        // 4. Update parent children list
         if (state.trashDocuments[parentId]) {
           state.trashDocuments[parentId].childDocuments = childDocuments;
         }
@@ -445,12 +382,11 @@ const documentSystemSlice = createSlice({
         }
       })
       .addCase(uploadFileMeta.fulfilled, (state, action) => {
-        const { id, folderId } = action.payload;
-        const parentId = folderId ?? "root";
+        const { id, parentId } = action.payload;
         state.documents[id] = {
           id,
           ...action.payload,
-          parentId,
+          parentId: parentId ?? "root",
         };
         if (state.documents[parentId]) {
           state.documents[parentId].childDocuments.push(id);

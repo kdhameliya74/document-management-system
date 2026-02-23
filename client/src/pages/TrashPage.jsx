@@ -1,18 +1,20 @@
 import React, { useEffect, useMemo } from "react";
+import toast from "react-hot-toast";
 import { Trash2, ArrowLeft, ChevronRight } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import { setSelectedId, getTrashedDocument, restoreDocument } from "@/store/documentSystemSlice";
+import { truncateFolderName } from "@/helpers/utils.js";
+import { TRASH_MESSAGES } from "@/helpers/constants";
 
 import ROUTES from "@/utils/routes";
-import { setSelectedId, getTrashedDocument, restoreDocument } from "@/store/documentSystemSlice";
 import useFileFolderContextMenu from "@/hooks/useFileFolderContextMenu";
 import ContextMenu from "@/components/common/ContextMenu";
-
 import FolderItem from "@/components/dashboard/FolderItem";
+import FileItem from "@/components/dashboard/FileItem";
 import Loading from "@/components/common/Loading";
-import { truncateFolderName } from "@/helpers/utils.js";
-import toast from "react-hot-toast";
-import { TRASH_MESSAGES } from "@/helpers/constants";
+
+
 
 const EmptyTrash = ({ onNavigateBack, folderId }) => (
   <div className="flex-1 flex flex-col items-center justify-center text-slate-500 text-center">
@@ -100,16 +102,26 @@ const TrashPage = () => {
   const renderFolders = () => (
     <div className="flex-1 overflow-y-auto -mx-6 px-6">
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-9 gap-6 py-4">
-        {childDocuments.map((folder) => (
-          <FolderItem
-            key={folder.id}
-            folder={folder}
-            isSelected={selectedId === folder.id}
-            onSelect={handleSelect}
-            onNavigate={handleNavigate}
-            onContextMenu={handleContextMenu}
-          />
-        ))}
+        {childDocuments.map((document) =>
+              document.docType === "folder" ? (
+                <FolderItem
+                  key={document.id}
+                  folder={document}
+                  isSelected={selectedId === document.id}
+                  onSelect={handleSelect}
+                  onNavigate={handleNavigate}
+                  onContextMenu={handleContextMenu}
+                />
+              ) : (
+                <FileItem
+                  key={document.id}
+                  file={document}
+                  isSelected={selectedId === document.id}
+                  onSelect={handleSelect}
+                  onContextMenu={handleContextMenu}
+                />
+              ),
+            )}
       </div>
     </div>
   );
