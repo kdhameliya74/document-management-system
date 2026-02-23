@@ -228,11 +228,10 @@ const documentSystemSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(createFolder.fulfilled, (state, action) => {
-        const parent = action?.payload?.parent ?? "root";
+        const parent = action?.payload?.parentId ?? "root";
         const normalizedFolder = {
           ...action.payload,
           childDocuments: [],
-          childFileIds: [],
         };
         state.documents[normalizedFolder.id] = normalizedFolder;
         if (parent && state.documents[parent]) {
@@ -286,8 +285,8 @@ const documentSystemSlice = createSlice({
 
         // 2. Current folder
         if (currentFolder) {
-          const { id, parent } = currentFolder;
-          const normalizedParentId = parent || "root";
+          const { id, parentId } = currentFolder;
+          const normalizedParentId = parentId || "root";
 
           ensureDocument(state, id, {
             ...currentFolder,
@@ -300,14 +299,15 @@ const documentSystemSlice = createSlice({
 
         // 3. Child folders
         const childDocuments = [...folders, ...files].map((doc) => {
-          const normalizedParentId = doc.docType === "folder" ? doc.parent : doc.folderId;
+          const normalizedParentId = doc.parentId || "root";
           ensureDocument(state, doc.id, {
             ...doc,
             id: doc.id,
-            parentId: normalizedParentId || "root",
+            parentId: normalizedParentId,
           });
           return doc.id;
         });
+
 
         // 4. Update parent children list
         if (state.documents[parentId]) {

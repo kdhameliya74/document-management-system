@@ -89,12 +89,10 @@ const FolderModal = ({
       }
 
       if (isCreate) {
-        console.log("craete folder");
         await saveNewFolder();
         toast.success(FOLDER_MESSAGES.CREATE_SUCCESS);
       } else {
         if (isFolder) {
-          console.log("update folder");
           await updateFolder();
         } else {
           await updateFile();

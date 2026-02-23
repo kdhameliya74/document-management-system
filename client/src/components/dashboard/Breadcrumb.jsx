@@ -14,7 +14,6 @@ const Breadcrumb = ({ currentFolderId }) => {
     let currentId = currentFolderId;
 
     while (currentId && documents[currentId]) {
-      console.log("current", documents[currentId])
       crumbs.unshift(documents[currentId]);
       currentId = documents[currentId].parentId;
     }
@@ -23,7 +22,6 @@ const Breadcrumb = ({ currentFolderId }) => {
   };
 
   const crumbs = getBreadcrumbs();
-  console.log("crumbs", crumbs);
 
   return (
     <nav className="flex items-center gap-1 text-sm text-text-muted my-2 overflow-x-auto whitespace-nowrap scrollbar-hide">
