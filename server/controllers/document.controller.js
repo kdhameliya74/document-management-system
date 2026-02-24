@@ -4,7 +4,7 @@ import Document from "../models/Document.model.js";
 import { DOC_TYPES } from "../constants/Shared.js";
 import { FILE_UPLOAD_STATUS } from "../constants/File.js";
 import { shortId, environment } from "../utils/helper.util.js";
-import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { PutObjectCommand, DeleteObjectCommand, DeleteObjectsCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { asyncHandler } from "../middlewares/error.middleware.js";
 
@@ -279,18 +279,61 @@ export const restoreDocument = asyncHandler(async (req, res) => {
   return res.status(200).json({ success: true, message: "Document restored successfully" });
 });
 
-// @route   DELETE /api/documents/:docId
-export const permenantDelete = asyncHandler(async (req, res) => {
-  const { docId } = req.params;
-  const doc = await Document.findById(docId);
-  if (!doc) {
-    return res.status(404).json({ success: false, message: "Document not found" });
+// @route   DELETE /api/documents/:id
+export const permanentDelete = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user.id;
+
+  const targetDoc = await Document.findOne({ _id: id, owner: userId });
+  if (!targetDoc) {
+    return res.status(404).json({ success: false, message: "Document not found or access denied" });
   }
-  if (doc.docType === DOC_TYPES.FILE) {
-  } else {
-    const documents = await Document.find({ parentId: docId });
-    console.log(documents);
+
+  const isFolder = targetDoc.docType === DOC_TYPES.FOLDER;
+  let docsToDelete = [targetDoc];
+
+  if (isFolder) {
+    const escapedPath = targetDoc.path.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const pathRegex = new RegExp(`^${escapedPath}/`);
+    const descendants = await Document.find({
+      owner: userId,
+      path: { $regex: pathRegex },
+    }).select("_id storageKey docType");
+    docsToDelete = [...docsToDelete, ...descendants];
   }
+
+  const storageKeys = docsToDelete
+    .filter((doc) => doc.docType === DOC_TYPES.FILE && doc.storageKey)
+    .map((doc) => doc.storageKey);
+  if (storageKeys.length > 0) {
+    const bucket = process.env.AWS_S3_BUCKET;
+
+    const CHUNK_SIZE = 1000;
+    for (let i = 0; i < storageKeys.length; i += CHUNK_SIZE) {
+      const chunk = storageKeys.slice(i, i + CHUNK_SIZE);
+      const deleteParams = {
+        Bucket: bucket,
+        Delete: {
+          Objects: chunk.map((key) => ({ Key: key })),
+        },
+      };
+
+      try {
+        await s3Client.send(new DeleteObjectsCommand(deleteParams));
+      } catch (error) {
+        // TODO: implement bullMQ
+        console.error("S3 Batch Deletion Error:", error);
+      }
+    }
+  }
+
+  const docIds = docsToDelete.map((doc) => doc._id);
+  await Document.deleteMany({ _id: { $in: docIds } });
+
+  return res.status(200).json({
+    success: true,
+    message: "Deleted"
+  });
 });
 
 // @route   POST /api/documents/upload-urls

@@ -3,7 +3,7 @@ import toast from "react-hot-toast";
 import { Trash2, ArrowLeft, ChevronRight } from "lucide-react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { setSelectedId, getTrashedDocument, restoreDocument } from "@/store/documentSystemSlice";
+import { setSelectedId, getTrashedDocument, restoreDocument, permenantDeleteDocument } from "@/store/documentSystemSlice";
 import { truncateFolderName } from "@/helpers/utils.js";
 import { TRASH_MENU_ACTIONS, TRASH_MESSAGES } from "@/helpers/constants";
 
@@ -65,7 +65,17 @@ const TrashPage = () => {
   };
 
   const deleteAction = async (item) => {
-    console.log("delete action", item);
+    const toastId = toast.loading(TRASH_MESSAGES.DELETE_LOADING);
+    try {
+      await dispatch(permenantDeleteDocument(item.id)).unwrap();
+      toast.success(TRASH_MESSAGES.DELETE_SUCCESS, {
+        id: toastId,
+      });
+    } catch(err) {
+      toast.error(err, {
+        id: toastId,
+      });
+    }
   };
   const contextMenuHandler = async (item, action) => {
     const actionsObject = {

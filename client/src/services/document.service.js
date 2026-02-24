@@ -18,7 +18,7 @@ const DocumentService = {
   },
 
   deleteDocument: async (docId) => {
-    const response = await api.patch(`/documents/${docId}`);
+    const response = await api.delete(`/documents/${docId}`);
     return response.data;
   },
 
@@ -29,6 +29,11 @@ const DocumentService = {
 
   restoreDocument: async (docId) => {
     const response = await api.patch(`/documents/${docId}/restore`);
+    return response.data;
+  },
+
+  permenantDocument: async (docId) => {
+    const response = await api.delete(`/documents/${docId}/permenant`);
     return response.data;
   },
 

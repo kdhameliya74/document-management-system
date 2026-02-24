@@ -37,6 +37,10 @@ export const TRASH_MESSAGES = Object.freeze({
   RESTORE_SUCCESS: "Document restored to its original location.",
   RESTORE_LOADING: "Restoring document. This may take a moment…",
   RESTORE_ERROR: "Failed to restore document!",
+
+  DELETE_LOADING: "Deleting document. This may take a moment…",
+  DELETE_SUCCESS: "Document deleted successfully!",
+  DELETE_ERROR: "Failed to delete document!",
 });
 
 export const FILE_MESSAGES = Object.freeze({

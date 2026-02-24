@@ -152,6 +152,22 @@ export const restoreDocument = createAsyncThunk(
   },
 );
 
+export const permenantDeleteDocument = createAsyncThunk(
+  "documents/permenant-delete",
+  async (id, { rejectWithValue }) => {
+    try {
+      const data = await DocumentService.permenantDocument(id);
+      return {
+        ...data,
+        id,
+      };
+    } catch (err) {
+      logError(err);
+      return rejectWithValue(TRASH_MESSAGES.DELETE_ERROR);
+    }
+  },
+);
+
 /*
 |--------------------------------------------------------------------------
 | getTrashedDocument
@@ -223,7 +239,7 @@ const documentSystemSlice = createSlice({
     },
     // fetch documents and files
     // Mock version history
-    addFileVersion: () => {},
+    addFileVersion: () => { },
   },
   extraReducers: (builder) => {
     builder
@@ -330,6 +346,13 @@ const documentSystemSlice = createSlice({
           state.documents = { ...restDocs };
         }
       })
+      .addCase(permenantDeleteDocument.fulfilled, (state, action) => {
+        const { id } = action.payload;
+        if (state.trashDocuments[id]) {
+          const { [id]: _, ...restDocs } = state.trashDocuments;
+          state.trashDocuments = { ...restDocs };
+        }
+      })
       .addCase(getTrashedDocument.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -381,11 +404,11 @@ const documentSystemSlice = createSlice({
         }
       })
       .addCase(uploadFileMeta.fulfilled, (state, action) => {
-        const { id, parentId } = action.payload;
+        const { id, parentId = "root" } = action.payload;
         state.documents[id] = {
           id,
           ...action.payload,
-          parentId: parentId ?? "root",
+          parentId: parentId,
         };
         if (state.documents[parentId]) {
           state.documents[parentId].childDocuments.push(id);
