@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import fileSystemAPI from "@/services/fileSystemService";
+import DocumentService from "@/services/document.service";
 import { TRASH_MESSAGES, FILE_MESSAGES } from "@/helpers/constants";
 import { logError } from "@/helpers/utils";
 
@@ -37,7 +37,7 @@ export const uploadFileMeta = createAsyncThunk(
   "file/uploadFile",
   async (file, { rejectWithValue }) => {
     try {
-      const data = await fileSystemAPI.confirmUpload(file);
+      const data = await DocumentService.confirmUpload(file);
       return {
         ...file,
         ...(data?.file || {}),
@@ -58,7 +58,7 @@ export const createFolder = createAsyncThunk(
   "folders/create",
   async (folder, { rejectWithValue }) => {
     try {
-      const data = await fileSystemAPI.createFolder(folder);
+      const data = await DocumentService.createFolder(folder);
       return data.folder;
     } catch (err) {
       return rejectWithValue(err?.message || "Folder creation failed");
@@ -75,7 +75,7 @@ export const fetchDocuments = createAsyncThunk(
   "documents/all",
   async (parentId, { rejectWithValue }) => {
     try {
-      const data = await fileSystemAPI.getAll(parentId);
+      const data = await DocumentService.getAll(parentId);
       return {
         folders: data.folders,
         files: data.files,
@@ -100,7 +100,7 @@ export const updateDocument = createAsyncThunk(
   "documents/update",
   async ({ id, ...rest }, { rejectWithValue }) => {
     try {
-      const data = await fileSystemAPI.updateDocument(id, rest);
+      const data = await DocumentService.updateDocument(id, rest);
       return {
         ...data,
         document: { id, ...rest },
@@ -120,7 +120,7 @@ export const deleteDocument = createAsyncThunk(
   "documents/delete",
   async (id, { rejectWithValue }) => {
     try {
-      const data = await fileSystemAPI.deleteDocument(id);
+      const data = await DocumentService.deleteDocument(id);
       return {
         ...data,
         id,
@@ -140,7 +140,7 @@ export const restoreDocument = createAsyncThunk(
   "documents/restore",
   async (id, { rejectWithValue }) => {
     try {
-      const data = await fileSystemAPI.restoreDocument(id);
+      const data = await DocumentService.restoreDocument(id);
       return {
         ...data,
         id,
@@ -161,7 +161,7 @@ export const getTrashedDocument = createAsyncThunk(
   "documents/trash",
   async (parentId, { rejectWithValue }) => {
     try {
-      const data = await fileSystemAPI.getTrash(parentId);
+      const data = await DocumentService.getTrash(parentId);
       return {
         folders: data.folders,
         files: data.files,

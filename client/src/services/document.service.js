@@ -1,7 +1,7 @@
 import api from "@/utils/api";
 import axios from "axios";
 
-const fileSystemAPI = {
+const DocumentService = {
   getAll: async (parentId) => {
     const response = await api.get("/documents", { params: { parentId } });
     return response.data;
@@ -18,7 +18,7 @@ const fileSystemAPI = {
   },
 
   deleteDocument: async (docId) => {
-    const response = await api.delete(`/documents/${docId}`);
+    const response = await api.patch(`/documents/${docId}`);
     return response.data;
   },
 
@@ -50,4 +50,4 @@ const fileSystemAPI = {
   },
 };
 
-export default fileSystemAPI;
+export default DocumentService;

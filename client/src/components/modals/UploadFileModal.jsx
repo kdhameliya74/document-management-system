@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Upload, X, Loader2, Check, AlertCircle } from "lucide-react";
 import { uploadFileMeta } from "@/store/documentSystemSlice";
 import Modal from "@/components/common/Modal";
-import fileSystemAPI from "@/services/fileSystemService";
+import DocumentService from "@/services/document.service";
 import { logError, uuidToBase64 } from "@/helpers/utils";
 
 const CHUNK_SIZE = 3;
@@ -52,7 +52,7 @@ const UploadFileModal = ({ isOpen, onClose, currentFolderId }) => {
 
   const uploadFile = async (uploadInfo, fileObj) => {
     try {
-      const response = await fileSystemAPI.uploadFileOnS3(uploadInfo.uploadUrl, fileObj.file);
+      const response = await DocumentService.uploadFileOnS3(uploadInfo.uploadUrl, fileObj.file);
       if (response.status === 200) {
         const fileMeta = {
           name: fileObj.name,
@@ -91,7 +91,7 @@ const UploadFileModal = ({ isOpen, onClose, currentFolderId }) => {
         fileType: f.type,
       }));
 
-      const response = await fileSystemAPI.getPresignedUrls(filesToGetUrls);
+      const response = await DocumentService.getPresignedUrls(filesToGetUrls);
 
       if (response?.success) {
         const { successfulUploads, failedUploads = [] } = response;

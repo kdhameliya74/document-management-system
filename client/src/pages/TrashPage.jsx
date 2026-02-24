@@ -5,7 +5,7 @@ import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { setSelectedId, getTrashedDocument, restoreDocument } from "@/store/documentSystemSlice";
 import { truncateFolderName } from "@/helpers/utils.js";
-import { TRASH_MESSAGES } from "@/helpers/constants";
+import { TRASH_MENU_ACTIONS, TRASH_MESSAGES } from "@/helpers/constants";
 
 import ROUTES from "@/utils/routes";
 import useFileFolderContextMenu from "@/hooks/useFileFolderContextMenu";
@@ -50,7 +50,7 @@ const TrashPage = () => {
 
   const { trashDocuments, selectedId, isLoading } = useSelector((state) => state.documentSystem);
 
-  const restoreHandler = async (item) => {
+  const restoreAction = async (item) => {
     const toastId = toast.loading(TRASH_MESSAGES.RESTORE_LOADING);
     try {
       await dispatch(restoreDocument(item.id)).unwrap();
@@ -63,13 +63,24 @@ const TrashPage = () => {
       });
     }
   };
+
+  const deleteAction = async (item) => {
+    console.log("delete action", item);
+  };
+  const contextMenuHandler = async (item, action) => {
+    const actionsObject = {
+      [TRASH_MENU_ACTIONS.RESTORE]: restoreAction,
+      [TRASH_MENU_ACTIONS.DELETE]: deleteAction,
+    };
+    await actionsObject[action](item);
+  };
   const {
     contextMenu,
     handleClickOutside,
     handleContextMenu,
     closeContextMenu,
     getContextMenuItems,
-  } = useFileFolderContextMenu("trash", restoreHandler);
+  } = useFileFolderContextMenu("trash", contextMenuHandler);
 
   /* ---------------------------- derived state ----------------------------- */
   const currentFolder = trashDocuments[folderId];

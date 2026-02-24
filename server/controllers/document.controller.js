@@ -212,7 +212,7 @@ export const trashDocument = asyncHandler(async (req, res) => {
   return res.status(200).json({ success: true, message: "Document moved to trash successfully" });
 });
 
-// @route   GET /api/documents/trash
+// @route   PATCH /api/documents/trash
 export const listTrash = asyncHandler(async (req, res) => {
   const ownerId = new mongoose.Types.ObjectId(req.user.id);
   const { parentId } = req.query;
@@ -277,6 +277,20 @@ export const restoreDocument = asyncHandler(async (req, res) => {
   );
 
   return res.status(200).json({ success: true, message: "Document restored successfully" });
+});
+
+// @route   DELETE /api/documents/:docId
+export const permenantDelete = asyncHandler(async (req, res) => {
+  const { docId } = req.params;
+  const doc = await Document.findById(docId);
+  if (!doc) {
+    return res.status(404).json({ success: false, message: "Document not found" });
+  }
+  if (doc.docType === DOC_TYPES.FILE) {
+  } else {
+    const documents = await Document.find({ parentId: docId });
+    console.log(documents);
+  }
 });
 
 // @route   POST /api/documents/upload-urls

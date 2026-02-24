@@ -6,6 +6,11 @@ export const DOCUMENT_MODES = Object.freeze({
   CREATE: "create",
 });
 
+export const TRASH_MENU_ACTIONS = Object.freeze({
+  RESTORE: "restore",
+  DELETE: "delete",
+});
+
 export const FOLDER_COLORS = Object.freeze({
   DEFAULT: "#6366f1",
   RED: "#ef4444",
