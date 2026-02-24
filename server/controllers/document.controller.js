@@ -4,7 +4,7 @@ import Document from "../models/Document.model.js";
 import { DOC_TYPES } from "../constants/Shared.js";
 import { FILE_UPLOAD_STATUS } from "../constants/File.js";
 import { shortId, environment } from "../utils/helper.util.js";
-import { PutObjectCommand, DeleteObjectCommand, DeleteObjectsCommand } from "@aws-sdk/client-s3";
+import { PutObjectCommand, DeleteObjectsCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { asyncHandler } from "../middlewares/error.middleware.js";
 
@@ -332,7 +332,7 @@ export const permanentDelete = asyncHandler(async (req, res) => {
 
   return res.status(200).json({
     success: true,
-    message: "Deleted"
+    message: "Deleted",
   });
 });
 

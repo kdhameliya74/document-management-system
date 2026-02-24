@@ -15,9 +15,7 @@ const ResourceNotFound = () => {
         <FileQuestion size={64} className="text-primary/50" />
       </div>
 
-      <h3 className="text-xl font-normal text-text-main mb-2">
-        Resource Not Found
-      </h3>
+      <h3 className="text-xl font-normal text-text-main mb-2">Resource Not Found</h3>
 
       <p>The file or folder you’re looking for doesn’t exist or was removed.</p>
 

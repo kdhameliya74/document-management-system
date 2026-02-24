@@ -3,7 +3,12 @@ import toast from "react-hot-toast";
 import { Trash2, ArrowLeft, ChevronRight } from "lucide-react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { setSelectedId, getTrashedDocument, restoreDocument, permenantDeleteDocument } from "@/store/documentSystemSlice";
+import {
+  setSelectedId,
+  getTrashedDocument,
+  restoreDocument,
+  permenantDeleteDocument,
+} from "@/store/documentSystemSlice";
 import { truncateFolderName } from "@/helpers/utils.js";
 import { TRASH_MENU_ACTIONS, TRASH_MESSAGES } from "@/helpers/constants";
 
@@ -71,7 +76,7 @@ const TrashPage = () => {
       toast.success(TRASH_MESSAGES.DELETE_SUCCESS, {
         id: toastId,
       });
-    } catch(err) {
+    } catch (err) {
       toast.error(err, {
         id: toastId,
       });

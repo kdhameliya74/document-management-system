@@ -93,7 +93,7 @@ const FolderView = () => {
 
   useEffect(() => {
     // fetch documents and files
-    if(!folderId || !currentFolder) return;
+    // if (!folderId || !currentFolder) return; //TODO: need to fix this
     const parentId = folderId === "root" ? null : folderId;
     dispatch(fetchDocuments(parentId));
     dispatch(setCurrentFolder(folderId));
@@ -129,8 +129,8 @@ const FolderView = () => {
     closeContextMenu();
   };
 
-  if(!folderId || !currentFolder) {
-    return <ResourceNotFound />
+  if (!folderId || !currentFolder) {
+    return <ResourceNotFound />;
   }
 
   return (
