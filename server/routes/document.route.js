@@ -10,6 +10,7 @@ import {
   restoreDocument,
   getPresignedUrls,
   confirmUpload,
+  permanentDelete,
 } from "../controllers/document.controller.js";
 
 const router = express.Router();
@@ -33,6 +34,7 @@ router.patch("/:id", protect, updateDocument);
 
 //Delete document
 router.delete("/:id", protect, trashDocument);
+router.delete("/:id/permenant", protect, permanentDelete);
 
 //Restore document
 router.patch("/:id/restore", protect, restoreDocument);

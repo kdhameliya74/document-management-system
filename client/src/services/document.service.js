@@ -1,7 +1,7 @@
 import api from "@/utils/api";
 import axios from "axios";
 
-const fileSystemAPI = {
+const DocumentService = {
   getAll: async (parentId) => {
     const response = await api.get("/documents", { params: { parentId } });
     return response.data;
@@ -32,6 +32,11 @@ const fileSystemAPI = {
     return response.data;
   },
 
+  permenantDocument: async (docId) => {
+    const response = await api.delete(`/documents/${docId}/permenant`);
+    return response.data;
+  },
+
   getPresignedUrls: async (files) => {
     const response = await api.post("/documents/upload-urls", files);
     return response.data;
@@ -50,4 +55,4 @@ const fileSystemAPI = {
   },
 };
 
-export default fileSystemAPI;
+export default DocumentService;

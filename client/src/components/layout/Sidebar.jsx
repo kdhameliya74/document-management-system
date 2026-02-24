@@ -1,6 +1,6 @@
 import React from "react";
 import { HardDrive, Clock, Users, Trash2, Cloud, LogOut } from "lucide-react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { logout } from "@/store/authSlice";
 import ROUTES from "@/utils/routes";
@@ -17,10 +17,15 @@ const navItemClass = ({ isActive }) =>
 
 const Sidebar = () => {
   const dispatch = useDispatch();
+  const location = useLocation();
 
   const handleLogout = () => {
     dispatch(logout());
   };
+
+  // Check if current path is a folder route to keep "My Drive" active
+  const isFolderActive = location.pathname.startsWith(ROUTES.DASHBOARD.FOLDER_BASE);
+  const isTrashActive = location.pathname.startsWith(ROUTES.DASHBOARD.TRASH);
 
   return (
     <div className="w-60 bg-bg-muted border-r border-border-muted flex flex-col p-4 h-full">
@@ -35,7 +40,10 @@ const Sidebar = () => {
       </div>
 
       <div className="flex flex-col gap-1 flex-1">
-        <NavLink to={ROUTES.DASHBOARD.FOLDER_ROOT} className={navItemClass}>
+        <NavLink
+          to={ROUTES.DASHBOARD.FOLDER_ROOT}
+          className={({ isActive }) => navItemClass({ isActive: isActive || isFolderActive })}
+        >
           <HardDrive size={18} />
           <span>My Drive</span>
         </NavLink>
@@ -50,7 +58,10 @@ const Sidebar = () => {
           <span>Recent</span>
         </NavLink>
 
-        <NavLink to={ROUTES.DASHBOARD.TRASH} className={navItemClass}>
+        <NavLink
+          to={ROUTES.DASHBOARD.TRASH}
+          className={({ isActive }) => navItemClass({ isActive: isActive || isTrashActive })}
+        >
           <Trash2 size={18} />
           <span>Trash</span>
         </NavLink>

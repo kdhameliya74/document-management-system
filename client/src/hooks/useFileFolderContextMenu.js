@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { Trash, Eye, Share, Download, FolderPen, ArchiveRestore } from "lucide-react";
+import { Trash, Eye, Share, Download, FolderPen, ArchiveRestore, Trash2 } from "lucide-react";
 import { setSelectedId, setShowDetails } from "@/store/documentSystemSlice";
+import { TRASH_MENU_ACTIONS } from "@/helpers/constants";
 
 const useFileFolderContextMenu = (menuFor = "dashbaord", onMenuAction) => {
   const dispatch = useDispatch();
@@ -36,12 +37,12 @@ const useFileFolderContextMenu = (menuFor = "dashbaord", onMenuAction) => {
     closeContextMenu();
   };
 
-  const onMenuActionHandler = async () => {
+  const onMenuActionHandler = async (action) => {
     updateSelection(contextMenu.item);
 
     if (!onMenuAction) return;
 
-    await onMenuAction(contextMenu.item);
+    await onMenuAction(contextMenu.item, action);
     updateSelection(null);
   };
 
@@ -57,7 +58,14 @@ const useFileFolderContextMenu = (menuFor = "dashbaord", onMenuAction) => {
         {
           label: "Restore",
           icon: ArchiveRestore,
-          onClick: () => onMenuActionHandler(),
+          onClick: () => onMenuActionHandler(TRASH_MENU_ACTIONS.RESTORE),
+        },
+        {
+          label: "Delete permenantly",
+          icon: Trash2,
+          severity: "warning",
+          tooltip: "You can not restore once it gets deleted",
+          onClick: () => onMenuActionHandler(TRASH_MENU_ACTIONS.DELETE),
         },
       ];
     }

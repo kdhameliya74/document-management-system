@@ -6,6 +6,11 @@ export const DOCUMENT_MODES = Object.freeze({
   CREATE: "create",
 });
 
+export const TRASH_MENU_ACTIONS = Object.freeze({
+  RESTORE: "restore",
+  DELETE: "delete",
+});
+
 export const FOLDER_COLORS = Object.freeze({
   DEFAULT: "#6366f1",
   RED: "#ef4444",
@@ -32,6 +37,10 @@ export const TRASH_MESSAGES = Object.freeze({
   RESTORE_SUCCESS: "Document restored to its original location.",
   RESTORE_LOADING: "Restoring document. This may take a moment…",
   RESTORE_ERROR: "Failed to restore document!",
+
+  DELETE_LOADING: "Deleting document. This may take a moment…",
+  DELETE_SUCCESS: "Document deleted successfully!",
+  DELETE_ERROR: "Failed to delete document!",
 });
 
 export const FILE_MESSAGES = Object.freeze({

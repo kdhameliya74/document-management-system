@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { Plus, Upload, FolderPlus, ChevronDown, Loader } from "lucide-react";
+import { DOCUMENT_MODES } from "@/helpers/constants";
 
 import ROUTES from "@/utils/routes";
 import {
@@ -20,7 +21,7 @@ import UploadFileModal from "@/components/modals/UploadFileModal";
 import DeleteModal from "@/components/modals/DeleteModal";
 import EmptyFolderScreen from "@/components/dashboard/EmptyFolderScreen";
 import useFileFolderContextMenu from "@/hooks/useFileFolderContextMenu";
-import { DOCUMENT_MODES } from "@/helpers/constants";
+import ResourceNotFound from "@/components/common/ResourceNotFound";
 
 const FolderView = () => {
   const { folderId } = useParams();
@@ -92,6 +93,7 @@ const FolderView = () => {
 
   useEffect(() => {
     // fetch documents and files
+    // if (!folderId || !currentFolder) return; //TODO: need to fix this
     const parentId = folderId === "root" ? null : folderId;
     dispatch(fetchDocuments(parentId));
     dispatch(setCurrentFolder(folderId));
@@ -126,6 +128,10 @@ const FolderView = () => {
     dispatch(setSelectedId(null));
     closeContextMenu();
   };
+
+  if (!folderId || !currentFolder) {
+    return <ResourceNotFound />;
+  }
 
   return (
     <div className="relative h-full flex flex-col" onClick={handleClickOutside}>
