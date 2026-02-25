@@ -9,9 +9,9 @@ const Breadcrumb = ({ currentFolderId }) => {
   const navigate = useNavigate();
   const { documents } = useSelector((state) => state.documentSystem);
 
-  const getBreadcrumbs = () => {
+  const crumbs = React.useMemo(() => {
     const crumbs = [];
-    let currentId = currentFolderId;
+    let currentId = currentFolderId ?? "root";
 
     while (currentId && documents[currentId]) {
       crumbs.unshift(documents[currentId]);
@@ -19,10 +19,7 @@ const Breadcrumb = ({ currentFolderId }) => {
     }
 
     return crumbs;
-  };
-
-  const crumbs = getBreadcrumbs();
-
+  }, [currentFolderId, documents]);
   return (
     <nav className="flex items-center gap-1.5 text-sm overflow-x-auto whitespace-nowrap scrollbar-hide py-1">
       <button
