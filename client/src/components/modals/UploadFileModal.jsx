@@ -149,67 +149,90 @@ const UploadFileModal = ({ isOpen, onClose, currentFolderId }) => {
   const totalCount = selectedFiles.length;
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title="Upload Files">
-      <div className="flex flex-col gap-6">
-        <div className="border-2 border-dashed border-border-muted rounded-2xl p-4 text-center relative cursor-pointer transition-all hover:border-primary hover:bg-primary/5 group">
+    <Modal isOpen={isOpen} onClose={handleClose} title="Upload Documents" icon={<Upload />}>
+      <div className="flex flex-col gap-8">
+        {/* Dropzone Area */}
+        <div className="group relative">
           <input
             type="file"
             multiple
             onChange={handleFileChange}
             disabled={isUploading}
-            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
+            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 disabled:cursor-not-allowed"
           />
-          <div className="flex flex-col items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-bg-hover flex items-center justify-center text-text-muted group-hover:text-primary transition-colors">
-              <Upload size={24} />
+          <div className="border-2 border-dashed border-border-main rounded-[2rem] p-10 text-center transition-all duration-300 bg-bg-panel/30 group-hover:border-primary/50 group-hover:bg-primary/5 group-hover:shadow-2xl group-hover:shadow-primary/5">
+            <div className="flex flex-col items-center gap-4">
+              <div className="w-16 h-16 rounded-2xl bg-bg-hover flex items-center justify-center text-text-dim group-hover:text-primary group-hover:scale-110 transition-all duration-300 shadow-inner">
+                <Upload size={32} strokeWidth={1.5} />
+              </div>
+              <div>
+                <p className="text-text-main font-bold text-lg tracking-tight">
+                  Drop your files here
+                </p>
+                <p className="text-text-dim text-sm mt-1 font-medium">
+                  or click to browse from your device
+                </p>
+              </div>
+              <div className="px-4 py-1.5 bg-bg-hover rounded-full text-[10px] font-black text-text-dim border border-border-muted uppercase tracking-[0.2em]">
+                Max 50MB per file
+              </div>
             </div>
-            <div className="text-text-main font-medium">Click to select or drag files here</div>
-            <div className="text-text-muted text-sm">Support for all file types</div>
           </div>
         </div>
 
         {selectedFiles.length > 0 && (
-          <div className="flex flex-col gap-3">
-            error
-            <div className="flex justify-between items-center text-sm">
-              <span className="text-text-main font-medium">Files to upload</span>
-              <span className="text-text-muted">
-                {completedCount}/{totalCount} uploaded
-              </span>
+          <div className="flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+            <div className="flex justify-between items-center px-1">
+              <span className="text-sm font-bold text-text-muted uppercase tracking-wider">Queue</span>
+              <div className="flex items-center gap-2">
+                <div className="h-1.5 w-24 bg-bg-hover rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-primary transition-all duration-500" 
+                    style={{ width: `${(completedCount / totalCount) * 100}%` }}
+                  />
+                </div>
+                <span className="text-xs font-bold text-primary">
+                  {completedCount}/{totalCount}
+                </span>
+              </div>
             </div>
-            <div className="max-h-48 overflow-y-auto pr-2 flex flex-col gap-2 custom-scrollbar">
+            
+            <div className="max-h-56 overflow-y-auto pr-2 flex flex-col gap-2.5 custom-scrollbar min-h-0">
               {selectedFiles.map((fileObj) => (
                 <div
                   key={fileObj.uid}
-                  className={`flex gap-2 items-center justify-between p-3 bg-bg-hover rounded-xl border ${uploadStatus[fileObj.uid] === STATUS.DUPLICATE ? "border-red-300 bg-red-300/10" : "border-border-muted"}`}
+                  className={`flex gap-4 items-center justify-between p-4 rounded-2xl border transition-all duration-200 ${
+                    uploadStatus[fileObj.uid] === STATUS.DUPLICATE 
+                      ? "border-red-500/20 bg-red-500/5" 
+                      : "border-border-muted bg-bg-panel/50 hover:bg-bg-panel"
+                  }`}
                 >
-                  <div className="flex-1 flex items-center gap-3 min-w-0">
-                    <div className="flex-1 text-text-main truncate text-sm font-medium">
-                      {fileObj.name}
-                      {uploadStatus[fileObj.uid] === STATUS.DUPLICATE && (
-                        <span className="text-red-500 ml-2"> (Duplicate)</span>
-                      )}
+                  <div className="flex-1 flex items-center gap-3.5 min-w-0">
+                    <div className={`p-2 rounded-lg ${uploadStatus[fileObj.uid] === STATUS.COMPLETED ? "bg-green-500/10 text-green-500" : "bg-bg-hover text-text-dim"}`}>
+                      {uploadStatus[fileObj.uid] === STATUS.COMPLETED ? <Check size={18} /> : <AlertCircle size={18} />}
                     </div>
-                    <div className="text-text-muted text-xs whitespace-nowrap">
-                      {(fileObj.size / 1024).toFixed(1)} KB
+                    <div className="flex-1 min-w-0">
+                      <p className="text-text-main truncate text-sm font-bold leading-none mb-1">
+                        {fileObj.name}
+                      </p>
+                      <p className="text-text-dim text-[11px] font-medium uppercase tracking-tight">
+                        {(fileObj.size / 1024).toFixed(1)} KB • {uploadStatus[fileObj.uid]}
+                        {uploadStatus[fileObj.uid] === STATUS.DUPLICATE && (
+                          <span className="text-red-400 ml-1"> (Already exists)</span>
+                        )}
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
                     {uploadStatus[fileObj.uid] === STATUS.UPLOADING && (
-                      <Loader2 size={16} className="text-primary animate-spin" />
-                    )}
-                    {uploadStatus[fileObj.uid] === STATUS.COMPLETED && (
-                      <Check size={16} className="text-green-500" />
-                    )}
-                    {uploadStatus[fileObj.uid] === STATUS.ERROR && (
-                      <AlertCircle size={16} className="text-red-500" />
+                      <div className="w-5 h-5 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
                     )}
                     {REMOVABLE_STATUSES.includes(uploadStatus[fileObj.uid]) && !isUploading && (
                       <button
                         onClick={() => removeFile(fileObj.uid)}
-                        className="cursor-pointer text-text-muted hover:text-red-500 transition-colors"
+                        className="p-2 rounded-lg text-text-dim hover:text-red-400 hover:bg-red-400/10 transition-all cursor-pointer"
                       >
-                        <X size={16} />
+                        <X size={16} strokeWidth={2.5} />
                       </button>
                     )}
                   </div>
@@ -219,20 +242,27 @@ const UploadFileModal = ({ isOpen, onClose, currentFolderId }) => {
           </div>
         )}
 
-        <div className="flex justify-end gap-4">
+        <div className="flex justify-end gap-3.5 pt-2">
           <button
             onClick={handleClose}
             disabled={isUploading}
-            className="py-2.5 px-5 rounded-xl font-normal text-sm transition-all bg-bg-hover text-text-muted hover:text-text-main cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 py-3.5 px-6 rounded-2xl font-bold text-sm transition-all duration-200 bg-bg-hover text-text-muted hover:text-text-main cursor-pointer border border-transparent hover:border-border-muted shadow-sm disabled:opacity-50"
           >
             {completedCount === totalCount && totalCount > 0 ? "Done" : "Cancel"}
           </button>
           <button
             onClick={handleUpload}
             disabled={selectedFiles.length === 0 || isUploading || completedCount === totalCount}
-            className="py-2.5 px-5 rounded-xl font-medium text-sm transition-all bg-primary text-white hover:bg-primary-hover shadow-lg shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            className="flex-[1.5] flex items-center justify-center gap-2 py-3.5 px-6 rounded-2xl font-bold text-sm transition-all duration-300 bg-primary text-white hover:bg-primary-hover shadow-xl shadow-primary/20 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer hover:-translate-y-0.5"
           >
-            {isUploading ? "Uploading..." : "Upload Files"}
+            {isUploading ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                <span>Uploading...</span>
+              </>
+            ) : (
+              <span>Upload {selectedFiles.length > 0 ? `${selectedFiles.length} ` : ""}Files</span>
+            )}
           </button>
         </div>
       </div>

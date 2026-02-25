@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Modal from "@/components/common/Modal";
-import { Loader, Trash2 } from "lucide-react";
+import { Loader, Trash2, AlertCircle } from "lucide-react";
 import toast from "react-hot-toast";
 
 const DeleteModal = ({ isOpen, onClose, onDelete, note, item, title = "Move to Trash" }) => {
@@ -26,30 +26,33 @@ const DeleteModal = ({ isOpen, onClose, onDelete, note, item, title = "Move to T
       isOpen={isOpen}
       onClose={onClose}
       title={title}
-      icon={<Trash2 className="text-red-500" />}
+      icon={<Trash2 className="text-red-400" />}
     >
-      <div className="flex flex-col gap-6">
-        <div>
-          <p className="text-text-main">
+      <div className="flex flex-col gap-8">
+        <div className="bg-red-500/5 border border-red-500/10 rounded-2xl p-6">
+          <p className="text-text-main text-base font-medium leading-relaxed">
             Are you sure you want to move{" "}
-            {item?.name && <span className="font-medium text-red-500">{item?.name} </span>} to
+            {item?.name && <span className="font-black text-red-400">"{item?.name}"</span>} to
             trash?
           </p>
 
           {note && (
-            <div className="mt-4">
-              <p className="text-xs text-text-muted leading-relaxed">
-                <span className="font-semibold text-text-main">Note:</span> {note}
+            <div className="mt-4 flex gap-3 p-4 bg-bg-panel/50 rounded-xl border border-border-muted/50">
+              <div className="text-primary shrink-0">
+                <AlertCircle size={18} />
+              </div>
+              <p className="text-xs text-text-muted leading-relaxed font-medium">
+                <span className="font-bold text-text-main uppercase tracking-wider mr-1">Note:</span> {note}
               </p>
             </div>
           )}
         </div>
 
-        <div className="flex justify-end gap-4">
+        <div className="flex justify-end gap-3.5 pt-2">
           <button
             onClick={onClose}
             disabled={isLoading}
-            className="py-2.5 px-5 cursor-pointer rounded-xl text-sm bg-bg-hover text-text-muted hover:text-text-main disabled:opacity-50"
+            className="flex-1 py-3.5 px-6 rounded-2xl font-bold text-sm transition-all duration-200 bg-bg-hover text-text-muted hover:text-text-main hover:bg-bg-hover/80 cursor-pointer border border-transparent hover:border-border-muted shadow-sm disabled:opacity-50"
           >
             Cancel
           </button>
@@ -57,10 +60,10 @@ const DeleteModal = ({ isOpen, onClose, onDelete, note, item, title = "Move to T
           <button
             onClick={handleDelete}
             disabled={isLoading}
-            className="py-2.5 px-5 flex gap-2 cursor-pointer rounded-xl text-sm font-medium bg-red-500 text-white hover:bg-red-500/70 disabled:opacity-70"
+            className="flex-[1.5] flex items-center justify-center gap-2 py-3.5 px-8 rounded-2xl font-bold text-sm transition-all duration-300 bg-red-500 text-white hover:bg-red-400 shadow-xl shadow-red-500/20 disabled:opacity-40 cursor-pointer hover:-translate-y-0.5"
           >
-            {isLoading ? <Loader className="animate-spin" size={18} /> : null}
-            <span>Move to trash</span>
+            {isLoading ? <Loader className="animate-spin" size={18} strokeWidth={2.5} /> : <Trash2 size={18} strokeWidth={2.5} />}
+            <span>Move to Trash</span>
           </button>
         </div>
       </div>

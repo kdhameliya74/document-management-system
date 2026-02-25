@@ -24,23 +24,23 @@ const Breadcrumb = ({ currentFolderId }) => {
   const crumbs = getBreadcrumbs();
 
   return (
-    <nav className="flex items-center gap-1 text-sm text-text-muted my-2 overflow-x-auto whitespace-nowrap scrollbar-hide">
+    <nav className="flex items-center gap-1.5 text-sm overflow-x-auto whitespace-nowrap scrollbar-hide py-1">
       <button
         onClick={() => navigate(ROUTES.DASHBOARD.FOLDER_ROOT)}
-        className="p-1 hover:bg-bg-hover hover:text-text-main rounded transition-colors cursor-pointer flex items-center"
+        className="p-2 hover:bg-bg-hover text-text-muted hover:text-text-main rounded-xl transition-all duration-200 cursor-pointer flex items-center shadow-sm"
       >
-        <Home size={16} />
+        <Home size={16} strokeWidth={2} />
       </button>
 
       {crumbs.map((crumb, index) => (
         <React.Fragment key={crumb.id}>
-          <ChevronRight size={14} className="text-border shrink-0" />
+          <ChevronRight size={14} className="text-text-dim shrink-0 mx-0.5" strokeWidth={3} />
           <button
             onClick={() => navigate(ROUTES.DASHBOARD.FOLDER_DYNAMIC(crumb.id))}
-            className={`px-2 py-1 rounded transition-colors cursor-pointer max-w-[150px] truncate ${
+            className={`px-3 py-1.5 rounded-xl transition-all duration-200 cursor-pointer max-w-[180px] truncate font-medium ${
               index === crumbs.length - 1
-                ? "text-text-main bg-primary/10"
-                : "hover:bg-bg-hover hover:text-text-main"
+                ? "text-primary bg-primary/10 shadow-sm shadow-primary/5"
+                : "text-text-muted hover:bg-bg-hover hover:text-text-main"
             }`}
             title={crumb.name}
           >

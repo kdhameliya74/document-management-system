@@ -26,45 +26,51 @@ const FloatingIcon = ({ Icon, delay, x, y, size, color }) => (
 
 const AuthBackground = () => {
   return (
-    <div className="absolute inset-0 z-0 overflow-hidden bg-bg-main">
-      {/* Abstract Gradients */}
-      <div className="absolute -top-[10%] -right-[5%] w-[500px] h-[500px] bg-linear-to-br from-primary/10 to-secondary/10 rounded-full blur-[100px]"></div>
-      <div className="absolute -bottom-[10%] -left-[10%] w-[600px] h-[600px] bg-linear-to-br from-secondary/10 to-purple-500/10 rounded-full blur-[120px]"></div>
+    <div className="absolute inset-0 z-0 overflow-hidden bg-[#09090b]">
+      {/* Abstract Gradients - More Vibrant and Layered */}
+      <div className="absolute -top-[15%] -right-[15%] w-[800px] h-[800px] bg-primary/20 rounded-full blur-[150px] animate-pulse duration-[10s]"></div>
+      <div className="absolute -bottom-[20%] -left-[15%] w-[900px] h-[900px] bg-primary/10 rounded-full blur-[180px] animate-pulse duration-[15s]"></div>
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[1000px] bg-indigo-500/5 rounded-full blur-[200px]"></div>
 
-      {/* Floating Document Icons */}
-      <FloatingIcon Icon={FileText} delay={0} x="10%" y="20%" size={64} color="text-primary/20" />
-      <FloatingIcon Icon={Folder} delay={1} x="80%" y="15%" size={80} color="text-secondary/20" />
-      <FloatingIcon Icon={Image} delay={2} x="15%" y="70%" size={56} color="text-purple-500/20" />
-      <FloatingIcon Icon={File} delay={1.5} x="70%" y="60%" size={72} color="text-sky-500/20" />
+      {/* Grid Pattern Overlay */}
+      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay"></div>
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:40px_40px]"></div>
+
+      {/* Floating Document Icons - More Subtle and Refined */}
+      <FloatingIcon Icon={FileText} delay={0} x="12%" y="18%" size={56} color="text-primary/10" />
+      <FloatingIcon Icon={Folder} delay={1.2} x="85%" y="12%" size={72} color="text-indigo-400/10" />
+      <FloatingIcon Icon={Image} delay={2.5} x="18%" y="75%" size={48} color="text-purple-400/10" />
+      <FloatingIcon Icon={File} delay={1.8} x="75%" y="65%" size={64} color="text-sky-400/10" />
       <FloatingIcon
         Icon={Database}
-        delay={0.5}
-        x="85%"
-        y="80%"
-        size={48}
-        color="text-emerald-500/20"
-      />
-      <FloatingIcon Icon={Cloud} delay={2.5} x="40%" y="10%" size={96} color="text-primary/20" />
-
-      {/* Additional scattered small icons */}
-      <FloatingIcon
-        Icon={FileText}
-        delay={3}
-        x="30%"
+        delay={0.8}
+        x="88%"
         y="85%"
-        size={32}
-        color="text-text-muted/10"
+        size={42}
+        color="text-emerald-400/10"
       />
-      <FloatingIcon
-        Icon={Folder}
-        delay={1.2}
-        x="60%"
-        y="30%"
-        size={40}
-        color="text-text-muted/10"
-      />
-      <FloatingIcon Icon={File} delay={4} x="50%" y="50%" size={48} color="text-primary/10" />
-      <FloatingIcon Icon={Image} delay={2.2} x="5%" y="40%" size={36} color="text-secondary/10" />
+      <FloatingIcon Icon={Cloud} delay={3} x="45%" y="12%" size={88} color="text-primary/10" />
+
+      {/* Scattered micro-points */}
+      {[...Array(20)].map((_, i) => (
+        <motion.div
+          key={i}
+          className="absolute w-1 h-1 bg-white/20 rounded-full"
+          style={{
+            left: `${Math.random() * 100}%`,
+            top: `${Math.random() * 100}%`,
+          }}
+          animate={{
+            opacity: [0.1, 0.4, 0.1],
+            scale: [1, 1.5, 1],
+          }}
+          transition={{
+            duration: 3 + Math.random() * 5,
+            repeat: Infinity,
+            delay: Math.random() * 5,
+          }}
+        />
+      ))}
     </div>
   );
 };

@@ -55,40 +55,43 @@ const TrashPage = () => {
 
   const { trashDocuments, selectedId, isLoading } = useSelector((state) => state.documentSystem);
 
-  const restoreAction = async (item) => {
-    const toastId = toast.loading(TRASH_MESSAGES.RESTORE_LOADING);
-    try {
-      await dispatch(restoreDocument(item.id)).unwrap();
-      toast.success(TRASH_MESSAGES.RESTORE_SUCCESS, {
-        id: toastId,
-      });
-    } catch (err) {
-      toast.error(err, {
-        id: toastId,
-      });
-    }
+  const handleAsyncAction = async ({
+  item,
+  asyncAction,
+  loadingMessage,
+  successMessage,
+}) => {
+  const toastId = toast.loading(loadingMessage);
+
+  try {
+    await dispatch(asyncAction(item.id)).unwrap();
+    toast.success(successMessage, { id: toastId });
+  } catch (err) {
+    toast.error(err, { id: toastId });
+  }
+};
+
+const contextMenuHandler = async (item, action) => {
+  const actionsMap = {
+    [TRASH_MENU_ACTIONS.RESTORE]: () =>
+      handleAsyncAction({
+        item,
+        asyncAction: restoreDocument,
+        loadingMessage: TRASH_MESSAGES.RESTORE_LOADING,
+        successMessage: TRASH_MESSAGES.RESTORE_SUCCESS,
+      }),
+
+    [TRASH_MENU_ACTIONS.DELETE]: () =>
+      handleAsyncAction({
+        item,
+        asyncAction: permenantDeleteDocument,
+        loadingMessage: TRASH_MESSAGES.DELETE_LOADING,
+        successMessage: TRASH_MESSAGES.DELETE_SUCCESS,
+      }),
   };
 
-  const deleteAction = async (item) => {
-    const toastId = toast.loading(TRASH_MESSAGES.DELETE_LOADING);
-    try {
-      await dispatch(permenantDeleteDocument(item.id)).unwrap();
-      toast.success(TRASH_MESSAGES.DELETE_SUCCESS, {
-        id: toastId,
-      });
-    } catch (err) {
-      toast.error(err, {
-        id: toastId,
-      });
-    }
-  };
-  const contextMenuHandler = async (item, action) => {
-    const actionsObject = {
-      [TRASH_MENU_ACTIONS.RESTORE]: restoreAction,
-      [TRASH_MENU_ACTIONS.DELETE]: deleteAction,
-    };
-    await actionsObject[action](item);
-  };
+  await actionsMap[action]?.();
+};
   const {
     contextMenu,
     handleClickOutside,
