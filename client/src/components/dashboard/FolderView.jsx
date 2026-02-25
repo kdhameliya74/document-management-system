@@ -141,9 +141,7 @@ const FolderView = () => {
           <h2 className="text-3xl font-bold text-text-main tracking-tight mb-1">
             {currentFolder?.name === "root" ? "My Drive" : currentFolder?.name}
           </h2>
-          <p className="text-sm text-text-dim">
-            Manage your folders and documents with ease
-          </p>
+          <p className="text-sm text-text-dim">Manage your folders and documents with ease</p>
         </div>
 
         <div className="relative" ref={dropdownRef}>

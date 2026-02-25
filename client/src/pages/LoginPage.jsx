@@ -44,7 +44,9 @@ const LoginPage = () => {
             <div className="inline-block p-4 rounded-3xl bg-primary/10 border border-primary/20 mb-6 shadow-inner">
               <Mail className="text-primary" size={32} strokeWidth={1.5} />
             </div>
-            <h1 className="text-4xl font-black text-text-main mb-3 tracking-tighter">Welcome back</h1>
+            <h1 className="text-4xl font-black text-text-main mb-3 tracking-tighter">
+              Welcome back
+            </h1>
             <p className="text-text-dim text-base font-medium">Access your secure document vault</p>
           </div>
 
@@ -61,9 +63,15 @@ const LoginPage = () => {
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-6">
             <div className="flex flex-col gap-2">
-              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-text-dim px-1">Login Identity</label>
+              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-text-dim px-1">
+                Login Identity
+              </label>
               <div className="relative group">
-                <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors" size={20} strokeWidth={2} />
+                <Mail
+                  className="absolute left-5 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors"
+                  size={20}
+                  strokeWidth={2}
+                />
                 <input
                   type="text"
                   placeholder="Username or email address"
@@ -78,11 +86,22 @@ const LoginPage = () => {
 
             <div className="flex flex-col gap-2">
               <div className="flex justify-between items-center px-1">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-text-dim">Passkey</label>
-                <button type="button" className="text-[10px] font-black uppercase tracking-[0.1em] text-primary hover:text-primary-hover transition-colors">Forgot?</button>
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-text-dim">
+                  Passkey
+                </label>
+                <button
+                  type="button"
+                  className="text-[10px] font-black uppercase tracking-[0.1em] text-primary hover:text-primary-hover transition-colors"
+                >
+                  Forgot?
+                </button>
               </div>
               <div className="relative group">
-                <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors" size={20} strokeWidth={2} />
+                <Lock
+                  className="absolute left-5 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors"
+                  size={20}
+                  strokeWidth={2}
+                />
                 <input
                   type="password"
                   placeholder="••••••••"
@@ -105,7 +124,11 @@ const LoginPage = () => {
               ) : (
                 <>
                   <span>Initialize Session</span>
-                  <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" strokeWidth={3} />
+                  <ArrowRight
+                    size={18}
+                    className="group-hover:translate-x-1 transition-transform"
+                    strokeWidth={3}
+                  />
                 </>
               )}
             </button>
@@ -114,7 +137,10 @@ const LoginPage = () => {
           <div className="mt-12 text-center">
             <p className="text-text-dim text-sm font-medium">
               New to the platform?
-              <Link to={ROUTES.SIGNUP} className="text-primary font-bold ml-2 hover:text-primary-hover transition-colors underline underline-offset-4 decoration-2">
+              <Link
+                to={ROUTES.SIGNUP}
+                className="text-primary font-bold ml-2 hover:text-primary-hover transition-colors underline underline-offset-4 decoration-2"
+              >
                 Create Vault
               </Link>
             </p>

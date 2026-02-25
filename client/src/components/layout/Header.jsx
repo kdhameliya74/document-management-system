@@ -8,7 +8,10 @@ const Header = () => {
   return (
     <div className="h-20 flex items-center justify-between px-8 bg-bg-main border-b border-border-muted relative z-30">
       <div className="relative w-[450px] group">
-        <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-dim group-focus-within:text-primary transition-colors" />
+        <Search
+          size={18}
+          className="absolute left-4 top-1/2 -translate-y-1/2 text-text-dim group-focus-within:text-primary transition-colors"
+        />
         <input
           type="text"
           placeholder="Search for anything..."
@@ -32,9 +35,7 @@ const Header = () => {
             <p className="text-sm font-bold text-text-main leading-none">
               {user?.fullName || "Guest User"}
             </p>
-            <p className="text-[11px] text-text-dim font-medium mt-1">
-              Member
-            </p>
+            <p className="text-[11px] text-text-dim font-medium mt-1">Member</p>
           </div>
           <div className="w-10 h-10 bg-indigo-600/10 border border-indigo-500/20 rounded-2xl flex items-center justify-center text-primary font-bold text-sm shadow-lg shadow-indigo-500/5 group-hover:scale-105 transition-transform">
             {user?.firstName?.charAt(0).toUpperCase() || "U"}

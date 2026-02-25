@@ -13,7 +13,11 @@ const ResourceNotFound = () => {
     <div className="w-full h-full flex flex-col items-center justify-center text-text-muted text-center p-10 animate-in fade-in zoom-in-95 duration-500">
       <div className="w-[160px] h-[160px] bg-bg-panel/50 rounded-[2.5rem] flex items-center justify-center mb-8 text-text-muted/20 border border-border-main shadow-inner relative group">
         <div className="absolute inset-0 bg-primary/5 blur-3xl rounded-full opacity-50" />
-        <FileQuestion size={80} className="text-primary/40 relative z-10 group-hover:scale-110 transition-transform duration-500" strokeWidth={1.5} />
+        <FileQuestion
+          size={80}
+          className="text-primary/40 relative z-10 group-hover:scale-110 transition-transform duration-500"
+          strokeWidth={1.5}
+        />
       </div>
 
       <h3 className="text-2xl font-black text-text-main mb-3 tracking-tight">Resource Not Found</h3>

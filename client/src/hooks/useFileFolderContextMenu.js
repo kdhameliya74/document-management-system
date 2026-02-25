@@ -63,8 +63,6 @@ const useFileFolderContextMenu = (menuFor = "dashbaord", onMenuAction) => {
         {
           label: "Delete forever",
           icon: Trash2,
-          severity: "warning",
-          tooltip: "You can not restore once it gets deleted",
           onClick: () => onMenuActionHandler(TRASH_MENU_ACTIONS.DELETE),
         },
       ];

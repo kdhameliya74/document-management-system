@@ -183,11 +183,13 @@ const UploadFileModal = ({ isOpen, onClose, currentFolderId }) => {
         {selectedFiles.length > 0 && (
           <div className="flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
             <div className="flex justify-between items-center px-1">
-              <span className="text-sm font-bold text-text-muted uppercase tracking-wider">Queue</span>
+              <span className="text-sm font-bold text-text-muted uppercase tracking-wider">
+                Queue
+              </span>
               <div className="flex items-center gap-2">
                 <div className="h-1.5 w-24 bg-bg-hover rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-primary transition-all duration-500" 
+                  <div
+                    className="h-full bg-primary transition-all duration-500"
                     style={{ width: `${(completedCount / totalCount) * 100}%` }}
                   />
                 </div>
@@ -196,20 +198,26 @@ const UploadFileModal = ({ isOpen, onClose, currentFolderId }) => {
                 </span>
               </div>
             </div>
-            
+
             <div className="max-h-56 overflow-y-auto pr-2 flex flex-col gap-2.5 custom-scrollbar min-h-0">
               {selectedFiles.map((fileObj) => (
                 <div
                   key={fileObj.uid}
                   className={`flex gap-4 items-center justify-between p-4 rounded-2xl border transition-all duration-200 ${
-                    uploadStatus[fileObj.uid] === STATUS.DUPLICATE 
-                      ? "border-red-500/20 bg-red-500/5" 
+                    uploadStatus[fileObj.uid] === STATUS.DUPLICATE
+                      ? "border-red-500/20 bg-red-500/5"
                       : "border-border-muted bg-bg-panel/50 hover:bg-bg-panel"
                   }`}
                 >
                   <div className="flex-1 flex items-center gap-3.5 min-w-0">
-                    <div className={`p-2 rounded-lg ${uploadStatus[fileObj.uid] === STATUS.COMPLETED ? "bg-green-500/10 text-green-500" : "bg-bg-hover text-text-dim"}`}>
-                      {uploadStatus[fileObj.uid] === STATUS.COMPLETED ? <Check size={18} /> : <AlertCircle size={18} />}
+                    <div
+                      className={`p-2 rounded-lg ${uploadStatus[fileObj.uid] === STATUS.COMPLETED ? "bg-green-500/10 text-green-500" : "bg-bg-hover text-text-dim"}`}
+                    >
+                      {uploadStatus[fileObj.uid] === STATUS.COMPLETED ? (
+                        <Check size={18} />
+                      ) : (
+                        <AlertCircle size={18} />
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-text-main truncate text-sm font-bold leading-none mb-1">

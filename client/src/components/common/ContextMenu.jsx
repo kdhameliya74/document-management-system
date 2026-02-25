@@ -1,12 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { TriangleAlert } from "lucide-react";
 
-const SEVERITY_COLORS = {
-  warning: "text-yellow-500",
-  error: "text-red-500",
-  info: "text-grey-500",
-};
-
 const ContextMenu = ({ x, y, items, onClose }) => {
   const menuRef = useRef(null);
 
@@ -45,11 +39,6 @@ const ContextMenu = ({ x, y, items, onClose }) => {
               </span>
             )}
             <span className="font-medium">{item.label}</span>
-            {item.severity && (
-              <span className={`ml-auto ${SEVERITY_COLORS[item.severity]} transition-transform duration-200 group-hover:scale-125`} title={item?.tooltip || ""}>
-                <TriangleAlert size={14} strokeWidth={2.5} />
-              </span>
-            )}
           </button>
         );
       })}

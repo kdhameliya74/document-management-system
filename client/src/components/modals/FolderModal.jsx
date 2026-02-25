@@ -125,7 +125,10 @@ const FolderModal = ({
     <Modal isOpen={isOpen} onClose={handleCancel} {...modalProps}>
       <div className="flex flex-col gap-8">
         <div className="flex flex-col gap-3">
-          <label htmlFor="folder_name" className="text-sm font-bold text-text-muted px-1 uppercase tracking-wider">
+          <label
+            htmlFor="folder_name"
+            className="text-sm font-bold text-text-muted px-1 uppercase tracking-wider"
+          >
             Display Name
           </label>
           <div className="relative group">
@@ -149,12 +152,18 @@ const FolderModal = ({
               </div>
             )}
           </div>
-          {errorMessage && <span className="text-xs font-semibold text-red-500 px-1 animate-in fade-in slide-in-from-top-1">{errorMessage}</span>}
+          {errorMessage && (
+            <span className="text-xs font-semibold text-red-500 px-1 animate-in fade-in slide-in-from-top-1">
+              {errorMessage}
+            </span>
+          )}
         </div>
 
         {(isFolder || isCreate) && (
           <div className="flex flex-col gap-4">
-            <label className="text-sm font-bold text-text-muted px-1 uppercase tracking-wider">Accent Color</label>
+            <label className="text-sm font-bold text-text-muted px-1 uppercase tracking-wider">
+              Accent Color
+            </label>
             <div className="flex flex-wrap gap-3.5 px-1">
               {Object.values(FOLDER_COLORS).map((color) => (
                 <button

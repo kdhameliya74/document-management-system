@@ -95,8 +95,12 @@ const SignupPage = () => {
             <div className="inline-block p-4 rounded-3xl bg-primary/10 border border-primary/20 mb-6 shadow-inner">
               <User className="text-primary" size={32} strokeWidth={1.5} />
             </div>
-            <h1 className="text-4xl font-black text-text-main mb-3 tracking-tighter">Create account</h1>
-            <p className="text-text-dim text-base font-medium">Join the secure document ecosystem</p>
+            <h1 className="text-4xl font-black text-text-main mb-3 tracking-tighter">
+              Create account
+            </h1>
+            <p className="text-text-dim text-base font-medium">
+              Join the secure document ecosystem
+            </p>
           </div>
 
           {(error || localError) && (
@@ -113,9 +117,15 @@ const SignupPage = () => {
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
             <div className="grid grid-cols-2 gap-5">
               <div className="flex flex-col gap-2">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-text-dim px-1">First Name</label>
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-text-dim px-1">
+                  First Name
+                </label>
                 <div className="relative group">
-                  <User className="absolute left-5 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors" size={18} strokeWidth={2.5} />
+                  <User
+                    className="absolute left-5 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors"
+                    size={18}
+                    strokeWidth={2.5}
+                  />
                   <input
                     type="text"
                     name="firstName"
@@ -129,9 +139,15 @@ const SignupPage = () => {
                 </div>
               </div>
               <div className="flex flex-col gap-2">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-text-dim px-1">Last Name</label>
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-text-dim px-1">
+                  Last Name
+                </label>
                 <div className="relative group">
-                  <User className="absolute left-5 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors" size={18} strokeWidth={2.5} />
+                  <User
+                    className="absolute left-5 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors"
+                    size={18}
+                    strokeWidth={2.5}
+                  />
                   <input
                     type="text"
                     name="lastName"
@@ -147,9 +163,15 @@ const SignupPage = () => {
             </div>
 
             <div className="flex flex-col gap-2">
-              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-text-dim px-1">Username</label>
+              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-text-dim px-1">
+                Username
+              </label>
               <div className="relative group">
-                <User className="absolute left-5 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors" size={18} strokeWidth={2.5} />
+                <User
+                  className="absolute left-5 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors"
+                  size={18}
+                  strokeWidth={2.5}
+                />
                 <input
                   type="text"
                   name="username"
@@ -164,9 +186,15 @@ const SignupPage = () => {
             </div>
 
             <div className="flex flex-col gap-2">
-              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-text-dim px-1">Email Address</label>
+              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-text-dim px-1">
+                Email Address
+              </label>
               <div className="relative group">
-                <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors" size={18} strokeWidth={2.5} />
+                <Mail
+                  className="absolute left-5 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors"
+                  size={18}
+                  strokeWidth={2.5}
+                />
                 <input
                   type="email"
                   name="email"
@@ -182,9 +210,15 @@ const SignupPage = () => {
 
             <div className="grid grid-cols-2 gap-5">
               <div className="flex flex-col gap-2">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-text-dim px-1">Passkey</label>
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-text-dim px-1">
+                  Passkey
+                </label>
                 <div className="relative group">
-                  <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors" size={18} strokeWidth={2.5} />
+                  <Lock
+                    className="absolute left-5 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors"
+                    size={18}
+                    strokeWidth={2.5}
+                  />
                   <input
                     type="password"
                     name="password"
@@ -198,9 +232,15 @@ const SignupPage = () => {
                 </div>
               </div>
               <div className="flex flex-col gap-2">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-text-dim px-1">Verify</label>
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-text-dim px-1">
+                  Verify
+                </label>
                 <div className="relative group">
-                  <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors" size={18} strokeWidth={2.5} />
+                  <Lock
+                    className="absolute left-5 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors"
+                    size={18}
+                    strokeWidth={2.5}
+                  />
                   <input
                     type="password"
                     name="confirmPassword"
@@ -225,7 +265,11 @@ const SignupPage = () => {
               ) : (
                 <>
                   <span>Construct Account</span>
-                  <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" strokeWidth={3} />
+                  <ArrowRight
+                    size={18}
+                    className="group-hover:translate-x-1 transition-transform"
+                    strokeWidth={3}
+                  />
                 </>
               )}
             </button>
@@ -234,7 +278,10 @@ const SignupPage = () => {
           <div className="mt-12 text-center">
             <p className="text-text-dim text-sm font-medium">
               Existing operative?
-              <Link to={ROUTES.LOGIN} className="text-primary font-bold ml-2 hover:text-primary-hover transition-colors underline underline-offset-4 decoration-2">
+              <Link
+                to={ROUTES.LOGIN}
+                className="text-primary font-bold ml-2 hover:text-primary-hover transition-colors underline underline-offset-4 decoration-2"
+              >
                 Authorize Session
               </Link>
             </p>

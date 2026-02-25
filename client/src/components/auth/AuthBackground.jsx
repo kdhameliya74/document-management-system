@@ -38,7 +38,14 @@ const AuthBackground = () => {
 
       {/* Floating Document Icons - More Subtle and Refined */}
       <FloatingIcon Icon={FileText} delay={0} x="12%" y="18%" size={56} color="text-primary/10" />
-      <FloatingIcon Icon={Folder} delay={1.2} x="85%" y="12%" size={72} color="text-indigo-400/10" />
+      <FloatingIcon
+        Icon={Folder}
+        delay={1.2}
+        x="85%"
+        y="12%"
+        size={72}
+        color="text-indigo-400/10"
+      />
       <FloatingIcon Icon={Image} delay={2.5} x="18%" y="75%" size={48} color="text-purple-400/10" />
       <FloatingIcon Icon={File} delay={1.8} x="75%" y="65%" size={64} color="text-sky-400/10" />
       <FloatingIcon

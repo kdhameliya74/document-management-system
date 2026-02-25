@@ -26,10 +26,17 @@ const FileItem = ({ file, isSelected, onSelect, onContextMenu }) => {
     >
       <div className="relative p-5 rounded-2xl bg-bg-main/50 border border-border-muted group-hover:border-primary/40 transition-all duration-300 shadow-inner group-hover:scale-105 group-hover:rotate-1">
         <div className="absolute inset-0 bg-primary/5 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
-        <FileIcon mimeType={file.mimeType} size={42} strokeWidth={1.5} className="relative drop-shadow-md" />
-        
+        <FileIcon
+          mimeType={file.mimeType}
+          size={42}
+          strokeWidth={1.5}
+          className="relative drop-shadow-md"
+        />
+
         {extension && (
-          <div className={`absolute -bottom-1 -right-1 px-1.5 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider border border-white/10 shadow-lg ${colorClass} bg-bg-panel backdrop-blur-md`}>
+          <div
+            className={`absolute -bottom-1 -right-1 px-1.5 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider border border-white/10 shadow-lg ${colorClass} bg-bg-panel backdrop-blur-md`}
+          >
             {extension}
           </div>
         )}

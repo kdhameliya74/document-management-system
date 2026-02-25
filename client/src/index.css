@@ -6,17 +6,17 @@
   --color-secondary: #0ea5e9;
 
   /* Modern Zinc Dark Palette */
-  --color-bg-main: #09090b;      /* Zinc-950 */
-  --color-bg-panel: #18181b;     /* Zinc-900 */
-  --color-bg-muted: #18181b;     /* Zinc-900 */
-  --color-bg-hover: #27272a;     /* Zinc-800 */
-  
-  --color-border-main: #27272a;  /* Zinc-800 */
+  --color-bg-main: #09090b; /* Zinc-950 */
+  --color-bg-panel: #18181b; /* Zinc-900 */
+  --color-bg-muted: #18181b; /* Zinc-900 */
+  --color-bg-hover: #27272a; /* Zinc-800 */
+
+  --color-border-main: #27272a; /* Zinc-800 */
   --color-border-muted: #1e1e21; /* Subtle divider */
-  
-  --color-text-main: #f4f4f5;    /* Zinc-100 */
-  --color-text-muted: #a1a1aa;   /* Zinc-400 */
-  --color-text-dim: #71717a;     /* Zinc-500 */
+
+  --color-text-main: #f4f4f5; /* Zinc-100 */
+  --color-text-muted: #a1a1aa; /* Zinc-400 */
+  --color-text-dim: #71717a; /* Zinc-500 */
 
   --font-sans:
     "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
