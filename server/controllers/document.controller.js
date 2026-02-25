@@ -48,10 +48,6 @@ export const listDocuments = asyncHandler(async (req, res) => {
   const userId = req.user.id;
   const { parentId = null } = req.query;
 
-  if (!isValidObjectId(parentId)) {
-    return res.status(400).json({ success: false, message: "Invalid document ID" });
-  }
-
   const baseFilter = {
     owner: userId,
     parentId: parentId || null,

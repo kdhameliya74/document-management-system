@@ -1,5 +1,6 @@
 import express from "express";
 import { protect } from "../middlewares/auth.moddleware.js";
+import { validateId } from "../middlewares/validateId.middleware.js";
 import {
   listDocuments,
   createFolder,
@@ -16,8 +17,8 @@ import {
 const router = express.Router();
 
 //List documents
-router.get("/", protect, listDocuments);
-router.get("/trash", protect, listTrash);
+router.get("/", protect, validateId("parentId", "query"), listDocuments);
+router.get("/trash", protect, validateId("parentId", "query"), listTrash);
 
 //Upload documents
 router.post("/upload-urls", protect, getPresignedUrls);
@@ -27,16 +28,16 @@ router.post("/upload-confirm", protect, confirmUpload);
 router.post("/folders", protect, createFolder);
 
 //Get document by id
-router.get("/:id", protect, getDocumentById);
+router.get("/:id", protect, validateId("id"), getDocumentById);
 
 //Update document
-router.patch("/:id", protect, updateDocument);
+router.patch("/:id", protect, validateId("id"), updateDocument);
 
 //Delete document
-router.delete("/:id", protect, trashDocument);
-router.delete("/:id/permenant", protect, permanentDelete);
+router.delete("/:id", protect, validateId("id"), trashDocument);
+router.delete("/:id/permenant", protect, validateId("id"), permanentDelete);
 
 //Restore document
-router.patch("/:id/restore", protect, restoreDocument);
+router.patch("/:id/restore", protect, validateId("id"), restoreDocument);
 
 export default router;
