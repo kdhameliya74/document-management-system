@@ -31,24 +31,23 @@ const PageNotFound = () => {
           >
             <Compass size="100%" className="text-primary" />
           </motion.div>
-          
+
           <Compass
             size={100}
             className="text-primary/80 relative z-10 drop-shadow-[0_0_15px_rgba(99,102,241,0.3)]"
             strokeWidth={1.2}
           />
-          
+
           <div className="absolute -top-4 -right-4 px-6 py-2 bg-primary text-white text-3xl font-black rounded-2xl shadow-xl shadow-primary/30 rotate-12">
             404
           </div>
         </div>
 
-        <h1 className="text-5xl font-black text-text-main mb-6 tracking-tighter">
-          Lost in Space?
-        </h1>
+        <h1 className="text-5xl font-black text-text-main mb-6 tracking-tighter">Lost in Space?</h1>
 
         <p className="max-w-[420px] mx-auto text-text-dim text-lg font-medium leading-relaxed mb-12">
-          The page you're searching for seems to have vanished into a black hole or never existed in the first place.
+          The page you're searching for seems to have vanished into a black hole or never existed in
+          the first place.
         </p>
 
         <div className="flex gap-5 justify-center">
@@ -56,12 +55,16 @@ const PageNotFound = () => {
             onClick={onGoHome}
             className="group flex items-center gap-3 py-4 px-10 rounded-2xl cursor-pointer font-black text-white bg-primary text-sm uppercase tracking-widest shadow-2xl shadow-primary/40 transition-all hover:bg-primary-hover hover:-translate-y-1 active:translate-y-0"
           >
-            <Home size={18} strokeWidth={2.5} className="group-hover:scale-110 transition-transform" />
+            <Home
+              size={18}
+              strokeWidth={2.5}
+              className="group-hover:scale-110 transition-transform"
+            />
             <span>Return to Mission Control</span>
           </button>
         </div>
       </motion.div>
-      
+
       <div className="absolute bottom-10 text-[10px] font-black uppercase tracking-[0.5em] text-text-dim/30">
         CloudDocs Error Protocol 404 // Access Denied
       </div>

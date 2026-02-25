@@ -33,7 +33,9 @@ const Breadcrumb = ({ currentFolderId }) => {
         <React.Fragment key={crumb.id}>
           <ChevronRight size={14} className="text-text-dim shrink-0 mx-0.5" strokeWidth={3} />
           <button
-            onClick={() => navigate(ROUTES.APP.FOLDER_DYNAMIC(crumb.id === "root" ? null : crumb.id))}
+            onClick={() =>
+              navigate(ROUTES.APP.FOLDER_DYNAMIC(crumb.id === "root" ? null : crumb.id))
+            }
             className={`px-3 py-1.5 rounded-xl transition-all duration-200 cursor-pointer max-w-[180px] truncate font-medium ${
               index === crumbs.length - 1
                 ? "text-primary bg-primary/10 shadow-sm shadow-primary/5"

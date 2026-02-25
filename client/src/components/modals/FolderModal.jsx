@@ -6,7 +6,7 @@ import { FOLDER_COLORS, FOLDER_MESSAGES, DOCUMENT_MODES } from "@/helpers/consta
 import { createFolder, updateDocument } from "@/store/documentSystemSlice";
 import toast from "react-hot-toast";
 import Modal from "@/components/common/Modal";
-import { getBaseName, getFileExtension, logError, getDocumentFlags } from "@/helpers/utils";
+import { getBaseName, getFileExtension, getDocumentFlags } from "@/helpers/utils";
 
 const FolderModal = ({
   documentItem,

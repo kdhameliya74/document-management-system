@@ -23,7 +23,7 @@ const DashboardPage = () => {
               <Route path={ROUTES.APP.RELATIVE.FOLDER} element={<FolderView />} />
               <Route path={ROUTES.APP.RELATIVE.TRASH} element={<TrashPage />} />
               <Route path={ROUTES.APP.RELATIVE.TRASH_FOLDER} element={<TrashPage />} />
-              
+
               {/* Catch-all for dashboard sub-routes */}
               <Route path="*" element={<PageNotFound />} />
             </Routes>

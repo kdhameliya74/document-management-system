@@ -1,6 +1,11 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import DocumentService from "@/services/document.service";
-import { TRASH_MESSAGES, FILE_MESSAGES, DEFAULT_MESSAGES, FOLDER_MESSAGES } from "@/helpers/constants";
+import {
+  TRASH_MESSAGES,
+  FILE_MESSAGES,
+  DEFAULT_MESSAGES,
+  FOLDER_MESSAGES,
+} from "@/helpers/constants";
 import { logError } from "@/helpers/utils";
 
 const initialState = {
@@ -240,7 +245,7 @@ const documentSystemSlice = createSlice({
     },
     // fetch documents and files
     // Mock version history
-    addFileVersion: () => { },
+    addFileVersion: () => {},
   },
   extraReducers: (builder) => {
     builder

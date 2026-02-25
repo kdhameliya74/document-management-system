@@ -30,9 +30,7 @@ const FolderView = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const { documents, selectedId, isLoading } = useSelector(
-    (state) => state.documentSystem
-  );
+  const { documents, selectedId, isLoading } = useSelector((state) => state.documentSystem);
 
   const normalizedFolderId = folderId || "root";
   const currentFolder = documents[normalizedFolderId];
@@ -80,14 +78,12 @@ const FolderView = () => {
         props: {
           item: selectedItem,
           itemType: selectedItemType,
-          note:
-            "You can restore this item from your Trash folder later if you change your mind.",
-          onDelete: async () =>
-            await dispatch(deleteDocument(selectedItem.id)).unwrap(),
+          note: "You can restore this item from your Trash folder later if you change your mind.",
+          onDelete: async () => await dispatch(deleteDocument(selectedItem.id)).unwrap(),
         },
       },
     }),
-    [folderId, selectedItem, selectedItemType, dispatch]
+    [folderId, selectedItem, selectedItemType, dispatch],
   );
 
   const DROPDOWN_ITEMS = useMemo(
@@ -103,7 +99,7 @@ const FolderView = () => {
         onClick: () => setActiveModal("upload"),
       },
     ],
-    [setActiveModal]
+    [setActiveModal],
   );
 
   const ActiveModal = MODALS_MAP[activeModal]?.Component;
@@ -111,8 +107,7 @@ const FolderView = () => {
   /* -------------------- Fetch Logic -------------------- */
 
   useEffect(() => {
-    const parentId =
-      normalizedFolderId === "root" ? null : normalizedFolderId;
+    const parentId = normalizedFolderId === "root" ? null : normalizedFolderId;
 
     const loadFolder = async () => {
       try {
@@ -130,26 +125,19 @@ const FolderView = () => {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target)
-      ) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setShowNewDropdown(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
-    return () =>
-      document.removeEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   /* -------------------- Derived Data -------------------- */
 
   const childDocuments = useMemo(
-    () =>
-      currentFolder?.childDocuments
-        ?.map((id) => documents[id])
-        .filter(Boolean) || [],
-    [currentFolder?.childDocuments, documents]
+    () => currentFolder?.childDocuments?.map((id) => documents[id]).filter(Boolean) || [],
+    [currentFolder?.childDocuments, documents],
   );
 
   const isEmpty = childDocuments.length === 0;
@@ -173,7 +161,7 @@ const FolderView = () => {
   if (isInitialLoading) {
     return (
       <div className="h-full flex items-center justify-center">
-        <Loading text="Refreshing items..."/>
+        <Loading text="Refreshing items..." />
       </div>
     );
   }
@@ -188,19 +176,14 @@ const FolderView = () => {
   /* -------------------- Render -------------------- */
 
   return (
-    <div
-      className="relative h-full flex flex-col px-8 py-6"
-      onClick={handleClickOutsideMain}
-    >
+    <div className="relative h-full flex flex-col px-8 py-6" onClick={handleClickOutsideMain}>
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
           <h2 className="text-3xl font-bold text-text-main tracking-tight mb-1 h-9">
             {folderName}
           </h2>
-          <p className="text-sm text-text-dim">
-            Manage your folders and documents with ease
-          </p>
+          <p className="text-sm text-text-dim">Manage your folders and documents with ease</p>
         </div>
 
         {/* Dropdown */}
@@ -216,9 +199,7 @@ const FolderView = () => {
             <span>New</span>
             <ChevronDown
               size={14}
-              className={`transition-transform ${
-                showNewDropdown ? "rotate-180" : ""
-              }`}
+              className={`transition-transform ${showNewDropdown ? "rotate-180" : ""}`}
             />
           </button>
 
@@ -246,9 +227,7 @@ const FolderView = () => {
         <Breadcrumb currentFolderId={folderId} />
       </div>
       <div className="flex-1 relative flex flex-col min-h-0">
-        {isRefreshing && (
-          <Loading text="Refreshing items all..."/>
-        )}
+        {isRefreshing && <Loading text="Refreshing items all..." />}
         {isEmpty && !isLoading ? (
           <EmptyFolderScreen setActiveModal={setActiveModal} />
         ) : (
@@ -271,7 +250,7 @@ const FolderView = () => {
                     onSelect={handleSelect}
                     onContextMenu={handleContextMenu}
                   />
-                )
+                ),
               )}
             </div>
           </div>
