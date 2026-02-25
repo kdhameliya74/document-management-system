@@ -19,6 +19,7 @@ import FolderItem from "@/components/dashboard/FolderItem";
 import FileItem from "@/components/dashboard/FileItem";
 import Loading from "@/components/common/Loading";
 import DeleteModal from "@/components/modals/DeleteModal";
+import ResourceNotFound from "@/components/common/ResourceNotFound";
 
 const EmptyTrash = ({ onNavigateBack, folderId }) => (
   <div className="flex-1 flex flex-col items-center justify-center text-slate-500 text-center">
@@ -123,7 +124,14 @@ const TrashPage = () => {
   /* -------------------------------- effects ------------------------------- */
   useEffect(() => {
     const parentId = folderId === "trash" ? null : folderId;
-    dispatch(getTrashedDocument(parentId));
+    const loadTrash = async () => {
+      try {
+        await dispatch(getTrashedDocument(parentId)).unwrap();
+      } catch (err) {
+        toast.error(err);
+      }
+    };
+    loadTrash();
   }, [folderId, dispatch]);
 
   const renderFolders = () => (
@@ -152,6 +160,10 @@ const TrashPage = () => {
       </div>
     </div>
   );
+
+  if (!isLoading && !currentFolder) {
+    return <ResourceNotFound />;
+  }
 
   return (
     <>

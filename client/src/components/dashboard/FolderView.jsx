@@ -119,7 +119,7 @@ const FolderView = () => {
         await dispatch(fetchDocuments(parentId)).unwrap();
         dispatch(setCurrentFolder(normalizedFolderId));
       } catch (err) {
-        toast.error(err?.message || "Failed to load folder");
+        toast.error(err);
       }
     };
 
