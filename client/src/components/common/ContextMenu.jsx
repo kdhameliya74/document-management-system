@@ -1,4 +1,11 @@
 import React, { useEffect, useRef } from "react";
+import { TriangleAlert } from "lucide-react";
+
+const SEVERITY_COLORS = {
+  warning: "text-yellow-500",
+  error: "text-red-500",
+  info: "text-grey-500",
+};
 
 const ContextMenu = ({ x, y, items, onClose }) => {
   const menuRef = useRef(null);
