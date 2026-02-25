@@ -21,6 +21,8 @@ export const FOLDER_COLORS = Object.freeze({
   PINK: "#ec4899",
   TEAL: "#14b8a6",
   SLATE: "#64748b",
+  ORANGE: "#f97316",
+  YELLOW: "#eab308",
 });
 
 export const DEFAULT_MESSAGES = Object.freeze({
