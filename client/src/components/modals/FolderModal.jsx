@@ -101,8 +101,7 @@ const FolderModal = ({
       }
       handleCancel();
     } catch (err) {
-      toast.error(FOLDER_MESSAGES.DOCUMENT_SAVE_FAILED);
-      logError(err);
+      toast.error(err);
     } finally {
       setIsLoading(false);
     }

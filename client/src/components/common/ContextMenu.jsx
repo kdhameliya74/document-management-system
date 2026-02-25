@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from "react";
-import { TriangleAlert } from "lucide-react";
 
 const ContextMenu = ({ x, y, items, onClose }) => {
   const menuRef = useRef(null);

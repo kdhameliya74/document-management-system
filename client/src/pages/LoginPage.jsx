@@ -22,7 +22,7 @@ const LoginPage = () => {
 
   useEffect(() => {
     if (!loading && isAuthenticated) {
-      navigate(ROUTES.DASHBOARD.ROOT, { replace: true });
+      navigate(ROUTES.APP.ROOT, { replace: true });
     }
   }, [loading, isAuthenticated, navigate]);
 

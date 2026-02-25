@@ -24,8 +24,8 @@ const Sidebar = () => {
   };
 
   // Check if current path is a folder route to keep "My Drive" active
-  const isFolderActive = location.pathname.startsWith(ROUTES.DASHBOARD.FOLDER_BASE);
-  const isTrashActive = location.pathname.startsWith(ROUTES.DASHBOARD.TRASH);
+  const isFolderActive = location.pathname.startsWith(ROUTES.APP.FOLDERS);
+  const isTrashActive = location.pathname.startsWith(ROUTES.APP.TRASH);
 
   return (
     <div className="w-64 bg-bg-panel border-r border-border-main flex flex-col p-5 h-full relative z-20">
@@ -47,25 +47,25 @@ const Sidebar = () => {
       {/* Navigation */}
       <div className="flex flex-col gap-1.5 flex-1">
         <NavLink
-          to={ROUTES.DASHBOARD.FOLDER_ROOT}
+          to={ROUTES.APP.FOLDERS}
           className={({ isActive }) => navItemClass({ isActive: isActive || isFolderActive })}
         >
           <HardDrive size={18} className="group-hover:scale-110 transition-transform" />
           <span>My Drive</span>
         </NavLink>
 
-        <NavLink to={ROUTES.DASHBOARD.SHARED} className={navItemClass}>
+        <NavLink to={ROUTES.APP.SHARED} className={navItemClass}>
           <Users size={18} className="group-hover:scale-110 transition-transform" />
           <span>Shared with me</span>
         </NavLink>
 
-        <NavLink to={ROUTES.DASHBOARD.RECENT} className={navItemClass}>
+        <NavLink to={ROUTES.APP.RECENT} className={navItemClass}>
           <Clock size={18} className="group-hover:scale-110 transition-transform" />
           <span>Recent</span>
         </NavLink>
 
         <NavLink
-          to={ROUTES.DASHBOARD.TRASH}
+          to={ROUTES.APP.TRASH}
           className={({ isActive }) => navItemClass({ isActive: isActive || isTrashActive })}
         >
           <Trash2 size={18} className="group-hover:scale-110 transition-transform" />

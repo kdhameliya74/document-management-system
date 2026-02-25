@@ -22,6 +22,7 @@ import DeleteModal from "@/components/modals/DeleteModal";
 import EmptyFolderScreen from "@/components/dashboard/EmptyFolderScreen";
 import useFileFolderContextMenu from "@/hooks/useFileFolderContextMenu";
 import ResourceNotFound from "@/components/common/ResourceNotFound";
+import toast from "react-hot-toast";
 
 const FolderView = () => {
   const { folderId } = useParams();
@@ -30,7 +31,8 @@ const FolderView = () => {
 
   const { documents, selectedId, isLoading } = useSelector((state) => state.documentSystem);
 
-  const currentFolder = documents[folderId];
+  const normalizedFolderId = folderId || "root";
+  const currentFolder = documents[normalizedFolderId];
 
   const [showNewDropdown, setShowNewDropdown] = useState(false);
   const dropdownRef = useRef(null);
@@ -92,11 +94,12 @@ const FolderView = () => {
   const ActiveModal = MODALS_MAP[activeModal]?.Component;
 
   useEffect(() => {
-    // fetch documents and files
-    // if (!folderId || !currentFolder) return; //TODO: need to fix this
-    const parentId = folderId === "root" ? null : folderId;
-    dispatch(fetchDocuments(parentId));
-    dispatch(setCurrentFolder(folderId));
+    const normalizedFolderId = folderId || "root";
+    const parentId = normalizedFolderId === "root" ? null : normalizedFolderId;
+    dispatch(fetchDocuments(parentId)).unwrap().catch((err) => {
+      toast.error(err)
+    });
+    dispatch(setCurrentFolder(normalizedFolderId));
   }, [folderId, dispatch]);
 
   useEffect(() => {
@@ -112,12 +115,12 @@ const FolderView = () => {
   }, []);
 
   const childDocuments =
-    currentFolder?.childDocuments.map((id) => documents[id]).filter(Boolean) || [];
+    currentFolder?.childDocuments?.map((id) => documents[id]).filter(Boolean) || [];
 
   const isEmpty = childDocuments.length === 0;
 
   const handleNavigate = (id) => {
-    navigate(ROUTES.DASHBOARD.FOLDER_DYNAMIC(id));
+    navigate(ROUTES.APP.FOLDER_DYNAMIC(id));
   };
 
   const handleSelect = (id) => {
@@ -129,7 +132,19 @@ const FolderView = () => {
     closeContextMenu();
   };
 
-  if (!folderId || !currentFolder) {
+  if (isLoading) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center gap-4">
+        <div className="relative">
+          <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+        </div>
+        <div className="text-text-muted font-medium animate-pulse">Loading items...</div>
+      </div>
+    );
+  }
+
+  // If we checked and it's still missing, it's a 404
+  if (!currentFolder) {
     return <ResourceNotFound />;
   }
 

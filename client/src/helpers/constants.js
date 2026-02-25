@@ -23,6 +23,11 @@ export const FOLDER_COLORS = Object.freeze({
   SLATE: "#64748b",
 });
 
+export const DEFAULT_MESSAGES = Object.freeze({
+  FAILED_TO_FETCH_DOCUMENTS: "Failed to fetch documents!",
+  NO_FOLDERS_AVAILABLE: "No folders available",
+});
+
 export const FOLDER_MESSAGES = Object.freeze({
   NAME_REQUIRED: "Folder name is required.",
   NAME_DUPLICATE: "A folder with this name already exists.",

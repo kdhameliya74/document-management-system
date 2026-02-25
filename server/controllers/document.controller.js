@@ -3,7 +3,7 @@ import s3Client from "../config/s3.js";
 import Document from "../models/Document.model.js";
 import { DOC_TYPES } from "../constants/Shared.js";
 import { FILE_UPLOAD_STATUS } from "../constants/File.js";
-import { shortId, environment } from "../utils/helper.util.js";
+import { shortId, environment, isValidObjectId } from "../utils/helper.util.js";
 import { PutObjectCommand, DeleteObjectsCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { asyncHandler } from "../middlewares/error.middleware.js";
@@ -47,6 +47,10 @@ async function buildBreadcrumbs(parentId, userId) {
 export const listDocuments = asyncHandler(async (req, res) => {
   const userId = req.user.id;
   const { parentId = null } = req.query;
+
+  if (!isValidObjectId(parentId)) {
+    return res.status(400).json({ success: false, message: "Invalid document ID" });
+  }
 
   const baseFilter = {
     owner: userId,

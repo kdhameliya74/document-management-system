@@ -6,7 +6,7 @@ const ResourceNotFound = () => {
   const navigate = useNavigate();
 
   const onGoHome = () => {
-    navigate(ROUTES.DASHBOARD.ROOT);
+    navigate(ROUTES.APP.FOLDERS);
   };
 
   return (

@@ -112,13 +112,13 @@ const TrashPage = () => {
 
   const handleNavigate = (id) => {
     if (!id) {
-      navigate(ROUTES.DASHBOARD.TRASH);
+      navigate(ROUTES.APP.TRASH);
     } else {
-      navigate(ROUTES.DASHBOARD.TRASH_DYNAMIC(id));
+      navigate(ROUTES.APP.TRASH_DYNAMIC(id));
     }
   };
 
-  const goBackHome = () => navigate(ROUTES.DASHBOARD.FOLDER_ROOT);
+  const goBackHome = () => navigate(ROUTES.APP.FOLDERS);
 
   /* -------------------------------- effects ------------------------------- */
   useEffect(() => {
@@ -199,7 +199,7 @@ const TrashPage = () => {
         {!isLoading && isEmpty && <EmptyTrash onNavigateBack={goBackHome} />}
         {!isLoading && !isEmpty && renderFolders()}
 
-        {contextMenu && location.pathname === ROUTES.DASHBOARD.TRASH && (
+        {contextMenu && location.pathname.startsWith(ROUTES.APP.TRASH) && (
           <ContextMenu
             x={contextMenu.x}
             y={contextMenu.y}
