@@ -6,6 +6,7 @@ import FolderView from "@/components/dashboard/FolderView";
 import RightSidebar from "@/components/dashboard/RightSidebar";
 
 import TrashPage from "@/pages/TrashPage";
+import PageNotFound from "@/pages/PageNotFound";
 import ROUTES from "@/utils/routes";
 
 const DashboardPage = () => {
@@ -17,10 +18,14 @@ const DashboardPage = () => {
         <div className="flex flex-1 overflow-hidden relative">
           <div className="flex-1 overflow-y-auto p-6 relative">
             <Routes>
-              <Route path="/" element={<Navigate to={ROUTES.DASHBOARD.RELATIVE.ROOT} />} />
-              <Route path={ROUTES.DASHBOARD.RELATIVE.FOLDER} element={<FolderView />} />
-              <Route path={ROUTES.DASHBOARD.RELATIVE.TRASH} element={<TrashPage />} />
-              <Route path={ROUTES.DASHBOARD.RELATIVE.TRASH_FOLDER} element={<TrashPage />} />
+              <Route path="/" element={<Navigate to={ROUTES.APP.RELATIVE.FOLDERS} />} />
+              <Route path={ROUTES.APP.RELATIVE.FOLDERS} element={<FolderView />} />
+              <Route path={ROUTES.APP.RELATIVE.FOLDER} element={<FolderView />} />
+              <Route path={ROUTES.APP.RELATIVE.TRASH} element={<TrashPage />} />
+              <Route path={ROUTES.APP.RELATIVE.TRASH_FOLDER} element={<TrashPage />} />
+
+              {/* Catch-all for dashboard sub-routes */}
+              <Route path="*" element={<PageNotFound />} />
             </Routes>
           </div>
           <RightSidebar />

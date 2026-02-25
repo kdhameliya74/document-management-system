@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { Trash2, ArrowLeft, ChevronRight } from "lucide-react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
@@ -18,6 +18,8 @@ import ContextMenu from "@/components/common/ContextMenu";
 import FolderItem from "@/components/dashboard/FolderItem";
 import FileItem from "@/components/dashboard/FileItem";
 import Loading from "@/components/common/Loading";
+import DeleteModal from "@/components/modals/DeleteModal";
+import ResourceNotFound from "@/components/common/ResourceNotFound";
 
 const EmptyTrash = ({ onNavigateBack, folderId }) => (
   <div className="flex-1 flex flex-col items-center justify-center text-slate-500 text-center">
@@ -52,42 +54,38 @@ const TrashPage = () => {
 
   const { folderId = "trash" } = useParams();
   const dispatch = useDispatch();
-
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
   const { trashDocuments, selectedId, isLoading } = useSelector((state) => state.documentSystem);
 
-  const restoreAction = async (item) => {
-    const toastId = toast.loading(TRASH_MESSAGES.RESTORE_LOADING);
+  const handleAsyncAction = async ({ item, asyncAction, loadingMessage, successMessage }) => {
+    const toastId = toast.loading(loadingMessage);
+
     try {
-      await dispatch(restoreDocument(item.id)).unwrap();
-      toast.success(TRASH_MESSAGES.RESTORE_SUCCESS, {
-        id: toastId,
-      });
+      await dispatch(asyncAction(item.id)).unwrap();
+      toast.success(successMessage, { id: toastId });
     } catch (err) {
-      toast.error(err, {
-        id: toastId,
-      });
+      toast.error(err, { id: toastId });
     }
   };
 
-  const deleteAction = async (item) => {
-    const toastId = toast.loading(TRASH_MESSAGES.DELETE_LOADING);
-    try {
-      await dispatch(permenantDeleteDocument(item.id)).unwrap();
-      toast.success(TRASH_MESSAGES.DELETE_SUCCESS, {
-        id: toastId,
-      });
-    } catch (err) {
-      toast.error(err, {
-        id: toastId,
-      });
-    }
-  };
   const contextMenuHandler = async (item, action) => {
-    const actionsObject = {
-      [TRASH_MENU_ACTIONS.RESTORE]: restoreAction,
-      [TRASH_MENU_ACTIONS.DELETE]: deleteAction,
+    const actionsMap = {
+      [TRASH_MENU_ACTIONS.RESTORE]: () =>
+        handleAsyncAction({
+          item,
+          asyncAction: restoreDocument,
+          loadingMessage: TRASH_MESSAGES.RESTORE_LOADING,
+          successMessage: TRASH_MESSAGES.RESTORE_SUCCESS,
+        }),
+
+      [TRASH_MENU_ACTIONS.DELETE]: () => {
+        setIsDeleteModalOpen(true);
+        setSelectedItem(item);
+      },
     };
-    await actionsObject[action](item);
+
+    await actionsMap[action]?.();
   };
   const {
     contextMenu,
@@ -115,18 +113,25 @@ const TrashPage = () => {
 
   const handleNavigate = (id) => {
     if (!id) {
-      navigate(ROUTES.DASHBOARD.TRASH);
+      navigate(ROUTES.APP.TRASH);
     } else {
-      navigate(ROUTES.DASHBOARD.TRASH_DYNAMIC(id));
+      navigate(ROUTES.APP.TRASH_DYNAMIC(id));
     }
   };
 
-  const goBackHome = () => navigate(ROUTES.DASHBOARD.FOLDER_ROOT);
+  const goBackHome = () => navigate(ROUTES.APP.FOLDERS);
 
   /* -------------------------------- effects ------------------------------- */
   useEffect(() => {
     const parentId = folderId === "trash" ? null : folderId;
-    dispatch(getTrashedDocument(parentId));
+    const loadTrash = async () => {
+      try {
+        await dispatch(getTrashedDocument(parentId)).unwrap();
+      } catch (err) {
+        toast.error(err);
+      }
+    };
+    loadTrash();
   }, [folderId, dispatch]);
 
   const renderFolders = () => (
@@ -156,60 +161,95 @@ const TrashPage = () => {
     </div>
   );
 
+  if (!isLoading && !currentFolder) {
+    return <ResourceNotFound />;
+  }
+
   return (
-    <div className="relative h-full flex flex-col" onClick={handleClickOutside}>
-      <header className="flex items-center justify-between pb-4 border-b border-border-muted -mx-6 px-6">
-        <h2 className="text-2xl font-medium text-text-main">Trash</h2>
-      </header>
+    <>
+      <div className="relative h-full flex flex-col" onClick={handleClickOutside}>
+        <header className="flex items-center justify-between pb-4 border-b border-border-muted -mx-6 px-6">
+          <h2 className="text-2xl font-medium text-text-main">Trash</h2>
+        </header>
 
-      <nav className="flex items-center gap-2 text-sm text-text-muted my-4 overflow-x-auto whitespace-nowrap scrollbar-hide">
-        <button
-          onClick={() => {
-            if (folderId === "trash") {
-              goBackHome();
-            } else {
-              handleNavigate(currentFolder?.parentId);
-            }
-          }}
-          className="p-2 hover:bg-bg-hover hover:text-text-main rounded-full transition-colors cursor-pointer flex items-center"
-          title="Go back"
-        >
-          <ArrowLeft size={16} />
-        </button>
+        <nav className="flex items-center gap-2 text-sm text-text-muted my-4 overflow-x-auto whitespace-nowrap scrollbar-hide">
+          <button
+            onClick={() => {
+              if (folderId === "trash") {
+                goBackHome();
+              } else {
+                handleNavigate(currentFolder?.parentId);
+              }
+            }}
+            className="p-2 hover:bg-bg-hover hover:text-text-main rounded-full transition-colors cursor-pointer flex items-center"
+            title="Go back"
+          >
+            <ArrowLeft size={16} />
+          </button>
 
-        <button
-          onClick={() => handleNavigate()}
-          className={`flex items-center gap-1.5 px-2 py-1 rounded transition-colors cursor-pointer bg-bg-hover text-text-main`}
-        >
-          <Trash2 size={16} />
-          <span>Trash</span>
-        </button>
-        {currentPath?.length !== 0 &&
-          currentPath.map((path, index) => (
-            <div className="flex items-center gap-1" key={path}>
-              <ChevronRight size={16} className="text-border shrink-0" />
-              <span
-                className={`text-sm ${index === currentPath.length - 1 ? "text-white border-b" : null}`}
-              >
-                {truncateFolderName(path)}
-              </span>
-            </div>
-          ))}
-      </nav>
+          <button
+            onClick={() => handleNavigate()}
+            className={`flex items-center gap-1.5 px-2 py-1 rounded transition-colors cursor-pointer bg-bg-hover text-text-main`}
+          >
+            <Trash2 size={16} />
+            <span>Trash</span>
+          </button>
+          {currentPath?.length !== 0 &&
+            currentPath.map((path, index) => (
+              <div className="flex items-center gap-1" key={path}>
+                <ChevronRight size={16} className="text-border shrink-0" />
+                <span
+                  className={`text-sm ${index === currentPath.length - 1 ? "text-white border-b" : null}`}
+                >
+                  {truncateFolderName(path)}
+                </span>
+              </div>
+            ))}
+        </nav>
 
-      {isLoading && <Loading />}
-      {!isLoading && isEmpty && <EmptyTrash onNavigateBack={goBackHome} />}
-      {!isLoading && !isEmpty && renderFolders()}
+        {isLoading && <Loading />}
+        {!isLoading && isEmpty && <EmptyTrash onNavigateBack={goBackHome} />}
+        {!isLoading && !isEmpty && renderFolders()}
 
-      {contextMenu && location.pathname === ROUTES.DASHBOARD.TRASH && (
-        <ContextMenu
-          x={contextMenu.x}
-          y={contextMenu.y}
-          items={getContextMenuItems()}
-          onClose={closeContextMenu}
-        />
-      )}
-    </div>
+        {contextMenu && location.pathname.startsWith(ROUTES.APP.TRASH) && (
+          <ContextMenu
+            x={contextMenu.x}
+            y={contextMenu.y}
+            items={getContextMenuItems()}
+            onClose={closeContextMenu}
+          />
+        )}
+      </div>
+      <DeleteModal
+        isOpen={isDeleteModalOpen}
+        deleteText="Delete forever"
+        title="Delete forever?"
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setSelectedItem(null);
+        }}
+        onDelete={() =>
+          handleAsyncAction({
+            item: selectedItem,
+            asyncAction: permenantDeleteDocument,
+            loadingMessage: TRASH_MESSAGES.DELETE_LOADING,
+            successMessage: TRASH_MESSAGES.DELETE_SUCCESS,
+          })
+        }
+        item={selectedItem}
+      >
+        <DeleteModal.Body>
+          <div className="bg-red-500/5 border border-red-500/10 rounded-2xl p-6">
+            <p className="text-text-main text-base leading-relaxed">
+              {selectedItem?.name && (
+                <span className="font-medium text-red-400">"{selectedItem?.name}" </span>
+              )}{" "}
+              will be deleted forever. This action cannot be undone!
+            </p>
+          </div>
+        </DeleteModal.Body>
+      </DeleteModal>
+    </>
   );
 };
 

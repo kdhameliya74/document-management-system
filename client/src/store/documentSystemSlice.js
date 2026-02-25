@@ -1,6 +1,11 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import DocumentService from "@/services/document.service";
-import { TRASH_MESSAGES, FILE_MESSAGES } from "@/helpers/constants";
+import {
+  TRASH_MESSAGES,
+  FILE_MESSAGES,
+  DEFAULT_MESSAGES,
+  FOLDER_MESSAGES,
+} from "@/helpers/constants";
 import { logError } from "@/helpers/utils";
 
 const initialState = {
@@ -84,9 +89,8 @@ export const fetchDocuments = createAsyncThunk(
         parentId: parentId || "root",
       };
     } catch (err) {
-      return rejectWithValue(
-        err?.response?.data?.message || err?.message || "No folders available",
-      );
+      logError(err);
+      return rejectWithValue(DEFAULT_MESSAGES.FAILED_TO_FETCH_DOCUMENTS);
     }
   },
 );
@@ -106,7 +110,8 @@ export const updateDocument = createAsyncThunk(
         document: { id, ...rest },
       };
     } catch (err) {
-      return rejectWithValue(err?.message || "Document not updated!");
+      logError(err);
+      return rejectWithValue(FOLDER_MESSAGES.DOCUMENT_SAVE_FAILED);
     }
   },
 );
@@ -126,7 +131,8 @@ export const deleteDocument = createAsyncThunk(
         id,
       };
     } catch (err) {
-      return rejectWithValue(err?.message || "Failed to move document to trash!");
+      logError(err);
+      return rejectWithValue(TRASH_MESSAGES.DELETE_ERROR);
     }
   },
 );
@@ -186,7 +192,7 @@ export const getTrashedDocument = createAsyncThunk(
       };
     } catch (err) {
       logError(err);
-      return rejectWithValue(err?.message || "Failed to fetch trash documents!");
+      return rejectWithValue(DEFAULT_MESSAGES.FAILED_TO_FETCH_DOCUMENTS);
     }
   },
 );

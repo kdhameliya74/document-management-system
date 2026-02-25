@@ -24,7 +24,7 @@ const ContextMenu = ({ x, y, items, onClose }) => {
 
   return (
     <div
-      className="fixed bg-white rounded-lg border border-slate-100 shadow-lg z-1000 min-w-[180px] animate-in fade-in zoom-in-95 duration-100 overflow-hidden"
+      className="fixed bg-bg-panel/90 rounded-2xl border border-border-main shadow-2xl z-[2000] min-w-[220px] animate-in fade-in zoom-in-95 duration-200 overflow-hidden glass-panel p-1.5"
       style={{ top: y, left: x }}
       ref={menuRef}
     >
@@ -33,23 +33,18 @@ const ContextMenu = ({ x, y, items, onClose }) => {
         return (
           <button
             key={index}
-            className="flex items-center w-full py-2 px-3 text-left text-sm text-slate-900 transition-colors hover:bg-bg-hover hover:text-white cursor-pointer"
+            className="flex items-center w-full py-2.5 px-4 text-left text-sm text-text-main transition-all duration-200 hover:bg-white/5 rounded-xl cursor-pointer group"
             onClick={() => {
               item.onClick();
               onClose();
             }}
           >
             {Icon && (
-              <span className="mr-3 flex items-center">
-                <Icon size={16} />
+              <span className="mr-3 flex items-center text-text-dim group-hover:text-primary transition-colors">
+                {React.isValidElement(Icon) ? Icon : <Icon size={16} strokeWidth={2} />}
               </span>
             )}
-            {item.label}
-            {item.severity && (
-              <span className={`${SEVERITY_COLORS[item.severity]}`} title={item?.tooltip || ""}>
-                <TriangleAlert size={16} className="ml-2" />
-              </span>
-            )}
+            <span className="font-medium">{item.label}</span>
           </button>
         );
       })}

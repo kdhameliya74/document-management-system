@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { Plus, Upload, FolderPlus, ChevronDown, Loader } from "lucide-react";
 import { DOCUMENT_MODES } from "@/helpers/constants";
+import Loading from "@/components/common/Loading";
 
 import ROUTES from "@/utils/routes";
 import {
@@ -22,6 +23,7 @@ import DeleteModal from "@/components/modals/DeleteModal";
 import EmptyFolderScreen from "@/components/dashboard/EmptyFolderScreen";
 import useFileFolderContextMenu from "@/hooks/useFileFolderContextMenu";
 import ResourceNotFound from "@/components/common/ResourceNotFound";
+import toast from "react-hot-toast";
 
 const FolderView = () => {
   const { folderId } = useParams();
@@ -30,7 +32,11 @@ const FolderView = () => {
 
   const { documents, selectedId, isLoading } = useSelector((state) => state.documentSystem);
 
-  const currentFolder = documents[folderId];
+  const normalizedFolderId = folderId || "root";
+  const currentFolder = documents[normalizedFolderId];
+
+  const isInitialLoading = isLoading && !currentFolder;
+  const isRefreshing = isLoading && !!currentFolder;
 
   const [showNewDropdown, setShowNewDropdown] = useState(false);
   const dropdownRef = useRef(null);
@@ -46,58 +52,76 @@ const FolderView = () => {
     getContextMenuItems,
   } = useFileFolderContextMenu();
 
-  // TODO: Think of different name for `currentFolderId`
-  const MODALS_MAP = {
-    createFolder: {
-      Component: FolderModal,
-      props: { currentFolderId: folderId },
-    },
-    upload: {
-      Component: UploadFileModal,
-      props: { currentFolderId: folderId },
-    },
-    edit: {
-      Component: FolderModal,
-      props: {
-        currentFolderId: folderId, // root folder Id
-        documentItem: selectedItem,
-        docType: selectedItemType,
-        mode: DOCUMENT_MODES.UPDATE,
-      },
-    },
-    delete: {
-      Component: DeleteModal,
-      props: {
-        item: selectedItem,
-        itemType: selectedItemType,
-        note: "You can restore this item from your Trash folder later if you change your mind.",
-        onDelete: async () => await dispatch(deleteDocument(selectedItem.id)).unwrap(),
-      },
-    },
-  };
+  /* -------------------- Modals -------------------- */
 
-  const DROPDOWN_ITEMS = [
-    {
-      label: "New Folder",
-      icon: <FolderPlus size={16} />,
-      onClick: () => setActiveModal("createFolder"),
-    },
-    {
-      label: "Upload File",
-      icon: <Upload size={16} />,
-      onClick: () => setActiveModal("upload"),
-    },
-  ];
+  const MODALS_MAP = useMemo(
+    () => ({
+      createFolder: {
+        Component: FolderModal,
+        props: { currentFolderId: folderId },
+      },
+      upload: {
+        Component: UploadFileModal,
+        props: { currentFolderId: folderId },
+      },
+      edit: {
+        Component: FolderModal,
+        props: {
+          currentFolderId: folderId,
+          documentItem: selectedItem,
+          docType: selectedItemType,
+          mode: DOCUMENT_MODES.UPDATE,
+        },
+      },
+      delete: {
+        Component: DeleteModal,
+        props: {
+          item: selectedItem,
+          itemType: selectedItemType,
+          note: "You can restore this item from your Trash folder later if you change your mind.",
+          onDelete: async () => await dispatch(deleteDocument(selectedItem.id)).unwrap(),
+        },
+      },
+    }),
+    [folderId, selectedItem, selectedItemType, dispatch],
+  );
+
+  const DROPDOWN_ITEMS = useMemo(
+    () => [
+      {
+        label: "New Folder",
+        icon: <FolderPlus size={16} />,
+        onClick: () => setActiveModal("createFolder"),
+      },
+      {
+        label: "Upload File",
+        icon: <Upload size={16} />,
+        onClick: () => setActiveModal("upload"),
+      },
+    ],
+    [setActiveModal],
+  );
 
   const ActiveModal = MODALS_MAP[activeModal]?.Component;
 
+  /* -------------------- Fetch Logic -------------------- */
+
   useEffect(() => {
-    // fetch documents and files
-    // if (!folderId || !currentFolder) return; //TODO: need to fix this
-    const parentId = folderId === "root" ? null : folderId;
-    dispatch(fetchDocuments(parentId));
-    dispatch(setCurrentFolder(folderId));
-  }, [folderId, dispatch]);
+    const parentId = normalizedFolderId === "root" ? null : normalizedFolderId;
+
+    const loadFolder = async () => {
+      try {
+        await dispatch(fetchDocuments(parentId)).unwrap();
+        dispatch(setCurrentFolder(normalizedFolderId));
+      } catch (err) {
+        toast.error(err);
+      }
+    };
+
+    loadFolder();
+  }, [folderId, dispatch]); // eslint-disable-line
+
+  /* -------------------- Dropdown Close -------------------- */
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -106,49 +130,72 @@ const FolderView = () => {
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const childDocuments =
-    currentFolder?.childDocuments.map((id) => documents[id]).filter(Boolean) || [];
+  /* -------------------- Derived Data -------------------- */
+
+  const childDocuments = useMemo(
+    () => currentFolder?.childDocuments?.map((id) => documents[id]).filter(Boolean) || [],
+    [currentFolder?.childDocuments, documents],
+  );
 
   const isEmpty = childDocuments.length === 0;
 
   const handleNavigate = (id) => {
-    navigate(ROUTES.DASHBOARD.FOLDER_DYNAMIC(id));
+    navigate(ROUTES.APP.FOLDER_DYNAMIC(id));
   };
 
   const handleSelect = (id) => {
     dispatch(setSelectedId(id));
   };
 
-  const handleClickOutside = () => {
+  const handleClickOutsideMain = () => {
     dispatch(setSelectedId(null));
     closeContextMenu();
   };
 
-  if (!folderId || !currentFolder) {
+  /* -------------------- Render Guards -------------------- */
+
+  // 🔥 Full page loader (initial load)
+  if (isInitialLoading) {
+    return (
+      <div className="h-full flex items-center justify-center">
+        <Loading text="Refreshing items..." />
+      </div>
+    );
+  }
+
+  // 🔥 404
+  if (!isLoading && !currentFolder) {
     return <ResourceNotFound />;
   }
 
+  const folderName = currentFolder?.name || "";
+
+  /* -------------------- Render -------------------- */
+
   return (
-    <div className="relative h-full flex flex-col" onClick={handleClickOutside}>
-      <div className="flex items-center justify-between pb-4 border-b border-border-muted -mx-6 px-6">
-        <div className="flex items-center gap-4">
-          <h2 className="text-2xl font-medium text-text-main">{currentFolder?.name}</h2>
+    <div className="relative h-full flex flex-col px-8 py-6" onClick={handleClickOutsideMain}>
+      {/* Header */}
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h2 className="text-3xl font-bold text-text-main tracking-tight mb-1 h-9">
+            {folderName}
+          </h2>
+          <p className="text-sm text-text-dim">Manage your folders and documents with ease</p>
         </div>
 
+        {/* Dropdown */}
         <div className="relative" ref={dropdownRef}>
           <button
-            className="flex items-center gap-2 bg-primary text-white py-2 px-4 rounded-xl text-sm transition-all shadow-lg hover:bg-primary-hover hover:-translate-y-px cursor-pointer"
+            className="flex items-center gap-2.5 bg-primary text-white py-2.5 px-5 rounded-2xl text-sm font-semibold shadow-lg hover:-translate-y-0.5 transition-all"
             onClick={(e) => {
               e.stopPropagation();
               setShowNewDropdown(!showNewDropdown);
             }}
           >
-            <Plus size={18} />
+            <Plus size={18} strokeWidth={2.5} />
             <span>New</span>
             <ChevronDown
               size={14}
@@ -157,11 +204,11 @@ const FolderView = () => {
           </button>
 
           {showNewDropdown && (
-            <div className="absolute top-full right-0 mt-2 w-48 bg-bg-panel rounded-xl shadow-2xl border border-border-muted overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-100">
+            <div className="absolute top-full right-0 mt-3 w-56 bg-bg-panel rounded-2xl shadow-2xl border border-border-main p-1.5 z-50">
               {DROPDOWN_ITEMS.map((item, index) => (
                 <button
                   key={index}
-                  className="flex items-center gap-3 w-full p-3 text-left hover:bg-bg-hover text-text-main font-medium text-sm cursor-pointer transition-colors"
+                  className="flex items-center gap-3 w-full p-2.5 text-left hover:bg-white/5 rounded-xl text-sm"
                   onClick={() => {
                     item.onClick();
                     setShowNewDropdown(false);
@@ -176,43 +223,41 @@ const FolderView = () => {
         </div>
       </div>
 
-      <Breadcrumb currentFolderId={folderId} />
-
-      {/* Grid View */}
-      {isLoading ? (
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-2">
-          <Loader size={32} className="animate-spin text-primary" />
-          <div className="text-text-muted">Loading...</div>
-        </div>
-      ) : isEmpty ? (
-        <EmptyFolderScreen setActiveModal={setActiveModal} />
-      ) : (
-        <div className="flex-1 overflow-y-auto -mx-6 px-6">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-9 gap-6 py-4">
-            {/* Documents */}
-            {childDocuments.map((document) =>
-              document.docType === "folder" ? (
-                <FolderItem
-                  key={document.id}
-                  folder={document}
-                  isSelected={selectedId === document.id}
-                  onNavigate={handleNavigate}
-                  onContextMenu={handleContextMenu}
-                />
-              ) : (
-                <FileItem
-                  key={document.id}
-                  file={document}
-                  isSelected={selectedId === document.id}
-                  onSelect={handleSelect}
-                  onContextMenu={handleContextMenu}
-                />
-              ),
-            )}
+      <div className="mb-6">
+        <Breadcrumb currentFolderId={folderId} />
+      </div>
+      <div className="flex-1 relative flex flex-col min-h-0">
+        {isRefreshing && <Loading text="Refreshing items all..." />}
+        {isEmpty && !isLoading ? (
+          <EmptyFolderScreen setActiveModal={setActiveModal} />
+        ) : (
+          <div className="flex-1 overflow-y-auto -mx-2 px-2 pb-10">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 2xl:grid-cols-9 gap-5 py-2">
+              {childDocuments.map((document) =>
+                document.docType === "folder" ? (
+                  <FolderItem
+                    key={document.id}
+                    folder={document}
+                    isSelected={selectedId === document.id}
+                    onNavigate={handleNavigate}
+                    onContextMenu={handleContextMenu}
+                  />
+                ) : (
+                  <FileItem
+                    key={document.id}
+                    file={document}
+                    isSelected={selectedId === document.id}
+                    onSelect={handleSelect}
+                    onContextMenu={handleContextMenu}
+                  />
+                ),
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
+      {/* Context Menu */}
       {contextMenu && (
         <ContextMenu
           x={contextMenu.x}
@@ -222,10 +267,11 @@ const FolderView = () => {
         />
       )}
 
+      {/* Active Modal */}
       {ActiveModal && (
         <ActiveModal
           {...MODALS_MAP[activeModal]?.props}
-          isOpen={true}
+          isOpen
           onClose={() => setActiveModal(null)}
         />
       )}

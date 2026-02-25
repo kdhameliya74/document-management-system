@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import LoginPage from "@/pages/LoginPage";
 import SignupPage from "@/pages/SignupPage";
 import DashboardPage from "@/pages/DashboardPage";
+import PageNotFound from "@/pages/PageNotFound";
 import ROUTES from "@/utils/routes";
 import { Toaster } from "react-hot-toast";
 
@@ -16,7 +17,7 @@ const PrivateRoute = ({ children }) => {
 const PublicRoute = ({ children }) => {
   const { isAuthenticated, isCheckingAuth } = useSelector((state) => state.auth);
   if (isCheckingAuth) return null; // Prevent flicker
-  return isAuthenticated ? <Navigate to={ROUTES.DASHBOARD.ROOT} replace /> : children;
+  return isAuthenticated ? <Navigate to={ROUTES.APP.ROOT} replace /> : children;
 };
 
 function App() {
@@ -45,7 +46,7 @@ function App() {
         />
 
         <Route
-          path={ROUTES.DASHBOARD.WILDCARD}
+          path={ROUTES.APP.WILDCARD}
           element={
             <PrivateRoute>
               <DashboardPage />
@@ -53,7 +54,10 @@ function App() {
           }
         />
 
-        <Route path={ROUTES.HOME} element={<Navigate to={ROUTES.DASHBOARD.ROOT} replace />} />
+        <Route path={ROUTES.HOME} element={<Navigate to={ROUTES.APP.ROOT} replace />} />
+
+        {/* Catch-all 404 */}
+        <Route path="*" element={<PageNotFound />} />
       </Routes>
     </Router>
   );

@@ -41,7 +41,7 @@ const FILE_TYPE_MAP = [
   {
     test: (type) => type === "application/pdf",
     Icon: FileText,
-    className: "text-orange-500",
+    className: "text-[#ef4444]", // Red-500
   },
   // Word Documents
   {
@@ -51,7 +51,7 @@ const FILE_TYPE_MAP = [
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       ].includes(type),
     Icon: FileText,
-    className: "text-blue-600",
+    className: "text-[#3b82f6]", // Blue-500
   },
   // Excel / CSV
   {
@@ -62,7 +62,7 @@ const FILE_TYPE_MAP = [
         "text/csv",
       ].includes(type),
     Icon: Sheet,
-    className: "text-green-600",
+    className: "text-[#22c55e]", // Green-500
   },
   // PowerPoint
   {
@@ -72,7 +72,7 @@ const FILE_TYPE_MAP = [
         "application/vnd.openxmlformats-officedocument.presentationml.presentation",
       ].includes(type),
     Icon: Presentation,
-    className: "text-orange-600",
+    className: "text-[#f59e0b]", // Amber-500
   },
   // ZIP / Compressed
   {

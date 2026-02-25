@@ -6,30 +6,40 @@ const Header = () => {
   const { user } = useSelector((state) => state.auth);
 
   return (
-    <div className="h-16 flex items-center justify-between px-6 bg-bg-panel border-b border-border-muted">
-      <div className="relative w-[400px]">
-        <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted" />
+    <div className="h-20 flex items-center justify-between px-8 bg-bg-main border-b border-border-muted relative z-30">
+      <div className="relative w-[450px] group">
+        <Search
+          size={18}
+          className="absolute left-4 top-1/2 -translate-y-1/2 text-text-dim group-focus-within:text-primary transition-colors"
+        />
         <input
           type="text"
-          placeholder="Search files, documents..."
-          className="w-full py-2 px-4 pl-10 border border-border-muted rounded-xl bg-bg-main text-sm text-text-main transition-all outline-none focus:border-primary focus:ring-4 focus:ring-primary/10"
+          placeholder="Search for anything..."
+          className="w-full py-2.5 px-6 pl-12 border border-border-main rounded-2xl bg-bg-panel text-sm text-text-main transition-all outline-none focus:border-primary/50 focus:ring-4 focus:ring-primary/5 shadow-inner group-hover:border-border-muted"
         />
       </div>
 
-      <div className="flex items-center gap-4">
-        <button className="text-text-muted p-2 rounded-full transition-all hover:bg-bg-hover hover:text-text-main">
-          <Bell size={18} />
-        </button>
-        <button className="text-text-muted p-2 rounded-full transition-all hover:bg-bg-hover hover:text-text-main">
-          <Settings size={18} />
-        </button>
-        <div className="flex items-center gap-2 cursor-pointer p-1 pr-2 rounded-xl transition-colors hover:bg-bg-hover">
-          <div className="w-8 h-8 bg-linear-to-br from-secondary to-primary rounded-full flex items-center justify-center text-white font-normal text-sm">
+      <div className="flex items-center gap-6">
+        <div className="flex items-center gap-2 border-r border-border-muted pr-6">
+          <button className="text-text-muted p-2.5 rounded-xl transition-all hover:bg-bg-hover hover:text-text-main group relative">
+            <Bell size={20} strokeWidth={1.5} />
+            <div className="absolute top-2.5 right-2.5 w-2 h-2 bg-primary rounded-full border-2 border-bg-main" />
+          </button>
+          <button className="text-text-muted p-2.5 rounded-xl transition-all hover:bg-bg-hover hover:text-text-main">
+            <Settings size={20} strokeWidth={1.5} />
+          </button>
+        </div>
+
+        <div className="flex items-center gap-3 cursor-pointer group">
+          <div className="text-right hidden sm:block">
+            <p className="text-sm font-bold text-text-main leading-none">
+              {user?.fullName || "Guest User"}
+            </p>
+            <p className="text-[11px] text-text-dim font-medium mt-1">Member</p>
+          </div>
+          <div className="w-10 h-10 bg-indigo-600/10 border border-indigo-500/20 rounded-2xl flex items-center justify-center text-primary font-bold text-sm shadow-lg shadow-indigo-500/5 group-hover:scale-105 transition-transform">
             {user?.firstName?.charAt(0).toUpperCase() || "U"}
           </div>
-          <span className="font-medium text-sm text-text-main line-clamp-1">
-            {user?.fullName || "User"}
-          </span>
         </div>
       </div>
     </div>
