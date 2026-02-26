@@ -1,4 +1,3 @@
-import { Loader } from "lucide-react";
 const Loading = ({ text = "Loading..." }) => {
   return (
     <div className="absolute inset-0 bg-bg-main/50 backdrop-blur-[1px] z-10 flex flex-col items-center justify-center gap-4 transition-all animate-in fade-in duration-300">

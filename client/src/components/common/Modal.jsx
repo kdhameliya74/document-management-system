@@ -18,7 +18,7 @@ const Modal = ({ isOpen, onClose, title, icon: Icon, children }) => {
           exit={{ opacity: 0, scale: 0.92, y: 30 }}
           transition={{ type: "spring", damping: 25, stiffness: 300 }}
         >
-          <div className="flex items-center justify-between p-7 border-b border-border-muted">
+          <div className="flex items-center justify-between p-5 border-b border-border-muted">
             <div className="flex items-center gap-4">
               {Icon && (
                 <div className="w-12 h-12 rounded-2xl bg-bg-hover flex items-center justify-center text-primary shadow-inner">
@@ -29,9 +29,6 @@ const Modal = ({ isOpen, onClose, title, icon: Icon, children }) => {
                 <h2 className="text-xl font-bold text-text-main tracking-tight leading-none mb-1">
                   {title}
                 </h2>
-                <p className="text-[11px] text-text-dim font-bold uppercase tracking-widest">
-                  Action Required
-                </p>
               </div>
             </div>
             <button
@@ -42,7 +39,7 @@ const Modal = ({ isOpen, onClose, title, icon: Icon, children }) => {
             </button>
           </div>
 
-          <div className="p-8">{children}</div>
+          <div className="p-5">{children}</div>
         </motion.div>
       </div>
     </AnimatePresence>

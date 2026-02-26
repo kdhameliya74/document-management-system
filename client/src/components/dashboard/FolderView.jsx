@@ -20,6 +20,7 @@ import ContextMenu from "@/components/common/ContextMenu";
 import FolderModal from "@/components/modals/FolderModal";
 import UploadFileModal from "@/components/modals/UploadFileModal";
 import DeleteModal from "@/components/modals/DeleteModal";
+import MoveModal from "@/components/modals/MoveModal";
 import EmptyFolderScreen from "@/components/dashboard/EmptyFolderScreen";
 import useFileFolderContextMenu from "@/hooks/useFileFolderContextMenu";
 import ResourceNotFound from "@/components/common/ResourceNotFound";
@@ -80,6 +81,12 @@ const FolderView = () => {
           itemType: selectedItemType,
           note: "You can restore this item from your Trash folder later if you change your mind.",
           onDelete: async () => await dispatch(deleteDocument(selectedItem.id)).unwrap(),
+        },
+      },
+      move: {
+        Component: MoveModal,
+        props: {
+          item: selectedItem,
         },
       },
     }),

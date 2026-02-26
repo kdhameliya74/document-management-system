@@ -1,3 +1,4 @@
+export const APP_ROOT_NAME = "My Drive";
 export const FOLDER_MAX_NAME_LENGTH = 20;
 export const FILE_MAX_NAME_LENGTH = 20;
 
@@ -21,11 +22,15 @@ export const FOLDER_COLORS = Object.freeze({
   PINK: "#ec4899",
   TEAL: "#14b8a6",
   SLATE: "#64748b",
+  ORANGE: "#f97316",
+  YELLOW: "#eab308",
 });
 
 export const DEFAULT_MESSAGES = Object.freeze({
   FAILED_TO_FETCH_DOCUMENTS: "Failed to fetch documents!",
   NO_FOLDERS_AVAILABLE: "No folders available",
+  DOCUMENT_MOVE_FAILED: "Failed to move document!",
+  DOCUMENT_MOVE_SUCCESS: "Document moved successfully!",
 });
 
 export const FOLDER_MESSAGES = Object.freeze({

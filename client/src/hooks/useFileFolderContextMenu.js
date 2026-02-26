@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { Trash, Eye, Share, Download, FolderPen, ArchiveRestore, Trash2 } from "lucide-react";
+import { Trash, Eye, Share, Download, FolderPen, Move, ArchiveRestore, Trash2 } from "lucide-react";
 import { setSelectedId, setShowDetails } from "@/store/documentSystemSlice";
 import { TRASH_MENU_ACTIONS } from "@/helpers/constants";
 
@@ -75,9 +75,9 @@ const useFileFolderContextMenu = (menuFor = "dashbaord", onMenuAction) => {
           onClick: () => openModal("edit"),
         },
         {
-          label: "Delete",
-          icon: Trash,
-          onClick: () => openModal("delete"),
+          label: "Move",
+          icon: Move,
+          onClick: () => openModal("move"),
         },
         {
           label: "View Details",
@@ -102,6 +102,11 @@ const useFileFolderContextMenu = (menuFor = "dashbaord", onMenuAction) => {
             alert("Download functionality coming soon!");
             closeContextMenu();
           },
+        },
+        {
+          label: "Delete",
+          icon: Trash,
+          onClick: () => openModal("delete"),
         },
       ];
     }
