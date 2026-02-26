@@ -1,36 +1,37 @@
 import React, { useState } from "react";
 import { Folder, Search, ChevronRight, ArrowLeft } from "lucide-react";
 import Modal from "@/components/common/Modal";
+import { FOLDER_COLORS } from "@/helpers/constants";
 
 const SAMPLE_FOLDERS = [
-  { id: "root", name: "My Drive", parentId: null },
-  { id: "1", name: "Project Alpha", parentId: "root" },
-  { id: "2", name: "Resources", parentId: "root" },
-  { id: "3", name: "Final Drafts", parentId: "1" },
-  { id: "4", name: "Archive", parentId: "2" },
-  { id: "5", name: "Project Beta", parentId: "root" },
-  { id: "6", name: "Project Gamma", parentId: "root" },
-  { id: "7", name: "Project Delta", parentId: "root" },
-  { id: "8", name: "Project Epsilon", parentId: "root" },
-  { id: "9", name: "Project Zeta", parentId: "1" },
-  { id: "10", name: "Project Eta", parentId: "1" },
-  { id: "11", name: "Project Theta", parentId: "1" },
-  { id: "12", name: "Project Iota", parentId: "1" },
-  { id: "13", name: "Project Kappa", parentId: "2" },
-  { id: "14", name: "Project Lambda", parentId: "2" },
-  { id: "15", name: "Project Mu", parentId: "2" },
-  { id: "16", name: "Project Nu", parentId: "2" },
-  { id: "17", name: "Project Xi", parentId: "2" },
-  { id: "18", name: "Project Omicron", parentId: "2" },
-  { id: "19", name: "Project Pi", parentId: "2" },
-  { id: "20", name: "Project Rho", parentId: "2" },
-  { id: "21", name: "Project Sigma", parentId: "3" },
-  { id: "22", name: "Project Tau", parentId: "3" },
-  { id: "23", name: "Project Upsilon", parentId: "3" },
-  { id: "24", name: "Project Phi", parentId: "3" },
-  { id: "25", name: "Project Chi", parentId: "3" },
-  { id: "26", name: "Project Psi", parentId: "4" },
-  { id: "27", name: "Project Omega", parentId: "4" },
+  { id: "root", name: "My Drive", parentId: null, color: FOLDER_COLORS.DEFAULT },
+  { id: "1", name: "Project Alpha", parentId: "root", color: FOLDER_COLORS.RED },
+  { id: "2", name: "Resources", parentId: "root", color: FOLDER_COLORS.AMBER },
+  { id: "3", name: "Final Drafts", parentId: "1", color: FOLDER_COLORS.EMERALD },
+  { id: "4", name: "Archive", parentId: "2", color: FOLDER_COLORS.BLUE },
+  { id: "5", name: "Project Beta", parentId: "root", color: FOLDER_COLORS.VIOLET },
+  { id: "6", name: "Project Gamma", parentId: "root", color: FOLDER_COLORS.PINK },
+  { id: "7", name: "Project Delta", parentId: "root", color: FOLDER_COLORS.TEAL },
+  { id: "8", name: "Project Epsilon", parentId: "root", color: FOLDER_COLORS.SLATE },
+  { id: "9", name: "Project Zeta", parentId: "1", color: FOLDER_COLORS.ORANGE },
+  { id: "10", name: "Project Eta", parentId: "1", color: FOLDER_COLORS.YELLOW },
+  { id: "11", name: "Project Theta", parentId: "1", color: FOLDER_COLORS.DEFAULT },
+  { id: "12", name: "Project Iota", parentId: "1", color: FOLDER_COLORS.RED },
+  { id: "13", name: "Project Kappa", parentId: "2", color: FOLDER_COLORS.AMBER },
+  { id: "14", name: "Project Lambda", parentId: "2", color: FOLDER_COLORS.EMERALD },
+  { id: "15", name: "Project Mu", parentId: "2", color: FOLDER_COLORS.BLUE },
+  { id: "16", name: "Project Nu", parentId: "2", color: FOLDER_COLORS.VIOLET },
+  { id: "17", name: "Project Xi", parentId: "2", color: FOLDER_COLORS.PINK },
+  { id: "18", name: "Project Omicron", parentId: "2", color: FOLDER_COLORS.TEAL },
+  { id: "19", name: "Project Pi", parentId: "2", color: FOLDER_COLORS.SLATE },
+  { id: "20", name: "Project Rho", parentId: "2", color: FOLDER_COLORS.ORANGE },
+  { id: "21", name: "Project Sigma", parentId: "3", color: FOLDER_COLORS.YELLOW },
+  { id: "22", name: "Project Tau", parentId: "3", color: FOLDER_COLORS.DEFAULT },
+  { id: "23", name: "Project Upsilon", parentId: "3", color: FOLDER_COLORS.RED },
+  { id: "24", name: "Project Phi", parentId: "3", color: FOLDER_COLORS.AMBER },
+  { id: "25", name: "Project Chi", parentId: "3"  , color: FOLDER_COLORS.EMERALD },
+  { id: "26", name: "Project Psi", parentId: "4", color: FOLDER_COLORS.BLUE },
+  { id: "27", name: "Project Omega", parentId: "4", color: FOLDER_COLORS.VIOLET },
 ];
 
 const MoveModal = ({ isOpen, onClose, onMove, item }) => {
@@ -70,7 +71,6 @@ const MoveModal = ({ isOpen, onClose, onMove, item }) => {
       icon={<Folder size={18} className="text-primary" />}
     >
       <div className="flex flex-col gap-5">
-        {/* Search */}
         <div className="relative group">
           <Search
             className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-dim group-focus-within:text-primary transition-colors"
@@ -104,12 +104,11 @@ const MoveModal = ({ isOpen, onClose, onMove, item }) => {
           ))}
         </div>
 
-        {/* Folder List */}
         <div className="flex flex-col max-h-[260px] overflow-y-auto pr-1 gap-0.5 custom-scrollbar">
           {currentParentId !== "root" && !searchQuery && (
             <button
               onClick={() => setCurrentParentId(currentParent?.parentId || "root")}
-              className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-bg-hover text-text-dim transition-all cursor-pointer group"
+              className="flex items-center gap-2.5 p-1.5 rounded-lg hover:bg-bg-hover text-text-dim transition-all cursor-pointer group"
             >
               <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
               <span className="text-sm font-medium">Back</span>
@@ -120,15 +119,15 @@ const MoveModal = ({ isOpen, onClose, onMove, item }) => {
             <button
               key={folder.id}
               onClick={() => setCurrentParentId(folder.id)}
-              className="flex items-center justify-between p-2 rounded-lg hover:bg-bg-hover text-text-main transition-all cursor-pointer group"
+              className="flex items-center justify-between p-1 rounded-lg hover:bg-bg-hover text-text-main transition-all cursor-pointer group"
             >
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary/20 transition-colors">
-                  <Folder size={18} fill="currentColor" fillOpacity={0.2} />
+                  <Folder size={16} color={folder.color} fill={folder.color} fillOpacity={0.2} />
                 </div>
                 <span className="text-sm font-medium">{folder.name}</span>
               </div>
-              <ChevronRight size={16} className="text-text-dim group-hover:translate-x-1 transition-transform opacity-0 group-hover:opacity-100" />
+              <ChevronRight size={16} className="text-text-dim group-hover:translate-x-1 transition-transform opacity-0 group-hover:opacity-100 mr-3" />
             </button>
           ))}
 

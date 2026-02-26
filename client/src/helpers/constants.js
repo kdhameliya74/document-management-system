@@ -1,3 +1,4 @@
+export const APP_ROOT_NAME = "My Drive";
 export const FOLDER_MAX_NAME_LENGTH = 20;
 export const FILE_MAX_NAME_LENGTH = 20;
 
