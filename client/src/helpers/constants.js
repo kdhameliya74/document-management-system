@@ -29,6 +29,8 @@ export const FOLDER_COLORS = Object.freeze({
 export const DEFAULT_MESSAGES = Object.freeze({
   FAILED_TO_FETCH_DOCUMENTS: "Failed to fetch documents!",
   NO_FOLDERS_AVAILABLE: "No folders available",
+  DOCUMENT_MOVE_FAILED: "Failed to move document!",
+  DOCUMENT_MOVE_SUCCESS: "Document moved successfully!",
 });
 
 export const FOLDER_MESSAGES = Object.freeze({

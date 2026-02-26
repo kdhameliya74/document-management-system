@@ -2,8 +2,8 @@ import api from "@/utils/api";
 import axios from "axios";
 
 const DocumentService = {
-  getAll: async (parentId) => {
-    const response = await api.get("/documents", { params: { parentId } });
+  getAll: async (parentId, extraParams = {}) => {
+    const response = await api.get("/documents", { params: { parentId, ...extraParams } });
     return response.data;
   },
 
@@ -52,6 +52,11 @@ const DocumentService = {
       headers: { "Content-Type": file.type },
     });
     return response;
+  },
+
+  moveDocument: async (docId, parentId) => {
+    const response = await api.patch(`/documents/${docId}/move`, { parentId });
+    return response.data;
   },
 };
 

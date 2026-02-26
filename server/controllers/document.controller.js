@@ -46,13 +46,44 @@ async function buildBreadcrumbs(parentId, userId) {
 // @access  Private
 export const listDocuments = asyncHandler(async (req, res) => {
   const userId = req.user.id;
-  const { parentId = null } = req.query;
+  const { parentId = null, mode = null } = req.query;
 
   const baseFilter = {
     owner: userId,
     parentId: parentId || null,
     isTrashed: false,
   };
+
+  if (mode === "move") {
+    const documents = await Document.find({ ...baseFilter, docType: DOC_TYPES.FOLDER })
+      .sort({ name: 1 })
+      .select("_id name parentId color")
+      .lean();
+
+    const folderIds = documents.map((f) => f._id);
+
+    const childFolders = await Document.find({
+      parentId: { $in: folderIds },
+      owner: userId,
+      docType: DOC_TYPES.FOLDER,
+      isTrashed: false,
+    })
+      .select("parentId")
+      .lean();
+    const parentsWithChildren = new Set(
+      childFolders.map((c) => c.parentId.toString())
+    );
+
+    const folders = documents.map((folder) => {
+      const { _id, ...rest } = folder;
+      return {
+        ...rest,
+        id: _id.toString(),
+        hasChildren: parentsWithChildren.has(_id.toString()),
+      }
+    });
+    return res.status(200).json({ success: true, folders });
+  }
 
   const [items, currentFolder] = await Promise.all([
     Document.find(baseFilter).sort({ docType: -1, name: 1 }), // folders first
@@ -66,12 +97,11 @@ export const listDocuments = asyncHandler(async (req, res) => {
   // Add current folder itself at the end of breadcrumbs if we're inside one
   if (currentFolder) {
     breadcrumbs.push({
-      id: currentFolder._id,
+      id: currentFolder._id.toString(),
       name: currentFolder.name,
       parentId: currentFolder.parentId || "root",
     });
   }
-
   const folders = items.filter((d) => d.docType === DOC_TYPES.FOLDER);
   const files = items.filter((d) => d.docType === DOC_TYPES.FILE);
 
@@ -405,4 +435,21 @@ export const confirmUpload = asyncHandler(async (req, res) => {
   });
 
   return res.status(201).json({ success: true, message: "File record created", file });
+});
+
+// @route   POST /api/documents/move
+export const moveDocument = asyncHandler(async (req, res) => {
+  const { parentId } = req.body;
+  const { id } = req.params;
+  const owner = req.user.id;
+
+  const document = await Document.findOne({ _id: id, owner });
+  if (!document) {
+    return res.status(404).json({ success: false, message: "Document not found" });
+  }
+
+  document.parentId = parentId || null;
+  await document.save();
+
+  return res.status(200).json({ success: true, message: "moved" });
 });

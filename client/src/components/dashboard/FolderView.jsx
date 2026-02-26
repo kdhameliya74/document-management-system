@@ -87,10 +87,6 @@ const FolderView = () => {
         Component: MoveModal,
         props: {
           item: selectedItem,
-          onMove: (parentId) => {
-            toast.success(`Moved to ${parentId}`);
-            // Move logic will be implemented later
-          },
         },
       },
     }),

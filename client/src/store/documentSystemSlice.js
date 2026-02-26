@@ -197,6 +197,27 @@ export const getTrashedDocument = createAsyncThunk(
   },
 );
 
+/*
+|--------------------------------------------------------------------------
+| moveDocument
+|--------------------------------------------------------------------------
+*/
+export const moveDocument = createAsyncThunk(
+  "documents/move",
+  async ({ id, parentId }, { rejectWithValue }) => {
+    try {
+      await DocumentService.moveDocument(id, parentId);
+      return {
+        id,
+        parentId,
+      };
+    } catch (err) {
+      logError(err);
+      return rejectWithValue(DEFAULT_MESSAGES.DOCUMENT_MOVE_FAILED);
+    }
+  },
+);
+
 const ensureDocument = (state, id, data, topParent = "root") => {
   const docState = topParent === "root" ? state.documents : state.trashDocuments;
   docState[id] ??= {
@@ -245,7 +266,7 @@ const documentSystemSlice = createSlice({
     },
     // fetch documents and files
     // Mock version history
-    addFileVersion: () => {},
+    addFileVersion: () => { },
   },
   extraReducers: (builder) => {
     builder
@@ -419,7 +440,13 @@ const documentSystemSlice = createSlice({
         if (state.documents[parentId]) {
           state.documents[parentId].childDocuments.push(id);
         }
-      });
+      }).addCase(moveDocument.fulfilled, (state, action) => {
+        const { id } = action.payload;
+        if (state.documents[id]) {
+          const { [id]: _, ...restDocs } = state.documents;
+          state.documents = { ...restDocs };
+        }
+      })
   },
 });
 

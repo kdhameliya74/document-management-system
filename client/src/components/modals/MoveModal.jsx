@@ -1,67 +1,104 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Folder, Search, ChevronRight, ArrowLeft } from "lucide-react";
 import Modal from "@/components/common/Modal";
-import { FOLDER_COLORS } from "@/helpers/constants";
+import DocumentService from "@/services/document.service";
+import { APP_ROOT_NAME, DEFAULT_MESSAGES } from "@/helpers/constants";
+import { logError } from "@/helpers/utils";
+import { useDispatch } from "react-redux";
+import { moveDocument } from "@/store/documentSystemSlice";
+import toast from "react-hot-toast";
+import Loading from "@/components/common/Loading";
 
-const SAMPLE_FOLDERS = [
-  { id: "root", name: "My Drive", parentId: null, color: FOLDER_COLORS.DEFAULT },
-  { id: "1", name: "Project Alpha", parentId: "root", color: FOLDER_COLORS.RED },
-  { id: "2", name: "Resources", parentId: "root", color: FOLDER_COLORS.AMBER },
-  { id: "3", name: "Final Drafts", parentId: "1", color: FOLDER_COLORS.EMERALD },
-  { id: "4", name: "Archive", parentId: "2", color: FOLDER_COLORS.BLUE },
-  { id: "5", name: "Project Beta", parentId: "root", color: FOLDER_COLORS.VIOLET },
-  { id: "6", name: "Project Gamma", parentId: "root", color: FOLDER_COLORS.PINK },
-  { id: "7", name: "Project Delta", parentId: "root", color: FOLDER_COLORS.TEAL },
-  { id: "8", name: "Project Epsilon", parentId: "root", color: FOLDER_COLORS.SLATE },
-  { id: "9", name: "Project Zeta", parentId: "1", color: FOLDER_COLORS.ORANGE },
-  { id: "10", name: "Project Eta", parentId: "1", color: FOLDER_COLORS.YELLOW },
-  { id: "11", name: "Project Theta", parentId: "1", color: FOLDER_COLORS.DEFAULT },
-  { id: "12", name: "Project Iota", parentId: "1", color: FOLDER_COLORS.RED },
-  { id: "13", name: "Project Kappa", parentId: "2", color: FOLDER_COLORS.AMBER },
-  { id: "14", name: "Project Lambda", parentId: "2", color: FOLDER_COLORS.EMERALD },
-  { id: "15", name: "Project Mu", parentId: "2", color: FOLDER_COLORS.BLUE },
-  { id: "16", name: "Project Nu", parentId: "2", color: FOLDER_COLORS.VIOLET },
-  { id: "17", name: "Project Xi", parentId: "2", color: FOLDER_COLORS.PINK },
-  { id: "18", name: "Project Omicron", parentId: "2", color: FOLDER_COLORS.TEAL },
-  { id: "19", name: "Project Pi", parentId: "2", color: FOLDER_COLORS.SLATE },
-  { id: "20", name: "Project Rho", parentId: "2", color: FOLDER_COLORS.ORANGE },
-  { id: "21", name: "Project Sigma", parentId: "3", color: FOLDER_COLORS.YELLOW },
-  { id: "22", name: "Project Tau", parentId: "3", color: FOLDER_COLORS.DEFAULT },
-  { id: "23", name: "Project Upsilon", parentId: "3", color: FOLDER_COLORS.RED },
-  { id: "24", name: "Project Phi", parentId: "3", color: FOLDER_COLORS.AMBER },
-  { id: "25", name: "Project Chi", parentId: "3"  , color: FOLDER_COLORS.EMERALD },
-  { id: "26", name: "Project Psi", parentId: "4", color: FOLDER_COLORS.BLUE },
-  { id: "27", name: "Project Omega", parentId: "4", color: FOLDER_COLORS.VIOLET },
-];
-
-const MoveModal = ({ isOpen, onClose, onMove, item }) => {
+const MoveModal = ({ isOpen, onClose, item }) => {
+  const [isMoving, setIsMoving] = useState(false);
   const [currentParentId, setCurrentParentId] = useState("root");
+  const [foldersCache, setFoldersCache] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [breadcrumbs, setBreadcrumbs] = useState([
+    { id: "root", name: APP_ROOT_NAME },
+  ]);
 
-  const currentParent = SAMPLE_FOLDERS.find((f) => f.id === currentParentId);
-  const breadcrumbs = [];
-  let tempId = currentParentId;
-  while (tempId) {
-    const f = SAMPLE_FOLDERS.find((folder) => folder.id === tempId);
-    if (f) {
-      breadcrumbs.unshift(f);
-      tempId = f.parentId;
-    } else {
-      tempId = null;
+  const dispatch = useDispatch();
+  const folders = foldersCache[currentParentId] || [];
+
+  const fetchFolders = useCallback(
+    async (parentId) => {
+      if (foldersCache[parentId]) return;
+
+      setIsLoading(true);
+      try {
+        const pId = parentId === "root" ? null : parentId;
+        const data = await DocumentService.getAll(pId, { mode: "move" });
+
+        setFoldersCache((prev) => ({
+          ...prev,
+          [parentId]: data.folders,
+        }));
+      } catch (error) {
+        logError(error);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [foldersCache]
+  );
+
+  useEffect(() => {
+    if (!isOpen) return;
+    fetchFolders(currentParentId);
+  }, [isOpen, currentParentId, fetchFolders]);
+  
+  useEffect(() => {
+    if (!isOpen) {
+      setCurrentParentId("root");
+      setSearchQuery("");
+      setBreadcrumbs([{ id: "root", name: APP_ROOT_NAME }]);
     }
-  }
+  }, [isOpen]);
 
-  const filteredFolders = SAMPLE_FOLDERS.filter((f) => {
-    const matchesParent = f.parentId === currentParentId;
+  const handleNavigate = (folder) => {
+    setCurrentParentId(folder.id);
+    setBreadcrumbs((prev) => {
+      const existingIndex = prev.findIndex((crumb) => crumb.id === folder.id);
+      if (existingIndex !== -1) {
+        return prev.slice(0, existingIndex + 1);
+      }
+      return [...prev, { id: folder.id, name: folder.name }];
+    });
+  };
+
+  const handleBack = () => {
+    if (breadcrumbs.length > 1) {
+      const parentCrumb = breadcrumbs[breadcrumbs.length - 2];
+      setCurrentParentId(parentCrumb.id);
+      setBreadcrumbs((prev) => prev.slice(0, -1));
+    }
+  };
+
+  const filteredFolders = folders.filter((f) => {
     const matchesSearch = f.name.toLowerCase().includes(searchQuery.toLowerCase());
     const isNotSelf = f.id !== item?.id;
-    return matchesParent && (searchQuery ? matchesSearch : true) && isNotSelf;
+    return (searchQuery ? matchesSearch : true) && isNotSelf;
   });
 
-  const handleMove = () => {
-    onMove(currentParentId);
-    onClose();
+  const handleMove = async (targetParentId = currentParentId) => {
+    try {
+      setIsMoving(true);
+      const pId = targetParentId === "root" ? null : targetParentId;
+      await dispatch(moveDocument({ id: item.id, parentId: pId }));
+      toast.success(DEFAULT_MESSAGES.DOCUMENT_MOVE_SUCCESS);
+      onClose();
+    } catch (error) {
+      logError(error);
+      toast.error(DEFAULT_MESSAGES.DOCUMENT_MOVE_FAILED);
+    } finally {
+      setIsMoving(false);
+    }
   };
+
+  const currentParent = breadcrumbs[breadcrumbs.length - 1];
+  const noFoldersFound = filteredFolders.length === 0 && !isLoading && !isMoving;
 
   return (
     <Modal
@@ -91,7 +128,7 @@ const MoveModal = ({ isOpen, onClose, onMove, item }) => {
             <React.Fragment key={crumb.id}>
               {index > 0 && <ChevronRight size={12} className="text-text-dim shrink-0" />}
               <button
-                onClick={() => setCurrentParentId(crumb.id)}
+                onClick={() => handleNavigate(crumb)}
                 className={`text-xs font-medium px-2 py-0.5 rounded-lg transition-colors whitespace-nowrap cursor-pointer ${
                   crumb.id === currentParentId
                     ? "text-primary bg-primary/10"
@@ -104,10 +141,11 @@ const MoveModal = ({ isOpen, onClose, onMove, item }) => {
           ))}
         </div>
 
-        <div className="flex flex-col max-h-[260px] overflow-y-auto pr-1 gap-0.5 custom-scrollbar">
+        <div className="flex flex-col min-h-[200px] max-h-[260px] overflow-y-auto pr-1 gap-0.5 custom-scrollbar relative">
+          {(isLoading || isMoving) && <Loading />}
           {currentParentId !== "root" && !searchQuery && (
             <button
-              onClick={() => setCurrentParentId(currentParent?.parentId || "root")}
+              onClick={handleBack}
               className="flex items-center gap-2.5 p-1.5 rounded-lg hover:bg-bg-hover text-text-dim transition-all cursor-pointer group"
             >
               <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
@@ -118,20 +156,43 @@ const MoveModal = ({ isOpen, onClose, onMove, item }) => {
           {filteredFolders.map((folder) => (
             <button
               key={folder.id}
-              onClick={() => setCurrentParentId(folder.id)}
-              className="flex items-center justify-between p-1 rounded-lg hover:bg-bg-hover text-text-main transition-all cursor-pointer group"
+              onClick={() => folder.hasChildren && handleNavigate(folder)}
+              className={`flex items-center justify-between p-1 rounded-lg text-text-main transition-all group ${
+                folder.id === item?.id ? "opacity-50 cursor-not-allowed" : "hover:bg-bg-hover cursor-pointer"
+              }`}
             >
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary/20 transition-colors">
-                  <Folder size={16} color={folder.color} fill={folder.color} fillOpacity={0.2} />
+                  <Folder
+                    size={16}
+                    color={folder.color}
+                    fill={folder.color || "currentColor"}
+                    fillOpacity={0.2}
+                  />
                 </div>
                 <span className="text-sm font-medium">{folder.name}</span>
               </div>
-              <ChevronRight size={16} className="text-text-dim group-hover:translate-x-1 transition-transform opacity-0 group-hover:opacity-100 mr-3" />
+              <div className="flex items-center gap-2 group/move">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleMove(folder.id);
+                  }}
+                  className="text-xs cursor-pointer bg-bg-panel/30 px-2.5 py-1.5 group-hover/move:bg-bg-panel rounded-lg text-white opacity-0 group-hover:opacity-100 transition-all"
+                >
+                  Move
+                </button>
+                {folder.hasChildren && (
+                  <ChevronRight
+                    size={16}
+                    className="text-text-dim opacity-40 group-hover:opacity-100 transition-opacity"
+                  />
+                )}
+              </div>
             </button>
           ))}
 
-          {filteredFolders.length === 0 && (
+          {noFoldersFound && (
             <div className="flex flex-col items-center justify-center py-8 text-text-dim">
               <Folder size={40} strokeWidth={1} className="mb-3 opacity-20" />
               <p className="font-medium text-xs">No folders found</p>
@@ -153,8 +214,9 @@ const MoveModal = ({ isOpen, onClose, onMove, item }) => {
               Cancel
             </button>
             <button
+              disabled={isMoving}
               onClick={handleMove}
-              className="px-6 py-2 rounded-lg text-sm font-medium text-white bg-primary hover:bg-primary-hover shadow-lg shadow-primary/20 transition-all cursor-pointer"
+              className="px-6 py-2 rounded-lg text-sm font-medium text-white bg-primary hover:bg-primary-hover shadow-lg shadow-primary/20 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Move Here
             </button>
