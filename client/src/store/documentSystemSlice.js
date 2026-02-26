@@ -266,7 +266,7 @@ const documentSystemSlice = createSlice({
     },
     // fetch documents and files
     // Mock version history
-    addFileVersion: () => { },
+    addFileVersion: () => {},
   },
   extraReducers: (builder) => {
     builder
@@ -440,13 +440,14 @@ const documentSystemSlice = createSlice({
         if (state.documents[parentId]) {
           state.documents[parentId].childDocuments.push(id);
         }
-      }).addCase(moveDocument.fulfilled, (state, action) => {
+      })
+      .addCase(moveDocument.fulfilled, (state, action) => {
         const { id } = action.payload;
         if (state.documents[id]) {
           const { [id]: _, ...restDocs } = state.documents;
           state.documents = { ...restDocs };
         }
-      })
+      });
   },
 });
 

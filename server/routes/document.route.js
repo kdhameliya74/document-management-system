@@ -12,7 +12,7 @@ import {
   getPresignedUrls,
   confirmUpload,
   permanentDelete,
-  moveDocument
+  moveDocument,
 } from "../controllers/document.controller.js";
 
 const router = express.Router();

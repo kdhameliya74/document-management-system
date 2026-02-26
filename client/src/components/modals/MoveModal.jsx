@@ -15,9 +15,7 @@ const MoveModal = ({ isOpen, onClose, item }) => {
   const [foldersCache, setFoldersCache] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [breadcrumbs, setBreadcrumbs] = useState([
-    { id: "root", name: APP_ROOT_NAME },
-  ]);
+  const [breadcrumbs, setBreadcrumbs] = useState([{ id: "root", name: APP_ROOT_NAME }]);
 
   const dispatch = useDispatch();
   const folders = foldersCache[currentParentId] || [];
@@ -41,14 +39,14 @@ const MoveModal = ({ isOpen, onClose, item }) => {
         setIsLoading(false);
       }
     },
-    [foldersCache]
+    [foldersCache],
   );
 
   useEffect(() => {
     if (!isOpen) return;
     fetchFolders(currentParentId);
   }, [isOpen, currentParentId, fetchFolders]);
-  
+
   useEffect(() => {
     if (!isOpen) {
       setCurrentParentId("root");
@@ -158,7 +156,9 @@ const MoveModal = ({ isOpen, onClose, item }) => {
               key={folder.id}
               onClick={() => folder.hasChildren && handleNavigate(folder)}
               className={`flex items-center justify-between p-1 rounded-lg text-text-main transition-all group ${
-                folder.id === item?.id ? "opacity-50 cursor-not-allowed" : "hover:bg-bg-hover cursor-pointer"
+                folder.id === item?.id
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:bg-bg-hover cursor-pointer"
               }`}
             >
               <div className="flex items-center gap-2.5">

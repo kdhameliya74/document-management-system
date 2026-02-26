@@ -70,9 +70,7 @@ export const listDocuments = asyncHandler(async (req, res) => {
     })
       .select("parentId")
       .lean();
-    const parentsWithChildren = new Set(
-      childFolders.map((c) => c.parentId.toString())
-    );
+    const parentsWithChildren = new Set(childFolders.map((c) => c.parentId.toString()));
 
     const folders = documents.map((folder) => {
       const { _id, ...rest } = folder;
@@ -80,7 +78,7 @@ export const listDocuments = asyncHandler(async (req, res) => {
         ...rest,
         id: _id.toString(),
         hasChildren: parentsWithChildren.has(_id.toString()),
-      }
+      };
     });
     return res.status(200).json({ success: true, folders });
   }
