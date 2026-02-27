@@ -80,8 +80,9 @@ const MoveModal = ({ isOpen, onClose, item }) => {
     return (searchQuery ? matchesSearch : true) && isNotSelf;
   });
 
-  const handleMove = async (targetParentId = currentParentId) => {
+  const handleMove = async (targetParentId) => {
     try {
+      console.log("handleMove", item);
       setIsMoving(true);
       const pId = targetParentId === "root" ? null : targetParentId;
       await dispatch(moveDocument({ id: item.id, parentId: pId }));
@@ -152,9 +153,16 @@ const MoveModal = ({ isOpen, onClose, item }) => {
           )}
 
           {filteredFolders.map((folder) => (
-            <button
+            <div
               key={folder.id}
+              role="button"
+              tabIndex={0}
               onClick={() => folder.hasChildren && handleNavigate(folder)}
+              onKeyDown={(e) => {
+                if ((e.key === "Enter" || e.key === " ") && folder.hasChildren) {
+                  handleNavigate(folder);
+                }
+              }}
               className={`flex items-center justify-between p-1 rounded-lg text-text-main transition-all group ${
                 folder.id === item?.id
                   ? "opacity-50 cursor-not-allowed"
@@ -172,6 +180,7 @@ const MoveModal = ({ isOpen, onClose, item }) => {
                 </div>
                 <span className="text-sm font-medium">{folder.name}</span>
               </div>
+
               <div className="flex items-center gap-2 group/move">
                 <button
                   onClick={(e) => {
@@ -182,6 +191,7 @@ const MoveModal = ({ isOpen, onClose, item }) => {
                 >
                   Move
                 </button>
+
                 {folder.hasChildren && (
                   <ChevronRight
                     size={16}
@@ -189,7 +199,7 @@ const MoveModal = ({ isOpen, onClose, item }) => {
                   />
                 )}
               </div>
-            </button>
+            </div>
           ))}
 
           {noFoldersFound && (
@@ -215,7 +225,7 @@ const MoveModal = ({ isOpen, onClose, item }) => {
             </button>
             <button
               disabled={isMoving}
-              onClick={handleMove}
+              onClick={() => handleMove(currentParentId)}
               className="px-6 py-2 rounded-lg text-sm font-medium text-white bg-primary hover:bg-primary-hover shadow-lg shadow-primary/20 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Move Here
