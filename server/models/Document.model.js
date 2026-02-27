@@ -121,7 +121,7 @@ documentSchema.index({ uploadStatus: 1 });
 // Recent documents
 documentSchema.index({ owner: 1, updatedAt: -1 });
 
-// ─── Access control helper ───────────────────────────────────────────────────
+// ─── Access control helper
 documentSchema.methods.hasAccess = function (userId, requiredPermission = PERMISSION_LEVELS.VIEW) {
   if (this.owner.toString() === userId.toString()) return true;
   if (this.isPublic && requiredPermission === PERMISSION_LEVELS.VIEW) return true;
@@ -137,21 +137,40 @@ documentSchema.methods.hasAccess = function (userId, requiredPermission = PERMIS
   return permissionRank[sharedUser.permission] >= permissionRank[requiredPermission];
 };
 
-// ─── Path computation (pre-validate) ─────────────────────────────────────────
+// ─── Path computation (pre-validate)
 documentSchema.pre("validate", async function () {
-  if (this.isNew || this.isModified("parentId") || this.isModified("name")) {
+  const isNew = this.isNew;
+  const parentIdChanged = this.isModified("parentId");
+  const nameChanged = this.isModified("name");
+
+  if (isNew || parentIdChanged || nameChanged) {
     if (this.parentId) {
-      const parentDoc = await this.model("Document").findById(this.parentId);
-      this.path = parentDoc ? `${parentDoc.path}/${this.name}` : `/${this.name}`;
+      const parentDoc = await this.model("Document").findOne({
+        _id: this.parentId,
+        owner: this.owner,
+      });
+
+      if (!parentDoc) {
+        this.path = `/${this.name}`;
+      } else {
+        this.path = `${parentDoc.path}/${this.name}`;
+      }
     } else {
       this.path = `/${this.name}`;
     }
   }
 });
 
-// ─── Cascade path update on rename / re (post-save) ────────────────────
-documentSchema.post("init", function (doc) {
-  doc._originalPath = doc.path;
+// ─── Cascade path update on rename
+documentSchema.pre("save", async function () {
+  if (this.isNew) return;
+
+  if (!this.isModified("parentId") && !this.isModified("name")) {
+    return;
+  }
+
+  const existing = await this.constructor.findById(this._id).select("path").lean();
+  this._originalPath = existing?.path;
 });
 
 function escapeRegex(str) {
@@ -166,24 +185,30 @@ documentSchema.post("save", async function (doc) {
   const escapedOldPath = escapeRegex(oldPath);
 
   // Update all descendants in the same collection
-  await doc.constructor.updateMany({ path: { $regex: `^${escapedOldPath}/` } }, [
+  await mongoose.model("Document").updateMany(
     {
-      $set: {
-        path: {
-          $concat: [
-            newPath,
-            {
-              $substrBytes: [
-                "$path",
-                oldPath.length,
-                { $subtract: [{ $strLenBytes: "$path" }, oldPath.length] },
-              ],
-            },
-          ],
+      owner: doc.owner,
+      path: { $regex: `^${escapedOldPath}/` },
+    },
+    [
+      {
+        $set: {
+          path: {
+            $concat: [
+              newPath,
+              {
+                $substrCP: [
+                  "$path",
+                  { $strLenCP: oldPath },
+                  { $subtract: [{ $strLenCP: "$path" }, { $strLenCP: oldPath }] },
+                ],
+              },
+            ],
+          },
         },
       },
-    },
-  ]);
+    ],
+  );
 });
 
 const Document = mongoose.model("Document", documentSchema);

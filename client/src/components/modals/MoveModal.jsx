@@ -82,7 +82,6 @@ const MoveModal = ({ isOpen, onClose, item }) => {
 
   const handleMove = async (targetParentId) => {
     try {
-      console.log("handleMove", item);
       setIsMoving(true);
       const pId = targetParentId === "root" ? null : targetParentId;
       await dispatch(moveDocument({ id: item.id, parentId: pId }));

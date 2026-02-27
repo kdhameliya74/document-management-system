@@ -196,7 +196,7 @@ const FolderView = () => {
         {/* Dropdown */}
         <div className="relative" ref={dropdownRef}>
           <button
-            className="flex items-center gap-2.5 bg-primary text-white py-2.5 px-5 rounded-2xl text-sm font-semibold shadow-lg hover:-translate-y-0.5 transition-all"
+            className="flex items-center cursor-pointer gap-2.5 bg-primary text-white py-2.5 px-5 rounded-2xl text-sm font-semibold shadow-lg hover:-translate-y-0.5 transition-all"
             onClick={(e) => {
               e.stopPropagation();
               setShowNewDropdown(!showNewDropdown);
@@ -215,7 +215,7 @@ const FolderView = () => {
               {DROPDOWN_ITEMS.map((item, index) => (
                 <button
                   key={index}
-                  className="flex items-center gap-3 w-full p-2.5 text-left hover:bg-white/5 rounded-xl text-sm"
+                  className="flex cursor-pointer items-center gap-3 w-full p-2.5 text-left hover:bg-white/5 rounded-xl text-sm"
                   onClick={() => {
                     item.onClick();
                     setShowNewDropdown(false);
