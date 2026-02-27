@@ -435,7 +435,7 @@ export const confirmUpload = asyncHandler(async (req, res) => {
   return res.status(201).json({ success: true, message: "File record created", file });
 });
 
-// @route   POST /api/documents/move
+// @route   PATCH /api/documents/:id/move
 export const moveDocument = asyncHandler(async (req, res) => {
   const { parentId } = req.body;
   const { id } = req.params;
@@ -445,9 +445,30 @@ export const moveDocument = asyncHandler(async (req, res) => {
   if (!document) {
     return res.status(404).json({ success: false, message: "Document not found" });
   }
+  const currentParent = document.parentId?.toString() || null;
+  const targetParent = parentId || null;
 
-  document.parentId = parentId || null;
+  if (currentParent === targetParent) {
+    return res.status(200).json({ success: true, message: "Document already in target folder" });
+  }
+
+  if (targetParent) {
+    const targetFolder = await Document.findOne({
+      _id: targetParent,
+      owner,
+      docType: DOC_TYPES.FOLDER,
+      isTrashed: false,
+    });
+
+    if (!targetFolder) {
+      return res.status(400).json({
+        success: false,
+        message: "Target folder not found or is not a valid folder",
+      });
+    }
+  }
+  document.parentId = targetParent;
   await document.save();
 
-  return res.status(200).json({ success: true, message: "moved" });
+  return res.status(200).json({ success: true, message: "Document moved successfully" });
 });

@@ -431,14 +431,15 @@ const documentSystemSlice = createSlice({
         }
       })
       .addCase(uploadFileMeta.fulfilled, (state, action) => {
-        const { id, parentId = "root" } = action.payload;
+        const { id, parentId } = action.payload;
+        const normalizedParentId = parentId || "root";
         state.documents[id] = {
           id,
           ...action.payload,
-          parentId: parentId,
+          parentId: normalizedParentId,
         };
-        if (state.documents[parentId]) {
-          state.documents[parentId].childDocuments.push(id);
+        if (state.documents[normalizedParentId]) {
+          state.documents[normalizedParentId].childDocuments.push(id);
         }
       })
       .addCase(moveDocument.fulfilled, (state, action) => {
