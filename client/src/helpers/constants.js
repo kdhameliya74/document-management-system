@@ -58,3 +58,14 @@ export const FILE_MESSAGES = Object.freeze({
   UPLOAD_LOADING: "Uploading file. This may take a moment…",
   UPLOAD_FAILED: "Failed to save file details",
 });
+
+export const PERMISSION_LEVELS = Object.freeze({
+  VIEW: "view",
+  EDIT: "edit",
+  ADMIN: "admin",
+});
+
+export const SHARE_MESSAGES = Object.freeze({
+  SHARE_SUCCESS: "Document shared successfully!",
+  SHARE_FAILED: "Failed to share document!",
+});

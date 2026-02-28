@@ -25,6 +25,12 @@ const initialState = {
       childDocuments: [],
       path: "",
     },
+    sharedDocuments: {
+      id: "shared",
+      name: "Shared",
+      parentId: null,
+      childDocuments: [],
+    },
   },
   currentFolderId: "root",
   selectedId: null,
@@ -266,7 +272,7 @@ const documentSystemSlice = createSlice({
     },
     // fetch documents and files
     // Mock version history
-    addFileVersion: () => {},
+    addFileVersion: () => { },
   },
   extraReducers: (builder) => {
     builder

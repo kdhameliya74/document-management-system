@@ -67,6 +67,36 @@ const useFileFolderContextMenu = (menuFor = "dashbaord", onMenuAction) => {
         },
       ];
     }
+    if (menuFor === "share") {
+      return [
+        {
+          label: "Edit",
+          icon: FolderPen,
+          onClick: () => openModal("edit"),
+        },
+        {
+          label: "View Details",
+          icon: Eye,
+          onClick: () => {
+            dispatch(setShowDetails(true));
+            closeContextMenu();
+          },
+        },
+        {
+          label: "Download",
+          icon: Download,
+          onClick: () => {
+            alert("Download functionality coming soon!");
+            closeContextMenu();
+          },
+        },
+        {
+          label: "Delete",
+          icon: Trash,
+          onClick: () => openModal("delete"),
+        },
+      ];
+    }
     if (menuFor === "dashbaord") {
       return [
         {
@@ -90,10 +120,7 @@ const useFileFolderContextMenu = (menuFor = "dashbaord", onMenuAction) => {
         {
           label: "Share",
           icon: Share,
-          onClick: () => {
-            alert("Share functionality coming soon!");
-            closeContextMenu();
-          },
+          onClick: () => openModal("share"),
         },
         {
           label: "Download",

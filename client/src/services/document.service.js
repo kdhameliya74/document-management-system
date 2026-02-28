@@ -58,6 +58,11 @@ const DocumentService = {
     const response = await api.patch(`/documents/${docId}/move`, { parentId });
     return response.data;
   },
+
+  shareDocument: async (docId, email, permission) => {
+    const response = await api.post(`/documents/${docId}/share`, { email, permission });
+    return response.data;
+  },
 };
 
 export default DocumentService;
