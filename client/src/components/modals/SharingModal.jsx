@@ -14,14 +14,10 @@ const SharingModal = ({ item, isOpen, onClose }) => {
   // Mocked collaborators for now
   const collaborators = item?.collaborators || [
     { email: "owner@example.com", permission: "admin", isOwner: true },
-    { email: "owner@example.com", permission: "admin", isOwner: true },
-    { email: "owner@example.com", permission: "admin", isOwner: true },
-    { email: "owner@example.com", permission: "admin", isOwner: true },
-    { email: "owner@example.com", permission: "admin", isOwner: true },
-    { email: "owner@example.com", permission: "admin", isOwner: true },
-    { email: "owner@example.com", permission: "admin", isOwner: true },
-    { email: "owner@example.com", permission: "admin", isOwner: true },
-    { email: "owner@example.com", permission: "admin", isOwner: true },
+    { email: "kaushik@example.com", permission: "edit", isOwner: false },
+    { email: "team@company.com", permission: "view", isOwner: false },
+    { email: "designer@studio.io", permission: "edit", isOwner: false },
+    { email: "guest@external.com", permission: "view", isOwner: false },
   ];
 
   const handleShare = async () => {
@@ -64,14 +60,14 @@ const SharingModal = ({ item, isOpen, onClose }) => {
                 placeholder="Enter email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full py-3.5 pl-12 pr-5 rounded-2xl bg-bg-panel text-text-main text-base font-medium outline-none border border-border-main focus:border-primary/50 focus:ring-4 focus:ring-primary/5 transition-all duration-300 shadow-inner"
+                className="w-full py-2.5 pl-12 pr-5 rounded-2xl bg-bg-panel text-text-main text-base outline-none border border-border-main focus:border-primary/50 focus:ring-4 focus:ring-primary/5 transition-all duration-300 shadow-inner"
               />
             </div>
             
             <div className="relative">
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="h-full px-4 rounded-2xl bg-bg-panel border border-border-main flex items-center gap-2 text-sm font-semibold text-text-main hover:bg-bg-hover transition-all"
+                className="cursor-pointer h-full px-4 rounded-2xl bg-bg-panel border border-border-main flex items-center gap-2 text-sm text-text-main hover:bg-bg-hover transition-all"
               >
                 <span className="capitalize">{permission}</span>
                 <ChevronDown size={14} className={`transition-transform ${isDropdownOpen ? "rotate-180" : ""}`} />
@@ -86,7 +82,7 @@ const SharingModal = ({ item, isOpen, onClose }) => {
                         setPermission(lvl);
                         setIsDropdownOpen(false);
                       }}
-                      className={`w-full text-left px-3 py-2 rounded-lg text-sm capitalize hover:bg-white/5 ${permission === lvl ? "text-primary font-bold" : "text-text-main"}`}
+                      className={`cursor-pointer w-full text-left px-3 py-2 rounded-lg text-sm capitalize hover:bg-white/5 ${permission === lvl ? "text-primary font-bold" : "text-text-main"}`}
                     >
                       {lvl}
                     </button>
@@ -102,7 +98,7 @@ const SharingModal = ({ item, isOpen, onClose }) => {
           <button
             onClick={handleShare}
             disabled={isLoading || !email.trim()}
-            className="flex-1 flex items-center justify-center gap-2 py-3.5 px-6 rounded-2xl font-bold text-sm transition-all duration-300 bg-primary text-white hover:bg-primary-hover shadow-xl shadow-primary/20 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+            className="flex-1 flex items-center justify-center gap-2 py-3 px-6 rounded-2xl font-bold text-sm transition-all duration-300 bg-primary text-white hover:bg-primary-hover shadow-xl shadow-primary/20 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
           >
             {isLoading ? <Loader className="animate-spin" size={18} /> : <span>Share</span>}
           </button>
@@ -116,27 +112,31 @@ const SharingModal = ({ item, isOpen, onClose }) => {
           <label className="text-sm font-bold text-text-muted px-1 uppercase tracking-wider">
             People with access
           </label>
-          <div className="flex flex-col gap-3 max-h-48 overflow-y-auto pr-1">
+          <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto pr-1">
             {collaborators.map((collab, index) => (
-              <div key={index} className="flex items-center justify-between p-3 rounded-2xl bg-bg-panel/50 border border-border-main/50">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                    <User size={18} />
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-sm font-semibold text-text-main truncate max-w-[180px]">
-                      {collab.email}
-                    </span>
-                    <span className="text-[10px] text-text-dim uppercase font-bold tracking-tight">
-                      {collab.isOwner ? "Owner" : collab.permission}
-                    </span>
-                  </div>
+              <div
+                key={index}
+                className={`flex items-center gap-2 px-2 py-1 rounded-full border transition-all duration-200 ${
+                  collab.isOwner
+                    ? "bg-primary/10 border-primary/30 text-primary shadow-sm shadow-primary/5"
+                    : "bg-bg-panel border-border-main text-text-main hover:border-border-muted hover:bg-bg-hover"
+                }`}
+              >
+                <div
+                  className={`w-4 h-4 rounded-full flex items-center justify-center ${
+                    collab.isOwner ? "bg-primary text-white" : "bg-bg-hover text-text-muted"
+                  }`}
+                >
+                  <User size={12} />
                 </div>
-                {!collab.isOwner && (
-                   <span className="text-xs text-text-dim font-medium mr-2">
-                     Can {collab.permission}
-                   </span>
-                )}
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs truncate max-w-[150px]">
+                    {collab.email}
+                  </span>
+                  <span className="text-[9px] font-semibold uppercase font-black tracking-tight opacity-50">
+                    {collab.isOwner ? "Owner" : collab.permission}
+                  </span>
+                </div>
               </div>
             ))}
           </div>
