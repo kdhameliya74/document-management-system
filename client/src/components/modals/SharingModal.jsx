@@ -1,28 +1,23 @@
 import React, { useState } from "react";
 import { Mail, Loader, Share2, User, ChevronDown } from "lucide-react";
-import { PERMISSION_LEVELS, SHARE_MESSAGES } from "@/helpers/constants.js";
+import { DEFAULT_MESSAGES, PERMISSION_LEVELS, SHARE_MESSAGES } from "@/helpers/constants.js";
 import DocumentService from "@/services/document.service";
 import toast from "react-hot-toast";
 import Modal from "@/components/common/Modal";
+import { isValidEmail } from "@/helpers/utils";
 
 const SharingModal = ({ item, isOpen, onClose }) => {
   const [email, setEmail] = useState("");
+  const [errors, setErrors] = useState({});
   const [permission, setPermission] = useState(PERMISSION_LEVELS.VIEW);
   const [isLoading, setIsLoading] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  // Mocked collaborators for now
-  const collaborators = item?.collaborators || [
-    { email: "owner@example.com", permission: "admin", isOwner: true },
-    { email: "kaushik@example.com", permission: "edit", isOwner: false },
-    { email: "team@company.com", permission: "view", isOwner: false },
-    { email: "designer@studio.io", permission: "edit", isOwner: false },
-    { email: "guest@external.com", permission: "view", isOwner: false },
-  ];
+  const collaborators = item?.sharedWith || [];
 
   const handleShare = async () => {
-    if (!email.trim()) {
-      toast.error("Please enter an email address");
+    if (!isValidEmail(email)) {
+      setErrors({ email: DEFAULT_MESSAGES.INVALID_EMAIL });
       return;
     }
 
@@ -31,9 +26,9 @@ const SharingModal = ({ item, isOpen, onClose }) => {
       await DocumentService.shareDocument(item.id, email.trim(), permission);
       toast.success(SHARE_MESSAGES.SHARE_SUCCESS);
       setEmail("");
-      // In a real app, we might want to refresh the collaborator list here
+      onClose();
     } catch (err) {
-      toast.error(err?.message || SHARE_MESSAGES.SHARE_FAILED);
+      toast.error(SHARE_MESSAGES.SHARE_FAILED);
     } finally {
       setIsLoading(false);
     }
@@ -59,7 +54,7 @@ const SharingModal = ({ item, isOpen, onClose }) => {
                 type="email"
                 placeholder="Enter email address"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {setEmail(e.target.value); setErrors({});}}
                 className="w-full py-2.5 pl-12 pr-5 rounded-2xl bg-bg-panel text-text-main text-base outline-none border border-border-main focus:border-primary/50 focus:ring-4 focus:ring-primary/5 transition-all duration-300 shadow-inner"
               />
             </div>
@@ -91,6 +86,9 @@ const SharingModal = ({ item, isOpen, onClose }) => {
               )}
             </div>
           </div>
+          {errors?.email && (
+            <p className="text-xs text-red-500">{errors?.email}</p>
+          )}
         </div>
 
         {/* Action Buttons */}
@@ -113,19 +111,13 @@ const SharingModal = ({ item, isOpen, onClose }) => {
             People with access
           </label>
           <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto pr-1">
-            {collaborators.map((collab, index) => (
+            {collaborators.length > 0 ? collaborators.map((collab, index) => (
               <div
                 key={index}
-                className={`flex items-center gap-2 px-2 py-1 rounded-full border transition-all duration-200 ${
-                  collab.isOwner
-                    ? "bg-primary/10 border-primary/30 text-primary shadow-sm shadow-primary/5"
-                    : "bg-bg-panel border-border-main text-text-main hover:border-border-muted hover:bg-bg-hover"
-                }`}
+                className={`flex items-center gap-2 px-2 py-1.5 rounded-full border transition-all duration-200 bg-bg-panel border-border-main text-text-main hover:border-border-muted hover:bg-bg-hover`}
               >
                 <div
-                  className={`w-4 h-4 rounded-full flex items-center justify-center ${
-                    collab.isOwner ? "bg-primary text-white" : "bg-bg-hover text-text-muted"
-                  }`}
+                  className={`w-4 h-4 rounded-full flex items-center justify-center bg-bg-hover text-text-muted`}
                 >
                   <User size={12} />
                 </div>
@@ -134,11 +126,19 @@ const SharingModal = ({ item, isOpen, onClose }) => {
                     {collab.email}
                   </span>
                   <span className="text-[9px] font-semibold uppercase font-black tracking-tight opacity-50">
-                    {collab.isOwner ? "Owner" : collab.permission}
+                    {collab.permission}
                   </span>
                 </div>
               </div>
-            ))}
+            )) : (
+              <div className="flex items-center gap-2 px-2 py-1.5 rounded-full border transition-all duration-200 bg-bg-panel border-border-main text-text-main hover:border-border-muted hover:bg-bg-hover">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs truncate max-w-[150px]">
+                    No one has access
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

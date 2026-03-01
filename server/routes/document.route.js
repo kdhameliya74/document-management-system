@@ -13,6 +13,7 @@ import {
   confirmUpload,
   permanentDelete,
   moveDocument,
+  shareDocument,
 } from "../controllers/document.controller.js";
 
 const router = express.Router();
@@ -40,6 +41,9 @@ router.delete("/:id/permenant", protect, validateId("id"), permanentDelete);
 
 //Restore document
 router.patch("/:id/restore", protect, validateId("id"), restoreDocument);
+
+//Share document
+router.post("/:id/share", protect, validateId("id"), shareDocument);
 
 //Move document
 router.patch("/:id/move", protect, validateId("id"), moveDocument);

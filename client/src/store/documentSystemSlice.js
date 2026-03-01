@@ -25,12 +25,6 @@ const initialState = {
       childDocuments: [],
       path: "",
     },
-    sharedDocuments: {
-      id: "shared",
-      name: "Shared",
-      parentId: null,
-      childDocuments: [],
-    },
   },
   currentFolderId: "root",
   selectedId: null,
