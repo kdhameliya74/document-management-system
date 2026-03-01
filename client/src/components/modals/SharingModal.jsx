@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 import { Mail, Loader, Share2, User, ChevronDown } from "lucide-react";
 import { DEFAULT_MESSAGES, PERMISSION_LEVELS, SHARE_MESSAGES } from "@/helpers/constants.js";
-import DocumentService from "@/services/document.service";
 import toast from "react-hot-toast";
 import Modal from "@/components/common/Modal";
 import { isValidEmail } from "@/helpers/utils";
+import { useDispatch } from "react-redux";
+import { shareDocument } from "@/store/documentSystemSlice";
 
 const SharingModal = ({ item, isOpen, onClose }) => {
+  const dispatch = useDispatch();
   const [email, setEmail] = useState("");
   const [errors, setErrors] = useState({});
   const [permission, setPermission] = useState(PERMISSION_LEVELS.VIEW);
@@ -23,12 +25,12 @@ const SharingModal = ({ item, isOpen, onClose }) => {
 
     setIsLoading(true);
     try {
-      await DocumentService.shareDocument(item.id, email.trim(), permission);
+      await dispatch(shareDocument({ id: item.id, email: email.trim(), permission })).unwrap();
       toast.success(SHARE_MESSAGES.SHARE_SUCCESS);
       setEmail("");
       onClose();
     } catch (err) {
-      toast.error(SHARE_MESSAGES.SHARE_FAILED);
+      toast.error(err);
     } finally {
       setIsLoading(false);
     }

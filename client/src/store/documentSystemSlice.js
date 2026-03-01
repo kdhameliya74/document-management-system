@@ -5,6 +5,7 @@ import {
   FILE_MESSAGES,
   DEFAULT_MESSAGES,
   FOLDER_MESSAGES,
+  SHARE_MESSAGES,
 } from "@/helpers/constants";
 import { logError } from "@/helpers/utils";
 
@@ -214,6 +215,29 @@ export const moveDocument = createAsyncThunk(
     } catch (err) {
       logError(err);
       return rejectWithValue(DEFAULT_MESSAGES.DOCUMENT_MOVE_FAILED);
+    }
+  },
+);
+
+/*
+|--------------------------------------------------------------------------
+| shareDocument
+|--------------------------------------------------------------------------
+*/
+export const shareDocument = createAsyncThunk(
+  "documents/share",
+  async ({ id, email, permission }, { rejectWithValue }) => {
+    try {
+      await DocumentService.shareDocument(id, email, permission);
+      return {
+        id,
+        email,
+        permission,
+      };
+
+    } catch (err) {
+      logError(err);
+      return rejectWithValue(SHARE_MESSAGES.SHARE_FAILED);
     }
   },
 );
@@ -447,6 +471,15 @@ const documentSystemSlice = createSlice({
         if (state.documents[id]) {
           const { [id]: _, ...restDocs } = state.documents;
           state.documents = { ...restDocs };
+        }
+      })
+      .addCase(shareDocument.fulfilled, (state, action) => {
+        const { email, permission, id } = action.payload;
+        if (state.documents[id]) {
+          state.documents[id].sharedWith.push({
+            email,
+            permission,
+          });
         }
       });
   },
