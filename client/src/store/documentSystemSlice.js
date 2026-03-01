@@ -234,7 +234,6 @@ export const shareDocument = createAsyncThunk(
         email,
         permission,
       };
-
     } catch (err) {
       logError(err);
       return rejectWithValue(SHARE_MESSAGES.SHARE_FAILED);
@@ -290,7 +289,7 @@ const documentSystemSlice = createSlice({
     },
     // fetch documents and files
     // Mock version history
-    addFileVersion: () => { },
+    addFileVersion: () => {},
   },
   extraReducers: (builder) => {
     builder

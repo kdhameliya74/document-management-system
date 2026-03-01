@@ -51,25 +51,34 @@ const SharingModal = ({ item, isOpen, onClose }) => {
           </label>
           <div className="flex gap-2">
             <div className="relative flex-1 group">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-text-dim group-focus-within:text-primary transition-colors" size={18} />
+              <Mail
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-text-dim group-focus-within:text-primary transition-colors"
+                size={18}
+              />
               <input
                 type="email"
                 placeholder="Enter email address"
                 value={email}
-                onChange={(e) => {setEmail(e.target.value); setErrors({});}}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setErrors({});
+                }}
                 className="w-full py-2.5 pl-12 pr-5 rounded-2xl bg-bg-panel text-text-main text-base outline-none border border-border-main focus:border-primary/50 focus:ring-4 focus:ring-primary/5 transition-all duration-300 shadow-inner"
               />
             </div>
-            
+
             <div className="relative">
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 className="cursor-pointer h-full px-4 rounded-2xl bg-bg-panel border border-border-main flex items-center gap-2 text-sm text-text-main hover:bg-bg-hover transition-all"
               >
                 <span className="capitalize">{permission}</span>
-                <ChevronDown size={14} className={`transition-transform ${isDropdownOpen ? "rotate-180" : ""}`} />
+                <ChevronDown
+                  size={14}
+                  className={`transition-transform ${isDropdownOpen ? "rotate-180" : ""}`}
+                />
               </button>
-              
+
               {isDropdownOpen && (
                 <div className="absolute top-full right-0 mt-2 w-32 bg-bg-panel border border-border-main rounded-xl shadow-xl z-50 p-1">
                   {Object.values(PERMISSION_LEVELS).map((lvl) => (
@@ -88,9 +97,7 @@ const SharingModal = ({ item, isOpen, onClose }) => {
               )}
             </div>
           </div>
-          {errors?.email && (
-            <p className="text-xs text-red-500">{errors?.email}</p>
-          )}
+          {errors?.email && <p className="text-xs text-red-500">{errors?.email}</p>}
         </div>
 
         {/* Action Buttons */}
@@ -113,31 +120,29 @@ const SharingModal = ({ item, isOpen, onClose }) => {
             People with access
           </label>
           <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto pr-1">
-            {collaborators.length > 0 ? collaborators.map((collab, index) => (
-              <div
-                key={index}
-                className={`flex items-center gap-2 px-2 py-1.5 rounded-full border transition-all duration-200 bg-bg-panel border-border-main text-text-main hover:border-border-muted hover:bg-bg-hover`}
-              >
+            {collaborators.length > 0 ? (
+              collaborators.map((collab, index) => (
                 <div
-                  className={`w-4 h-4 rounded-full flex items-center justify-center bg-bg-hover text-text-muted`}
+                  key={index}
+                  className={`flex items-center gap-2 px-2 py-1.5 rounded-full border transition-all duration-200 bg-bg-panel border-border-main text-text-main hover:border-border-muted hover:bg-bg-hover`}
                 >
-                  <User size={12} />
+                  <div
+                    className={`w-4 h-4 rounded-full flex items-center justify-center bg-bg-hover text-text-muted`}
+                  >
+                    <User size={12} />
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs truncate max-w-[150px]">{collab.email}</span>
+                    <span className="text-[9px] font-semibold uppercase font-black tracking-tight opacity-50">
+                      {collab.permission}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-xs truncate max-w-[150px]">
-                    {collab.email}
-                  </span>
-                  <span className="text-[9px] font-semibold uppercase font-black tracking-tight opacity-50">
-                    {collab.permission}
-                  </span>
-                </div>
-              </div>
-            )) : (
+              ))
+            ) : (
               <div className="flex items-center gap-2 px-2 py-1.5 rounded-full border transition-all duration-200 bg-bg-panel border-border-main text-text-main hover:border-border-muted hover:bg-bg-hover">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-xs truncate max-w-[150px]">
-                    No one has access
-                  </span>
+                  <span className="text-xs truncate max-w-[150px]">No one has access</span>
                 </div>
               </div>
             )}

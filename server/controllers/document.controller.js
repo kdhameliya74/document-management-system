@@ -476,7 +476,6 @@ export const moveDocument = asyncHandler(async (req, res) => {
 
 // @route   PATCH /api/documents/:id/share
 export const shareDocument = asyncHandler(async (req, res) => {
-
   const { id } = req.params;
   const { email, permission } = req.body;
 
@@ -512,7 +511,7 @@ export const shareDocument = asyncHandler(async (req, res) => {
           sharedAt: new Date(),
         },
       },
-    }
+    },
   );
 
   return res.status(200).json({

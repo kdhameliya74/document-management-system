@@ -72,8 +72,7 @@ export const isValidEmail = (email) => {
 
   const trimmedEmail = email.trim().toLowerCase();
 
-  const emailRegex =
-    /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
   return emailRegex.test(trimmedEmail);
 };
