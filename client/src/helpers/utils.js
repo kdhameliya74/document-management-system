@@ -66,3 +66,13 @@ export const getDocumentFlags = (mode, docType) => {
     isFile: isUpdate && docType === "file",
   };
 };
+
+export const isValidEmail = (email) => {
+  if (!email || typeof email !== "string") return false;
+
+  const trimmedEmail = email.trim().toLowerCase();
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+  return emailRegex.test(trimmedEmail);
+};

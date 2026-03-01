@@ -67,6 +67,10 @@ const documentSchema = new mongoose.Schema(
           type: mongoose.Schema.Types.ObjectId,
           ref: "User",
         },
+        email: {
+          type: String,
+          required: true,
+        },
         permission: {
           type: String,
           enum: PERMISSION_ARRAY,

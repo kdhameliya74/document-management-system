@@ -21,6 +21,7 @@ import FolderModal from "@/components/modals/FolderModal";
 import UploadFileModal from "@/components/modals/UploadFileModal";
 import DeleteModal from "@/components/modals/DeleteModal";
 import MoveModal from "@/components/modals/MoveModal";
+import SharingModal from "@/components/modals/SharingModal";
 import EmptyFolderScreen from "@/components/dashboard/EmptyFolderScreen";
 import useFileFolderContextMenu from "@/hooks/useFileFolderContextMenu";
 import ResourceNotFound from "@/components/common/ResourceNotFound";
@@ -85,6 +86,12 @@ const FolderView = () => {
       },
       move: {
         Component: MoveModal,
+        props: {
+          item: selectedItem,
+        },
+      },
+      share: {
+        Component: SharingModal,
         props: {
           item: selectedItem,
         },
