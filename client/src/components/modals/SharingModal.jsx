@@ -20,14 +20,14 @@ const SharingModal = ({ item, isOpen, onClose }) => {
   const collaborators = item?.sharedWith || [];
 
   const handleShare = async () => {
-    if(newCollaborators.length === 0) {
+    if (newCollaborators.length === 0) {
       return;
     }
     setIsLoading(true);
     try {
       const payload = {
         id: item.id,
-        collaborators: newCollaborators.map(c => ({ email: c.email, permission: c.permission }))
+        collaborators: newCollaborators.map((c) => ({ email: c.email, permission: c.permission })),
       };
       await dispatch(shareDocument(payload)).unwrap();
       toast.success(SHARE_MESSAGES.SHARE_SUCCESS);
@@ -45,17 +45,17 @@ const SharingModal = ({ item, isOpen, onClose }) => {
       setErrors({ email: DEFAULT_MESSAGES.INVALID_EMAIL });
       return;
     }
-    if (collaborators.some(c => c.email === email)) {
+    if (collaborators.some((c) => c.email === email)) {
       setErrors({ email: "User already has access" });
       return;
     }
-    setNewCollaborators(prev => [...prev, { email, permission }]);
+    setNewCollaborators((prev) => [...prev, { email, permission }]);
     setEmail("");
     setErrors({});
   };
 
   const handleRemoveCollaborator = useCallback((index) => {
-    setNewCollaborators(prev => prev.filter((_, i) => i !== index));
+    setNewCollaborators((prev) => prev.filter((_, i) => i !== index));
   }, []);
 
   const modalProps = {
@@ -120,11 +120,11 @@ const SharingModal = ({ item, isOpen, onClose }) => {
             </div>
             <div className="flex items-center justify-center">
               <button
-              onClick={handleAddCollaborator}
-              className="py-3 px-6 rounded-2xl font-bold text-sm transition-all duration-300 bg-primary text-white hover:bg-primary-hover cursor-pointer"
-            >
-              <Plus size={18} />
-            </button>
+                onClick={handleAddCollaborator}
+                className="py-3 px-6 rounded-2xl font-bold text-sm transition-all duration-300 bg-primary text-white hover:bg-primary-hover cursor-pointer"
+              >
+                <Plus size={18} />
+              </button>
             </div>
           </div>
           {errors?.email && <p className="text-xs text-red-500">{errors?.email}</p>}

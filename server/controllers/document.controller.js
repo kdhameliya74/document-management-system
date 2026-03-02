@@ -478,18 +478,35 @@ export const moveDocument = asyncHandler(async (req, res) => {
 export const shareDocument = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { collaborators } = req.body;
-  console.log("collaborators", collaborators);
 
-  const doc = await Document.findOne({ _id: id, owner: req.user.id }).select("_id sharedWith");
-  if (!doc) {
-    return res.status(404).json({ success: false, message: "Document not found" });
+  const exists = await Document.exists({
+    _id: id,
+    owner: req.user.id,
+  });
+
+  if (!exists) {
+    return res.status(404).json({
+      success: false,
+      message: "Document not found",
+    });
   }
 
-  const users = await User.find({ email: { $in: collaborators.map((c) => c.email) } }).select("_id email").lean();
-  if (!users) {
-    return res.status(404).json({ success: false, message: "User not found" });
+  const emails = collaborators.map((c) => c.email.toLowerCase());
+
+  const users = await User.find({
+    email: { $in: emails },
+  })
+    .select("_id email")
+    .lean();
+
+  if (users.length === 0) {
+    return res.status(404).json({
+      success: false,
+      message: "No valid users found",
+    });
   }
 
+  // Prevent owner sharing to himself
   if (users.some((u) => u._id.toString() === req.user.id.toString())) {
     return res.status(400).json({
       success: false,
@@ -497,22 +514,30 @@ export const shareDocument = asyncHandler(async (req, res) => {
     });
   }
 
+  const userMap = new Map(users.map((u) => [u.email, u._id]));
+
   const sharedAt = new Date();
-  const newCollaborators = collaborators.map((c) => ({
-    user: users.find((u) => u.email === c.email)._id,
-    email: c.email,
-    permission: c.permission,
-    sharedAt,
-  }));
+
+  const newCollaborators = collaborators
+    .filter((c) => userMap.has(c.email.toLowerCase()))
+    .map((c) => ({
+      user: userMap.get(c.email.toLowerCase()),
+      email: c.email.toLowerCase(),
+      permission: c.permission,
+      sharedAt,
+    }));
+
+  if (newCollaborators.length === 0) {
+    return res.status(400).json({
+      success: false,
+      message: "No valid collaborators to add",
+    });
+  }
 
   await Document.updateOne(
+    { _id: id, owner: req.user.id },
     {
-      _id: id,
-      owner: req.user.id,
-      "sharedWith.user": { $nin: newCollaborators.map((c) => c.user) },
-    },
-    {
-      $push: {
+      $addToSet: {
         sharedWith: {
           $each: newCollaborators,
         },
