@@ -226,13 +226,12 @@ export const moveDocument = createAsyncThunk(
 */
 export const shareDocument = createAsyncThunk(
   "documents/share",
-  async ({ id, email, permission }, { rejectWithValue }) => {
+  async ({ id, collaborators }, { rejectWithValue }) => {
     try {
-      await DocumentService.shareDocument(id, email, permission);
+      await DocumentService.shareDocument(id, collaborators);
       return {
         id,
-        email,
-        permission,
+        collaborators,
       };
     } catch (err) {
       logError(err);
@@ -289,7 +288,7 @@ const documentSystemSlice = createSlice({
     },
     // fetch documents and files
     // Mock version history
-    addFileVersion: () => {},
+    addFileVersion: () => { },
   },
   extraReducers: (builder) => {
     builder
@@ -473,12 +472,9 @@ const documentSystemSlice = createSlice({
         }
       })
       .addCase(shareDocument.fulfilled, (state, action) => {
-        const { email, permission, id } = action.payload;
+        const { collaborators, id } = action.payload;
         if (state.documents[id]) {
-          state.documents[id].sharedWith.push({
-            email,
-            permission,
-          });
+          state.documents[id].sharedWith.push(...collaborators);
         }
       });
   },

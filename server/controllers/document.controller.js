@@ -474,41 +474,47 @@ export const moveDocument = asyncHandler(async (req, res) => {
   return res.status(200).json({ success: true, message: "Document moved successfully" });
 });
 
-// @route   PATCH /api/documents/:id/share
+// @route   POST /api/documents/:id/share
 export const shareDocument = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const { email, permission } = req.body;
+  const { collaborators } = req.body;
+  console.log("collaborators", collaborators);
 
   const doc = await Document.findOne({ _id: id, owner: req.user.id }).select("_id sharedWith");
   if (!doc) {
     return res.status(404).json({ success: false, message: "Document not found" });
   }
 
-  const user = await User.findOne({ email }).select("_id").lean();
-  if (!user) {
+  const users = await User.find({ email: { $in: collaborators.map((c) => c.email) } }).select("_id email").lean();
+  if (!users) {
     return res.status(404).json({ success: false, message: "User not found" });
   }
 
-  if (user._id.toString() === req.user.id.toString()) {
+  if (users.some((u) => u._id.toString() === req.user.id.toString())) {
     return res.status(400).json({
       success: false,
       message: "You cannot share a document with yourself",
     });
   }
 
+  const sharedAt = new Date();
+  const newCollaborators = collaborators.map((c) => ({
+    user: users.find((u) => u.email === c.email)._id,
+    email: c.email,
+    permission: c.permission,
+    sharedAt,
+  }));
+
   await Document.updateOne(
     {
       _id: id,
       owner: req.user.id,
-      "sharedWith.user": { $ne: user._id }, // prevent duplicate
+      "sharedWith.user": { $nin: newCollaborators.map((c) => c.user) },
     },
     {
       $push: {
         sharedWith: {
-          user: user._id,
-          email,
-          permission,
-          sharedAt: new Date(),
+          $each: newCollaborators,
         },
       },
     },
@@ -516,7 +522,6 @@ export const shareDocument = asyncHandler(async (req, res) => {
 
   return res.status(200).json({
     success: true,
-
     message: "Document shared successfully",
   });
 });
