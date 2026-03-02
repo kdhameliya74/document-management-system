@@ -10,13 +10,6 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { asyncHandler } from "../middlewares/error.middleware.js";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-
-/**
- * Build breadcrumbs for a given document by walking parent chain.
- * @param {string} parentId - The `parent` ObjectId of the current folder
- * @param {string} userId   - Owner filter for safety
- * @returns {Array} breadcrumb array in root→current order
- */
 async function buildBreadcrumbs(parentId, userId) {
   const breadcrumbs = [];
   let tempParentId = parentId;
@@ -40,11 +33,80 @@ async function buildBreadcrumbs(parentId, userId) {
   return breadcrumbs;
 }
 
+async function moveTreeList(req, res, baseFilter) {
+  const userId = req.user.id;
+  const documents = await Document.find({ ...baseFilter, docType: DOC_TYPES.FOLDER })
+    .sort({ name: 1 })
+    .select("_id name parentId color")
+    .lean();
+
+  const folderIds = documents.map((f) => f._id);
+
+  const childFolders = await Document.find({
+    parentId: { $in: folderIds },
+    owner: userId,
+    docType: DOC_TYPES.FOLDER,
+    isTrashed: false,
+  })
+    .select("parentId")
+    .lean();
+  const parentsWithChildren = new Set(childFolders.map((c) => c.parentId.toString()));
+
+  const folders = documents.map((folder) => {
+    const { _id, ...rest } = folder;
+    return {
+      ...rest,
+      id: _id.toString(),
+      hasChildren: parentsWithChildren.has(_id.toString()),
+    };
+  });
+  res.status(200).json({ success: true, folders });
+}
+
+async function listSharedDocuments(req, res, baseFilter) {
+  const userId = req.user.id;
+  const { parentId } = req.query;
+
+  if (parentId) {
+    const [sharedItems, currentFolder] = await Promise.all([
+      Document.find({
+        parentId,
+        isTrashed: baseFilter.isTrashed,
+      }).lean(),
+
+      Document.findOne({
+        _id: parentId,
+        isTrashed: baseFilter.isTrashed,
+      }).lean(),
+    ]);
+
+    return res.status(200).json({
+      success: true,
+      currentFolder,
+      folders: sharedItems.filter((d) => d.docType === DOC_TYPES.FOLDER),
+      files: sharedItems.filter((d) => d.docType === DOC_TYPES.FILE),
+    });
+  }
+
+  const documents = await Document.find({
+    isTrashed: baseFilter.isTrashed,
+    "sharedWith.user": userId,
+  }).lean();
+  const sharedIds = new Set(documents.map((d) => d._id.toString()));
+
+  const rootShared = documents.filter(
+    (d) => !d.parentId || !sharedIds.has(d.parentId.toString()),
+  );
+  return res.status(200).json({
+    success: true,
+    folders: rootShared.filter((d) => d.docType === DOC_TYPES.FOLDER),
+    files: rootShared.filter((d) => d.docType === DOC_TYPES.FILE),
+  });
+}
 // ─── Controllers ─────────────────────────────────────────────────────────────
 
 // @desc    List documents inside a folder (folders + files)
 // @route   GET /api/documents?parentId=<id>
-// @access  Private
 export const listDocuments = asyncHandler(async (req, res) => {
   const userId = req.user.id;
   const { parentId = null, mode = null } = req.query;
@@ -55,33 +117,12 @@ export const listDocuments = asyncHandler(async (req, res) => {
     isTrashed: false,
   };
 
-  if (mode === "move") {
-    const documents = await Document.find({ ...baseFilter, docType: DOC_TYPES.FOLDER })
-      .sort({ name: 1 })
-      .select("_id name parentId color")
-      .lean();
-
-    const folderIds = documents.map((f) => f._id);
-
-    const childFolders = await Document.find({
-      parentId: { $in: folderIds },
-      owner: userId,
-      docType: DOC_TYPES.FOLDER,
-      isTrashed: false,
-    })
-      .select("parentId")
-      .lean();
-    const parentsWithChildren = new Set(childFolders.map((c) => c.parentId.toString()));
-
-    const folders = documents.map((folder) => {
-      const { _id, ...rest } = folder;
-      return {
-        ...rest,
-        id: _id.toString(),
-        hasChildren: parentsWithChildren.has(_id.toString()),
-      };
-    });
-    return res.status(200).json({ success: true, folders });
+  if (['move', 'share'].includes(mode)) {
+    const modeActions = {
+      move: moveTreeList,
+      share: listSharedDocuments,
+    }
+    return modeActions[mode](req, res, baseFilter);
   }
 
   const [items, currentFolder] = await Promise.all([
@@ -273,7 +314,7 @@ export const listTrash = asyncHandler(async (req, res) => {
   const trashedItems = await Document.find({
     owner: ownerId,
     isTrashed: true,
-  });
+  }).lean();
 
   const trashedIds = new Set(trashedItems.map((d) => d._id.toString()));
 
