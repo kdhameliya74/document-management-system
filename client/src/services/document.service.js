@@ -59,8 +59,8 @@ const DocumentService = {
     return response.data;
   },
 
-  shareDocument: async (docId, email, permission) => {
-    const response = await api.post(`/documents/${docId}/share`, { email, permission });
+  shareDocument: async (docId, collaborators) => {
+    const response = await api.post(`/documents/${docId}/share`, { collaborators });
     return response.data;
   },
 };

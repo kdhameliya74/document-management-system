@@ -474,41 +474,72 @@ export const moveDocument = asyncHandler(async (req, res) => {
   return res.status(200).json({ success: true, message: "Document moved successfully" });
 });
 
-// @route   PATCH /api/documents/:id/share
+// @route   POST /api/documents/:id/share
 export const shareDocument = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const { email, permission } = req.body;
+  const { collaborators } = req.body;
 
-  const doc = await Document.findOne({ _id: id, owner: req.user.id }).select("_id sharedWith");
-  if (!doc) {
-    return res.status(404).json({ success: false, message: "Document not found" });
+  const exists = await Document.exists({
+    _id: id,
+    owner: req.user.id,
+  });
+
+  if (!exists) {
+    return res.status(404).json({
+      success: false,
+      message: "Document not found",
+    });
   }
 
-  const user = await User.findOne({ email }).select("_id").lean();
-  if (!user) {
-    return res.status(404).json({ success: false, message: "User not found" });
+  const emails = collaborators.map((c) => c.email.toLowerCase());
+
+  const users = await User.find({
+    email: { $in: emails },
+  })
+    .select("_id email")
+    .lean();
+
+  if (users.length === 0) {
+    return res.status(404).json({
+      success: false,
+      message: "No valid users found",
+    });
   }
 
-  if (user._id.toString() === req.user.id.toString()) {
+  // Prevent owner sharing to himself
+  if (users.some((u) => u._id.toString() === req.user.id.toString())) {
     return res.status(400).json({
       success: false,
       message: "You cannot share a document with yourself",
     });
   }
 
+  const userMap = new Map(users.map((u) => [u.email, u._id]));
+
+  const sharedAt = new Date();
+
+  const newCollaborators = collaborators
+    .filter((c) => userMap.has(c.email.toLowerCase()))
+    .map((c) => ({
+      user: userMap.get(c.email.toLowerCase()),
+      email: c.email.toLowerCase(),
+      permission: c.permission,
+      sharedAt,
+    }));
+
+  if (newCollaborators.length === 0) {
+    return res.status(400).json({
+      success: false,
+      message: "No valid collaborators to add",
+    });
+  }
+
   await Document.updateOne(
+    { _id: id, owner: req.user.id },
     {
-      _id: id,
-      owner: req.user.id,
-      "sharedWith.user": { $ne: user._id }, // prevent duplicate
-    },
-    {
-      $push: {
+      $addToSet: {
         sharedWith: {
-          user: user._id,
-          email,
-          permission,
-          sharedAt: new Date(),
+          $each: newCollaborators,
         },
       },
     },
@@ -516,7 +547,6 @@ export const shareDocument = asyncHandler(async (req, res) => {
 
   return res.status(200).json({
     success: true,
-
     message: "Document shared successfully",
   });
 });

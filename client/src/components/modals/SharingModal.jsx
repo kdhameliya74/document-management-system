@@ -1,8 +1,9 @@
-import React, { useState } from "react";
-import { Mail, Loader, Share2, User, ChevronDown } from "lucide-react";
+import React, { useState, useCallback } from "react";
+import { Mail, Loader, Share2, User, ChevronDown, Plus } from "lucide-react";
 import { DEFAULT_MESSAGES, PERMISSION_LEVELS, SHARE_MESSAGES } from "@/helpers/constants.js";
 import toast from "react-hot-toast";
 import Modal from "@/components/common/Modal";
+import UserTag from "@/components/common/UserTag";
 import { isValidEmail } from "@/helpers/utils";
 import { useDispatch } from "react-redux";
 import { shareDocument } from "@/store/documentSystemSlice";
@@ -10,6 +11,7 @@ import { shareDocument } from "@/store/documentSystemSlice";
 const SharingModal = ({ item, isOpen, onClose }) => {
   const dispatch = useDispatch();
   const [email, setEmail] = useState("");
+  const [newCollaborators, setNewCollaborators] = useState([]);
   const [errors, setErrors] = useState({});
   const [permission, setPermission] = useState(PERMISSION_LEVELS.VIEW);
   const [isLoading, setIsLoading] = useState(false);
@@ -18,16 +20,17 @@ const SharingModal = ({ item, isOpen, onClose }) => {
   const collaborators = item?.sharedWith || [];
 
   const handleShare = async () => {
-    if (!isValidEmail(email)) {
-      setErrors({ email: DEFAULT_MESSAGES.INVALID_EMAIL });
+    if (newCollaborators.length === 0) {
       return;
     }
-
     setIsLoading(true);
     try {
-      await dispatch(shareDocument({ id: item.id, email: email.trim(), permission })).unwrap();
+      const payload = {
+        id: item.id,
+        collaborators: newCollaborators.map((c) => ({ email: c.email, permission: c.permission })),
+      };
+      await dispatch(shareDocument(payload)).unwrap();
       toast.success(SHARE_MESSAGES.SHARE_SUCCESS);
-      setEmail("");
       onClose();
     } catch (err) {
       toast.error(err);
@@ -35,6 +38,25 @@ const SharingModal = ({ item, isOpen, onClose }) => {
       setIsLoading(false);
     }
   };
+
+  const handleAddCollaborator = () => {
+    setErrors({});
+    if (!isValidEmail(email)) {
+      setErrors({ email: DEFAULT_MESSAGES.INVALID_EMAIL });
+      return;
+    }
+    if (collaborators.some((c) => c.email === email)) {
+      setErrors({ email: "User already has access" });
+      return;
+    }
+    setNewCollaborators((prev) => [...prev, { email, permission }]);
+    setEmail("");
+    setErrors({});
+  };
+
+  const handleRemoveCollaborator = useCallback((index) => {
+    setNewCollaborators((prev) => prev.filter((_, i) => i !== index));
+  }, []);
 
   const modalProps = {
     title: `Share "${item?.name}"`,
@@ -96,15 +118,35 @@ const SharingModal = ({ item, isOpen, onClose }) => {
                 </div>
               )}
             </div>
+            <div className="flex items-center justify-center">
+              <button
+                onClick={handleAddCollaborator}
+                className="py-3 px-6 rounded-2xl font-bold text-sm transition-all duration-300 bg-primary text-white hover:bg-primary-hover cursor-pointer"
+              >
+                <Plus size={18} />
+              </button>
+            </div>
           </div>
           {errors?.email && <p className="text-xs text-red-500">{errors?.email}</p>}
+          {newCollaborators.length > 0 && (
+            <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto pr-1">
+              {newCollaborators.map((collaborator, index) => (
+                <UserTag
+                  key={`new-${index}`}
+                  label={collaborator.email}
+                  subLabel={collaborator.permission}
+                  onClose={() => handleRemoveCollaborator(index)}
+                />
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Action Buttons */}
         <div className="flex justify-end gap-3 px-1">
           <button
             onClick={handleShare}
-            disabled={isLoading || !email.trim()}
+            disabled={isLoading || newCollaborators.length === 0}
             className="flex-1 flex items-center justify-center gap-2 py-3 px-6 rounded-2xl font-bold text-sm transition-all duration-300 bg-primary text-white hover:bg-primary-hover shadow-xl shadow-primary/20 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
           >
             {isLoading ? <Loader className="animate-spin" size={18} /> : <span>Share</span>}
@@ -122,22 +164,11 @@ const SharingModal = ({ item, isOpen, onClose }) => {
           <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto pr-1">
             {collaborators.length > 0 ? (
               collaborators.map((collab, index) => (
-                <div
-                  key={index}
-                  className={`flex items-center gap-2 px-2 py-1.5 rounded-full border transition-all duration-200 bg-bg-panel border-border-main text-text-main hover:border-border-muted hover:bg-bg-hover`}
-                >
-                  <div
-                    className={`w-4 h-4 rounded-full flex items-center justify-center bg-bg-hover text-text-muted`}
-                  >
-                    <User size={12} />
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-xs truncate max-w-[150px]">{collab.email}</span>
-                    <span className="text-[9px] font-semibold uppercase font-black tracking-tight opacity-50">
-                      {collab.permission}
-                    </span>
-                  </div>
-                </div>
+                <UserTag
+                  key={`existing-${index}`}
+                  label={collab.email}
+                  subLabel={collab.permission}
+                />
               ))
             ) : (
               <div className="flex items-center gap-2 px-2 py-1.5 rounded-full border transition-all duration-200 bg-bg-panel border-border-main text-text-main hover:border-border-muted hover:bg-bg-hover">
