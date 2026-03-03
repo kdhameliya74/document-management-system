@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { Trash, Eye, Share, Download, FolderPen, Move, ArchiveRestore, Trash2 } from "lucide-react";
-import { setSelectedId, setShowDetails } from "@/store/documentSystemSlice";
+import { setSelectedId, setShowDetails } from "@/store/documents.slice";
 import { TRASH_MENU_ACTIONS } from "@/helpers/constants";
 
 const useFileFolderContextMenu = (menuFor = "dashbaord", onMenuAction) => {

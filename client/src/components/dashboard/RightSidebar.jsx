@@ -1,7 +1,7 @@
 import React from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { FileText, Folder, Download, Trash2, Share2, Clock, Info, User, X } from "lucide-react";
-import { deleteItem, setShowDetails } from "@/store/documentSystemSlice";
+import { deleteItem, setShowDetails } from "@/store/documents.slice";
 import { format } from "date-fns";
 
 import DeleteModal from "@/components/modals/DeleteModal";

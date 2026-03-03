@@ -276,7 +276,7 @@ const linkChildToParent = (state, parentId, childId) => {
   }
 };
 
-const documentSystemSlice = createSlice({
+const documentsSlice = createSlice({
   name: "documentSystem",
   initialState,
   reducers: {
@@ -302,7 +302,7 @@ const documentSystemSlice = createSlice({
     },
     // fetch documents and files
     // Mock version history
-    addFileVersion: () => {},
+    addFileVersion: () => { },
   },
   extraReducers: (builder) => {
     builder
@@ -473,5 +473,5 @@ export const {
   renameItem,
   deleteItem,
   addFileVersion,
-} = documentSystemSlice.actions;
-export default documentSystemSlice.reducer;
+} = documentsSlice.actions;
+export default documentsSlice.reducer;

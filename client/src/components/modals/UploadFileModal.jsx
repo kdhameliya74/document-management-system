@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Upload, X, Loader2, Check, AlertCircle } from "lucide-react";
-import { uploadFileMeta } from "@/store/documentSystemSlice";
+import { uploadFileMeta } from "@/store/documents.slice";
 import Modal from "@/components/common/Modal";
 import DocumentService from "@/services/document.service";
 import { logError, uuidToBase64 } from "@/helpers/utils";

@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Folder, Loader, Edit } from "lucide-react";
 import { FOLDER_COLORS, FOLDER_MESSAGES, DOCUMENT_MODES } from "@/helpers/constants.js";
 
-import { createFolder, updateDocument } from "@/store/documentSystemSlice";
+import { createFolder, updateDocument } from "@/store/documents.slice";
 import toast from "react-hot-toast";
 import Modal from "@/components/common/Modal";
 import { getBaseName, getFileExtension, getDocumentFlags } from "@/helpers/utils";

@@ -6,7 +6,7 @@ import Modal from "@/components/common/Modal";
 import UserTag from "@/components/common/UserTag";
 import { isValidEmail } from "@/helpers/utils";
 import { useDispatch } from "react-redux";
-import { shareDocument } from "@/store/documentSystemSlice";
+import { shareDocument } from "@/store/documents.slice";
 
 const SharingModal = ({ item, isOpen, onClose }) => {
   const dispatch = useDispatch();

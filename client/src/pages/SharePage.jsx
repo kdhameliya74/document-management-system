@@ -2,7 +2,7 @@ import React, { useEffect, useMemo } from "react";
 import { Share2 } from "lucide-react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { fetchDocuments, setSelectedId } from "@/store/documentSystemSlice";
+import { fetchDocuments, setSelectedId } from "@/store/documents.slice";
 import { APP_VIEWS_MAP } from "@/helpers/constants";
 import ROUTES from "@/utils/routes";
 
