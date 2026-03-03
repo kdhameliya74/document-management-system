@@ -6,23 +6,26 @@ const ROUTES = {
     ROOT: "/app",
     WILDCARD: "/app/*",
     FOLDERS: "/app/folders",
-    FOLDER: "/app/folders/:folderId",
     RECENT: "/app/recent",
-    SHARED: "/app/shared/:folderId?",
+    SHARED: "/app/shared",
     TRASH: "/app/trash",
+
+    FOLDER: "/app/folders/:folderId",
     TRASH_FOLDER: "/app/trash/:folderId",
+    SHARED_FOLDER: "/app/shared/:folderId",
+
     FOLDER_DYNAMIC: (folderId) => (folderId ? `/app/folders/${folderId}` : "/app/folders"),
     TRASH_DYNAMIC: (folderId) => (folderId ? `/app/trash/${folderId}` : "/app/trash"),
     SHARED_DYNAMIC: (folderId) => (folderId ? `/app/shared/${folderId}` : "/app/shared"),
+
     RELATIVE: {
       FOLDERS: "folders",
       FOLDER: "folders/:folderId",
       TRASH: "trash",
       TRASH_FOLDER: "trash/:folderId",
       RECENT: "recent",
-      SHARED: "shared/:folderId?",
-      SHARE_FOLDER: "share/folder/:folderId",
-      SHARE_FILE: "share/file/:fileId",
+      SHARED: "shared",
+      SHARED_FOLDER: "shared/:folderId",
     },
   },
 };

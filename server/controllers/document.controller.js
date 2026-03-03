@@ -94,15 +94,14 @@ async function listSharedDocuments(req, res, baseFilter) {
   }).lean();
   const sharedIds = new Set(documents.map((d) => d._id.toString()));
 
-  const rootShared = documents.filter(
-    (d) => !d.parentId || !sharedIds.has(d.parentId.toString()),
-  );
+  const rootShared = documents.filter((d) => !d.parentId || !sharedIds.has(d.parentId.toString()));
   return res.status(200).json({
     success: true,
     folders: rootShared.filter((d) => d.docType === DOC_TYPES.FOLDER),
     files: rootShared.filter((d) => d.docType === DOC_TYPES.FILE),
   });
 }
+
 // ─── Controllers ─────────────────────────────────────────────────────────────
 
 // @desc    List documents inside a folder (folders + files)
@@ -117,11 +116,11 @@ export const listDocuments = asyncHandler(async (req, res) => {
     isTrashed: false,
   };
 
-  if (['move', 'share'].includes(mode)) {
+  if (["move", "share"].includes(mode)) {
     const modeActions = {
       move: moveTreeList,
       share: listSharedDocuments,
-    }
+    };
     return modeActions[mode](req, res, baseFilter);
   }
 

@@ -2,8 +2,8 @@ import api from "@/utils/api";
 import axios from "axios";
 
 const DocumentService = {
-  getAll: async (parentId, extraParams = {}) => {
-    const response = await api.get("/documents", { params: { parentId, ...extraParams } });
+  getAll: async (payload) => {
+    const response = await api.get("/documents", { params: payload });
     return response.data;
   },
 

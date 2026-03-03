@@ -20,6 +20,7 @@ import FileItem from "@/components/dashboard/FileItem";
 import Loading from "@/components/common/Loading";
 import DeleteModal from "@/components/modals/DeleteModal";
 import ResourceNotFound from "@/components/common/ResourceNotFound";
+import PageHeader from "@/components/common/PageHeader";
 
 const EmptyTrash = ({ onNavigateBack, folderId }) => (
   <div className="flex-1 flex flex-col items-center justify-center text-slate-500 text-center">
@@ -167,10 +168,13 @@ const TrashPage = () => {
 
   return (
     <>
-      <div className="relative h-full flex flex-col" onClick={handleClickOutside}>
-        <header className="flex items-center justify-between pb-4 border-b border-border-muted -mx-6 px-6">
-          <h2 className="text-2xl font-medium text-text-main">Trash</h2>
-        </header>
+      <div className="relative h-full flex flex-col px-8 py-6" onClick={handleClickOutside}>
+        <PageHeader>
+          <PageHeader.Left
+            title={"Trash"}
+            subtitle="Manage your trashed folders and documents with ease"
+          />
+        </PageHeader>
 
         <nav className="flex items-center gap-2 text-sm text-text-muted my-4 overflow-x-auto whitespace-nowrap scrollbar-hide">
           <button

@@ -17,6 +17,18 @@ const initialState = {
       parentId: null,
       childDocuments: [],
     },
+    shared: {
+      id: "shared",
+      name: "Shared",
+      parentId: null,
+      childDocuments: [],
+    },
+    trash: {
+      id: "trash",
+      name: "Trash",
+      parentId: null,
+      childDocuments: [],
+    },
   },
   trashDocuments: {
     trash: {
@@ -79,15 +91,17 @@ export const createFolder = createAsyncThunk(
 */
 export const fetchDocuments = createAsyncThunk(
   "documents/all",
-  async (parentId, { rejectWithValue }) => {
+  async (payload, { rejectWithValue, getState }) => {
     try {
-      const data = await DocumentService.getAll(parentId);
+      const state = getState();
+      const currentFolderId = state.documentSystem.currentFolderId;
+      const data = await DocumentService.getAll(payload);
       return {
-        folders: data.folders,
-        files: data.files,
-        currentFolder: data.currentFolder,
-        breadcrumbs: data.breadcrumbs || [],
-        parentId: parentId || "root",
+        folders: data?.folders || [],
+        files: data?.files || [],
+        currentFolder: data?.currentFolder,
+        breadcrumbs: data?.breadcrumbs || [],
+        parentId: payload?.parentId || currentFolderId,
       };
     } catch (err) {
       logError(err);
