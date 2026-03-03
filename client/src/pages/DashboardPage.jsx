@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { setCurrentFolder } from "@/store/documentSystemSlice";
+import { setCurrentFolder } from "@/store/documents.slice";
 import { APP_VIEWS_MAP } from "@/helpers/constants";
 
 import Sidebar from "@/components/layout/Sidebar";

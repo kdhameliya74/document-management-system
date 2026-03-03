@@ -5,7 +5,7 @@ import DocumentService from "@/services/document.service";
 import { APP_ROOT_NAME, DEFAULT_MESSAGES } from "@/helpers/constants";
 import { logError } from "@/helpers/utils";
 import { useDispatch } from "react-redux";
-import { moveDocument } from "@/store/documentSystemSlice";
+import { moveDocument } from "@/store/documents.slice";
 import toast from "react-hot-toast";
 import Loading from "@/components/common/Loading";
 

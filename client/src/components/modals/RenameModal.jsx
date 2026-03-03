@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
-import { renameItem } from "@/store/documentSystemSlice";
+import { renameItem } from "@/store/documents.slice";
 import { FileText } from "lucide-react";
 import Modal from "@/components/common/Modal";
 

@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { Trash, Eye, Share, Download, FolderPen, Move, ArchiveRestore, Trash2 } from "lucide-react";
-import { setSelectedId, setShowDetails } from "@/store/documentSystemSlice";
-import { TRASH_MENU_ACTIONS } from "@/helpers/constants";
+import { setSelectedId, setShowDetails } from "@/store/documents.slice";
+import { APP_VIEWS_MAP, TRASH_MENU_ACTIONS } from "@/helpers/constants";
 
 const useFileFolderContextMenu = (menuFor = "dashbaord", onMenuAction) => {
   const dispatch = useDispatch();
@@ -121,6 +121,37 @@ const useFileFolderContextMenu = (menuFor = "dashbaord", onMenuAction) => {
           label: "Share",
           icon: Share,
           onClick: () => openModal("share"),
+        },
+        {
+          label: "Download",
+          icon: Download,
+          onClick: () => {
+            alert("Download functionality coming soon!");
+            closeContextMenu();
+          },
+        },
+        {
+          label: "Delete",
+          icon: Trash,
+          onClick: () => openModal("delete"),
+        },
+      ];
+    }
+
+    if (menuFor === APP_VIEWS_MAP.SHARED) {
+      return [
+        {
+          label: "Edit",
+          icon: FolderPen,
+          onClick: () => openModal("edit"),
+        },
+        {
+          label: "View Details",
+          icon: Eye,
+          onClick: () => {
+            dispatch(setShowDetails(true));
+            closeContextMenu();
+          },
         },
         {
           label: "Download",

@@ -1,8 +1,9 @@
 import React, { useEffect, useMemo } from "react";
+import toast from "react-hot-toast";
 import { Share2 } from "lucide-react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { fetchDocuments, setSelectedId } from "@/store/documentSystemSlice";
+import { fetchDocuments, setSelectedId } from "@/store/documents.slice";
 import { APP_VIEWS_MAP } from "@/helpers/constants";
 import ROUTES from "@/utils/routes";
 
@@ -13,7 +14,8 @@ import FolderItem from "@/components/dashboard/FolderItem";
 import FileItem from "@/components/dashboard/FileItem";
 import Breadcrumb from "@/components/dashboard/Breadcrumb";
 import ResourceNotFound from "@/components/common/ResourceNotFound";
-import toast from "react-hot-toast";
+import ContextMenu from "@/components/common/ContextMenu";
+import useFileFolderContextMenu from "@/hooks/useFileFolderContextMenu";
 
 const SharePage = () => {
   const { folderId } = useParams();
@@ -57,6 +59,9 @@ const SharePage = () => {
     [currentFolder?.childDocuments, documents],
   );
 
+  const { contextMenu, handleContextMenu, closeContextMenu, getContextMenuItems } =
+    useFileFolderContextMenu(APP_VIEWS_MAP.SHARED);
+
   const isEmpty = childDocuments.length === 0;
   // 🔥 Full page loader (initial load)
   if (isInitialLoading) {
@@ -72,8 +77,13 @@ const SharePage = () => {
     return <ResourceNotFound />;
   }
 
+  const handleClickOutsideMain = () => {
+    dispatch(setSelectedId(null));
+    closeContextMenu();
+  };
+
   return (
-    <div className="relative h-full flex flex-col px-8 py-6">
+    <div className="relative h-full flex flex-col px-8 py-6" onClick={handleClickOutsideMain}>
       <PageHeader>
         <PageHeader.Left title="Shared with me" subtitle="Viewing shared content" />
       </PageHeader>
@@ -99,6 +109,8 @@ const SharePage = () => {
                     folder={document}
                     isSelected={selectedId === document.id}
                     onNavigate={handleNavigate}
+                    onSelect={handleSelect}
+                    onContextMenu={handleContextMenu}
                   />
                 ) : (
                   <FileItem
@@ -106,6 +118,7 @@ const SharePage = () => {
                     file={document}
                     isSelected={selectedId === document.id}
                     onSelect={handleSelect}
+                    onContextMenu={handleContextMenu}
                   />
                 ),
               )}
@@ -113,6 +126,16 @@ const SharePage = () => {
           </div>
         )}
       </div>
+
+      {/* Context Menu */}
+      {contextMenu && (
+        <ContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          items={getContextMenuItems()}
+          onClose={closeContextMenu}
+        />
+      )}
     </div>
   );
 };

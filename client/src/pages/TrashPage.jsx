@@ -8,7 +8,7 @@ import {
   getTrashedDocument,
   restoreDocument,
   permenantDeleteDocument,
-} from "@/store/documentSystemSlice";
+} from "@/store/documents.slice";
 import { truncateFolderName } from "@/helpers/utils.js";
 import { TRASH_MENU_ACTIONS, TRASH_MESSAGES } from "@/helpers/constants";
 

@@ -102,6 +102,7 @@ export const fetchDocuments = createAsyncThunk(
         currentFolder: data?.currentFolder,
         breadcrumbs: data?.breadcrumbs || [],
         parentId: payload?.parentId || currentFolderId,
+        mode: payload?.mode || "root",
       };
     } catch (err) {
       logError(err);
@@ -254,40 +255,48 @@ export const shareDocument = createAsyncThunk(
   },
 );
 
-const ensureDocument = (state, id, data) => {
+const ensureDocument = (state, id, data, rootId) => {
   const docState = state.documents;
+  const parentId = data.parentId;
+
+  // Normalize parentId if it's not present in state and we have a rootId (e.g. shared)
+  if (parentId && !docState[parentId] && rootId) {
+    data.parentId = rootId;
+  }
+
   docState[id] ??= {
     id,
     name: "",
-    parentId: state.currentFolderId,
+    parentId: rootId || state.currentFolderId,
     childDocuments: [],
   };
 
   Object.assign(docState[id], data);
 };
 
-const linkChildToParent = (state, parentId, childId) => {
+const linkChildToParent = (state, parentId, childId, rootId) => {
   const docState = state.documents;
-  if (!docState[parentId]) return; // TODO: parent folder is not in the state
+  const targetParentId = docState[parentId] ? parentId : rootId;
 
-  const children = docState[parentId].childDocuments;
+  if (!docState[targetParentId]) return;
+
+  const children = docState[targetParentId].childDocuments;
   if (!children.includes(childId)) {
     children.push(childId);
   }
 };
 
-const documentSystemSlice = createSlice({
+const documentsSlice = createSlice({
   name: "documentSystem",
   initialState,
   reducers: {
     setCurrentFolder: (state, action) => {
       state.currentFolderId = action.payload;
-      state.selectedId = null; // Clear selection on navigation
-      state.showDetails = false; // Close details on navigation
+      state.selectedId = null;
+      state.showDetails = false;
     },
     setSelectedId: (state, action) => {
       state.selectedId = action.payload;
-      // Do not automatically show details
     },
     setShowDetails: (state, action) => {
       state.showDetails = action.payload;
@@ -325,36 +334,47 @@ const documentSystemSlice = createSlice({
       })
       .addCase(fetchDocuments.fulfilled, (state, action) => {
         state.isLoading = false;
-        const { folders, files, currentFolder, breadcrumbs, parentId } = action.payload;
+        const { folders, files, currentFolder, breadcrumbs, parentId, mode } = action.payload;
+        const rootId = mode || "root";
 
         // 1. Breadcrumbs
         breadcrumbs.forEach(({ id, name, parentId: pid }) => {
-          ensureDocument(state, id, { id, name, parentId: pid });
-          linkChildToParent(state, pid, id);
+          ensureDocument(state, id, { id, name, parentId: pid }, rootId);
+          linkChildToParent(state, pid, id, rootId);
         });
 
         // 2. Current folder
         if (currentFolder) {
           const { id, parentId } = currentFolder;
-          const normalizedParentId = parentId || state.currentFolderId;
+          const normalizedParentId = parentId || rootId;
 
-          ensureDocument(state, id, {
-            ...currentFolder,
+          ensureDocument(
+            state,
             id,
-            parentId: normalizedParentId,
-          });
+            {
+              ...currentFolder,
+              id,
+              parentId: normalizedParentId,
+            },
+            rootId,
+          );
 
-          linkChildToParent(state, normalizedParentId, id);
+          linkChildToParent(state, normalizedParentId, id, rootId);
         }
 
         // 3. Child folders
         const childDocuments = [...folders, ...files].map((doc) => {
-          const normalizedParentId = doc.parentId || state.currentFolderId;
-          ensureDocument(state, doc.id, {
-            ...doc,
-            id: doc.id,
-            parentId: normalizedParentId,
-          });
+          const normalizedParentId = doc.parentId || rootId;
+          ensureDocument(
+            state,
+            doc.id,
+            {
+              ...doc,
+              id: doc.id,
+              parentId: normalizedParentId,
+            },
+            rootId,
+          );
           return doc.id;
         });
 
@@ -473,5 +493,5 @@ export const {
   renameItem,
   deleteItem,
   addFileVersion,
-} = documentSystemSlice.actions;
-export default documentSystemSlice.reducer;
+} = documentsSlice.actions;
+export default documentsSlice.reducer;

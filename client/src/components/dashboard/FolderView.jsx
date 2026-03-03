@@ -7,7 +7,7 @@ import Loading from "@/components/common/Loading";
 import PageHeader from "@/components/common/PageHeader";
 
 import ROUTES from "@/utils/routes";
-import { setSelectedId, fetchDocuments, deleteDocument } from "@/store/documentSystemSlice";
+import { setSelectedId, fetchDocuments, deleteDocument } from "@/store/documents.slice";
 
 import FolderItem from "@/components/dashboard/FolderItem";
 import FileItem from "@/components/dashboard/FileItem";
