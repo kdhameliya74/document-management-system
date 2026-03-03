@@ -18,7 +18,7 @@ import UploadFileModal from "@/components/modals/UploadFileModal";
 import DeleteModal from "@/components/modals/DeleteModal";
 import MoveModal from "@/components/modals/MoveModal";
 import SharingModal from "@/components/modals/SharingModal";
-import EmptyFolderScreen from "@/components/dashboard/EmptyFolderScreen";
+import EmptyState from "@/components/common/EmptyState";
 import useFileFolderContextMenu from "@/hooks/useFileFolderContextMenu";
 import ResourceNotFound from "@/components/common/ResourceNotFound";
 import toast from "react-hot-toast";
@@ -237,7 +237,22 @@ const FolderView = () => {
       <div className="flex-1 relative flex flex-col min-h-0">
         {isRefreshing && <Loading text="Refreshing items all..." />}
         {isEmpty && !isLoading ? (
-          <EmptyFolderScreen setActiveModal={setActiveModal} />
+          <EmptyState
+            icon={<FolderPlus />}
+            title="Your Drive is Empty"
+            description="Start by uploading your first file or create an organized folder structure to get things moving."
+            actions={[
+              {
+                label: "Upload File",
+                onClick: () => setActiveModal("upload"),
+              },
+              {
+                label: "Create Folder",
+                onClick: () => setActiveModal("createFolder"),
+                variant: "secondary",
+              },
+            ]}
+          />
         ) : (
           <div className="flex-1 overflow-y-auto -mx-2 px-2 pb-10">
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 2xl:grid-cols-9 gap-5 py-2">

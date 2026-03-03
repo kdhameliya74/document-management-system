@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo } from "react";
+import { Share2 } from "lucide-react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchDocuments } from "@/store/documentSystemSlice";
@@ -7,7 +8,7 @@ import ROUTES from "@/utils/routes";
 
 import PageHeader from "@/components/common/PageHeader";
 import Loading from "@/components/common/Loading";
-import EmptyFolderScreen from "@/components/dashboard/EmptyFolderScreen";
+import EmptyState from "@/components/common/EmptyState";
 import FolderItem from "@/components/dashboard/FolderItem";
 import FileItem from "@/components/dashboard/FileItem";
 import Breadcrumb from "@/components/dashboard/Breadcrumb";
@@ -81,7 +82,11 @@ const SharePage = () => {
       <div className="flex-1 relative flex flex-col min-h-0">
         {isRefreshing && <Loading text="Refreshing items all..." />}
         {isEmpty && !isLoading ? (
-          <EmptyFolderScreen />
+          <EmptyState
+            icon={<Share2 />}
+            title="No shared items"
+            description="Items that others share with you will appear here. You can collaborate on documents and folders in real-time."
+          />
         ) : (
           <div className="flex-1 overflow-y-auto -mx-2 px-2 pb-10">
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 2xl:grid-cols-9 gap-5 py-2">

@@ -20,33 +20,9 @@ import FileItem from "@/components/dashboard/FileItem";
 import Loading from "@/components/common/Loading";
 import DeleteModal from "@/components/modals/DeleteModal";
 import ResourceNotFound from "@/components/common/ResourceNotFound";
+import EmptyState from "@/components/common/EmptyState";
 import PageHeader from "@/components/common/PageHeader";
 
-const EmptyTrash = ({ onNavigateBack, folderId }) => (
-  <div className="flex-1 flex flex-col items-center justify-center text-slate-500 text-center">
-    <div className="w-32 h-32 rounded-full flex items-center justify-center mb-6 bg-bg-panel">
-      <Trash2 size={64} className="text-primary/50" />
-    </div>
-    {folderId === "trash" ? (
-      <>
-        <h3 className="text-xl font-normal text-text-main mb-2">Trash is empty</h3>
-        <p>Items moved to trash will appear here</p>
-        <button
-          onClick={onNavigateBack}
-          className="mt-6 flex text-sm items-center gap-2 py-2 cursor-pointer px-3 rounded-lg transition-all bg-primary text-white hover:bg-primary-hover shadow-md"
-        >
-          <ArrowLeft size={18} />
-          <span>Go to My Drive</span>
-        </button>
-      </>
-    ) : (
-      <>
-        <h3 className="text-xl font-normal text-text-main mb-2">This folder is empty</h3>
-        <p>There are no files or folders here.</p>
-      </>
-    )}
-  </div>
-);
 
 const TrashPage = () => {
   /* -------------------------------- hooks -------------------------------- */
@@ -212,7 +188,27 @@ const TrashPage = () => {
         </nav>
 
         {isLoading && <Loading />}
-        {!isLoading && isEmpty && <EmptyTrash onNavigateBack={goBackHome} />}
+        {!isLoading && isEmpty && (
+          <EmptyState
+            icon={<Trash2 />}
+            title={folderId === "trash" ? "Trash is empty" : "This folder is empty"}
+            description={
+              folderId === "trash"
+                ? "Items moved to trash will appear here. They will be permanently deleted after 30 days."
+                : "There are no files or folders here."
+            }
+            actions={
+              folderId === "trash"
+                ? [
+                    {
+                      label: "Go to My Drive",
+                      onClick: goBackHome,
+                    },
+                  ]
+                : []
+            }
+          />
+        )}
         {!isLoading && !isEmpty && renderFolders()}
 
         {contextMenu && location.pathname.startsWith(ROUTES.APP.TRASH) && (
