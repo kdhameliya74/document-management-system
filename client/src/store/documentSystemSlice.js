@@ -17,6 +17,18 @@ const initialState = {
       parentId: null,
       childDocuments: [],
     },
+    shared: {
+      id: "shared",
+      name: "Shared",
+      parentId: null,
+      childDocuments: [],
+    },
+    trash: {
+      id: "trash",
+      name: "Trash",
+      parentId: null,
+      childDocuments: [],
+    },
   },
   trashDocuments: {
     trash: {
@@ -79,15 +91,17 @@ export const createFolder = createAsyncThunk(
 */
 export const fetchDocuments = createAsyncThunk(
   "documents/all",
-  async (parentId, { rejectWithValue }) => {
+  async (payload, { rejectWithValue, getState }) => {
     try {
-      const data = await DocumentService.getAll(parentId);
+      const state = getState();
+      const currentFolderId = state.documentSystem.currentFolderId;
+      const data = await DocumentService.getAll(payload);
       return {
-        folders: data.folders,
-        files: data.files,
-        currentFolder: data.currentFolder,
-        breadcrumbs: data.breadcrumbs || [],
-        parentId: parentId || "root",
+        folders: data?.folders || [],
+        files: data?.files || [],
+        currentFolder: data?.currentFolder,
+        breadcrumbs: data?.breadcrumbs || [],
+        parentId: payload?.parentId || currentFolderId,
       };
     } catch (err) {
       logError(err);
@@ -240,21 +254,21 @@ export const shareDocument = createAsyncThunk(
   },
 );
 
-const ensureDocument = (state, id, data, topParent = "root") => {
-  const docState = topParent === "root" ? state.documents : state.trashDocuments;
+const ensureDocument = (state, id, data) => {
+  const docState = state.documents;
   docState[id] ??= {
     id,
     name: "",
-    parentId: topParent,
+    parentId: state.currentFolderId,
     childDocuments: [],
   };
 
   Object.assign(docState[id], data);
 };
 
-const linkChildToParent = (state, parentId, childId, topParent = "root") => {
-  const docState = topParent === "root" ? state.documents : state.trashDocuments;
-  if (!docState[parentId]) return;
+const linkChildToParent = (state, parentId, childId) => {
+  const docState = state.documents;
+  if (!docState[parentId]) return; // TODO: parent folder is not in the state
 
   const children = docState[parentId].childDocuments;
   if (!children.includes(childId)) {
@@ -310,35 +324,6 @@ const documentSystemSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchDocuments.fulfilled, (state, action) => {
-        /**
-         * we need following structure
-         *
-         * documents = {
-         *    root: {
-         *      id: "root",
-         *      name: "root",
-         *      parentId: null,
-         *      childDocuments: ["folderId1", "folderId2"],
-         *      childFileIds: ["fileId1", "fileId2"],
-         *    },
-         *    folderId1: {
-         *      id: "folderId1",
-         *      name: "folder1",
-         *      parentId: "root",
-         *      childDocuments: ["folderId2", "folderId3"],
-         *      childFileIds: ["fileId1", "fileId2"],
-         *    },
-         *    folderId2: {
-         *      id: "folderId2",
-         *      name: "folder2",
-         *      parentId: "folderId1",
-         *      childDocuments: ["folderId3", "folderId4"],
-         *      childFileIds: ["fileId3", "fileId4"],
-         *    },
-         *    ...
-         * }
-         */
-
         state.isLoading = false;
         const { folders, files, currentFolder, breadcrumbs, parentId } = action.payload;
 
@@ -351,7 +336,7 @@ const documentSystemSlice = createSlice({
         // 2. Current folder
         if (currentFolder) {
           const { id, parentId } = currentFolder;
-          const normalizedParentId = parentId || "root";
+          const normalizedParentId = parentId || state.currentFolderId;
 
           ensureDocument(state, id, {
             ...currentFolder,
@@ -364,7 +349,7 @@ const documentSystemSlice = createSlice({
 
         // 3. Child folders
         const childDocuments = [...folders, ...files].map((doc) => {
-          const normalizedParentId = doc.parentId || "root";
+          const normalizedParentId = doc.parentId || state.currentFolderId;
           ensureDocument(state, doc.id, {
             ...doc,
             id: doc.id,
