@@ -59,16 +59,8 @@ const SharePage = () => {
     [currentFolder?.childDocuments, documents],
   );
 
-  const {
-    contextMenu,
-    activeModal,
-    setActiveModal,
-    selectedItem,
-    selectedItemType,
-    handleContextMenu,
-    closeContextMenu,
-    getContextMenuItems,
-  } = useFileFolderContextMenu(APP_VIEWS_MAP.SHARED);
+  const { contextMenu, handleContextMenu, closeContextMenu, getContextMenuItems } =
+    useFileFolderContextMenu(APP_VIEWS_MAP.SHARED);
 
   const isEmpty = childDocuments.length === 0;
   // 🔥 Full page loader (initial load)
@@ -117,7 +109,7 @@ const SharePage = () => {
                     folder={document}
                     isSelected={selectedId === document.id}
                     onNavigate={handleNavigate}
-                    onSelect={handleSelect}  
+                    onSelect={handleSelect}
                     onContextMenu={handleContextMenu}
                   />
                 ) : (
@@ -135,7 +127,7 @@ const SharePage = () => {
         )}
       </div>
 
-        {/* Context Menu */}
+      {/* Context Menu */}
       {contextMenu && (
         <ContextMenu
           x={contextMenu.x}
@@ -144,7 +136,6 @@ const SharePage = () => {
           onClose={closeContextMenu}
         />
       )}
-
     </div>
   );
 };
