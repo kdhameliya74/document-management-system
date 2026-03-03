@@ -10,14 +10,16 @@ import Loading from "@/components/common/Loading";
 import EmptyFolderScreen from "@/components/dashboard/EmptyFolderScreen";
 import FolderItem from "@/components/dashboard/FolderItem";
 import FileItem from "@/components/dashboard/FileItem";
+import Breadcrumb from "@/components/dashboard/Breadcrumb";
+import ResourceNotFound from "@/components/common/ResourceNotFound";
 import toast from "react-hot-toast";
 
 const SharePage = () => {
   const { folderId } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
-  const { documents, isLoading, selectedId } = useSelector((state) => state.documentSystem);
+  
+  const { documents, isLoading, selectedId, currentFolderId } = useSelector((state) => state.documentSystem);
 
   const normalizedFolderId = folderId || APP_VIEWS_MAP.SHARED;
   const currentFolder = documents[normalizedFolderId];
@@ -30,7 +32,7 @@ const SharePage = () => {
 
     const loadSharedDocuments = async () => {
       try {
-        await dispatch(fetchDocuments({ parentId, mode: normalizedFolderId })).unwrap();
+        await dispatch(fetchDocuments({ parentId, mode: APP_VIEWS_MAP.SHARED })).unwrap();
       } catch (err) {
         toast.error(err);
       }
@@ -73,9 +75,9 @@ const SharePage = () => {
         <PageHeader.Left title="Shared with me" subtitle="Viewing shared content" />
       </PageHeader>
 
-      {/* <div className="mb-6">
-        <Breadcrumb currentFolderId={folderId} />
-      </div> */}
+      <div className="mb-6">
+        <Breadcrumb mode={APP_VIEWS_MAP.SHARED} currentFolderId={folderId || currentFolderId} />
+      </div>
       <div className="flex-1 relative flex flex-col min-h-0">
         {isRefreshing && <Loading text="Refreshing items all..." />}
         {isEmpty && !isLoading ? (

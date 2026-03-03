@@ -9,7 +9,22 @@ import { PutObjectCommand, DeleteObjectsCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { asyncHandler } from "../middlewares/error.middleware.js";
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+//Helpers 
+const splitByType = (docs) => {
+  const folders = [];
+  const files = [];
+
+  for (const doc of docs) {
+    const transformed = { ...doc, id: doc._id.toString() };
+    if (doc.docType === DOC_TYPES.FOLDER) {
+      folders.push(transformed);
+    } else {
+      files.push(transformed);
+    }
+  }
+
+  return { folders, files };
+};
 async function buildBreadcrumbs(parentId, userId) {
   const breadcrumbs = [];
   let tempParentId = parentId;
@@ -70,21 +85,30 @@ async function listSharedDocuments(req, res, baseFilter) {
   if (parentId) {
     const [sharedItems, currentFolder] = await Promise.all([
       Document.find({
-        parentId,
+        parentId: baseFilter.parentId,
         isTrashed: baseFilter.isTrashed,
       }).lean(),
-
-      Document.findOne({
-        _id: parentId,
-        isTrashed: baseFilter.isTrashed,
-      }).lean(),
+      parentId
+        ? Document.findOne({ _id: baseFilter.parentId, isTrashed: baseFilter.isTrashed })
+        : Promise.resolve(null),
     ]);
 
+    const breadcrumbs = currentFolder ? await buildBreadcrumbs(currentFolder.parentId, userId) : [];
+    if (currentFolder) {
+      breadcrumbs.push({
+        id: currentFolder._id.toString(),
+        name: currentFolder.name,
+        parentId: currentFolder.parentId || "shared",
+      });
+    }
+
+    const { folders, files } = splitByType(sharedItems);
     return res.status(200).json({
       success: true,
       currentFolder,
-      folders: sharedItems.filter((d) => d.docType === DOC_TYPES.FOLDER),
-      files: sharedItems.filter((d) => d.docType === DOC_TYPES.FILE),
+      breadcrumbs,
+      folders,
+      files,
     });
   }
 
@@ -92,13 +116,18 @@ async function listSharedDocuments(req, res, baseFilter) {
     isTrashed: baseFilter.isTrashed,
     "sharedWith.user": userId,
   }).lean();
+
   const sharedIds = new Set(documents.map((d) => d._id.toString()));
 
   const rootShared = documents.filter((d) => !d.parentId || !sharedIds.has(d.parentId.toString()));
+
+  const { folders, files } = splitByType(rootShared);
   return res.status(200).json({
     success: true,
-    folders: rootShared.filter((d) => d.docType === DOC_TYPES.FOLDER),
-    files: rootShared.filter((d) => d.docType === DOC_TYPES.FILE),
+    breadcrumbs: [],
+    currentFolder: null,
+    folders,
+    files,
   });
 }
 
@@ -116,16 +145,16 @@ export const listDocuments = asyncHandler(async (req, res) => {
     isTrashed: false,
   };
 
-  if (["move", "share"].includes(mode)) {
+  if (["move", "shared"].includes(mode)) {
     const modeActions = {
       move: moveTreeList,
-      share: listSharedDocuments,
+      shared: listSharedDocuments,
     };
     return modeActions[mode](req, res, baseFilter);
   }
 
   const [items, currentFolder] = await Promise.all([
-    Document.find(baseFilter).sort({ docType: -1, name: 1 }), // folders first
+    Document.find(baseFilter).sort({ docType: -1, name: 1 }).lean(), // folders first
     parentId
       ? Document.findOne({ _id: parentId, owner: userId, isTrashed: false })
       : Promise.resolve(null),
@@ -141,8 +170,8 @@ export const listDocuments = asyncHandler(async (req, res) => {
       parentId: currentFolder.parentId || "root",
     });
   }
-  const folders = items.filter((d) => d.docType === DOC_TYPES.FOLDER);
-  const files = items.filter((d) => d.docType === DOC_TYPES.FILE);
+
+  const { folders, files } = splitByType(items);
 
   return res.status(200).json({
     success: true,
@@ -292,7 +321,7 @@ export const listTrash = asyncHandler(async (req, res) => {
         parentId,
         owner: ownerId,
         isTrashed: true,
-      }),
+      }).lean(),
 
       Document.findOne({
         _id: parentId,
@@ -301,11 +330,12 @@ export const listTrash = asyncHandler(async (req, res) => {
       }),
     ]);
 
+    const { folders, files } = splitByType(trashedItems);
     return res.status(200).json({
       success: true,
       currentFolder,
-      folders: trashedItems.filter((d) => d.docType === DOC_TYPES.FOLDER),
-      files: trashedItems.filter((d) => d.docType === DOC_TYPES.FILE),
+      folders,
+      files,
     });
   }
 
@@ -321,10 +351,11 @@ export const listTrash = asyncHandler(async (req, res) => {
     (d) => !d.parentId || !trashedIds.has(d.parentId.toString()),
   );
 
+  const { folders, files } = splitByType(rootTrash);
   return res.status(200).json({
     success: true,
-    folders: rootTrash.filter((d) => d.docType === DOC_TYPES.FOLDER),
-    files: rootTrash.filter((d) => d.docType === DOC_TYPES.FILE),
+    folders,
+    files,
   });
 });
 

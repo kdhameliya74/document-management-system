@@ -28,7 +28,7 @@ const FolderView = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const { documents, selectedId, isLoading } = useSelector((state) => state.documentSystem);
+  const { documents, selectedId, isLoading, currentFolderId } = useSelector((state) => state.documentSystem);
 
   const normalizedFolderId = folderId || APP_VIEWS_MAP.FOLDERS;
   const currentFolder = documents[normalizedFolderId];
@@ -232,7 +232,7 @@ const FolderView = () => {
       </PageHeader>
 
       <div className="mb-6">
-        <Breadcrumb currentFolderId={folderId} />
+        <Breadcrumb mode={APP_VIEWS_MAP.FOLDERS} currentFolderId={normalizedFolderId} />
       </div>
       <div className="flex-1 relative flex flex-col min-h-0">
         {isRefreshing && <Loading text="Refreshing items all..." />}

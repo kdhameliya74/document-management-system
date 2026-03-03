@@ -302,7 +302,7 @@ const documentSystemSlice = createSlice({
     },
     // fetch documents and files
     // Mock version history
-    addFileVersion: () => {},
+    addFileVersion: () => { },
   },
   extraReducers: (builder) => {
     builder
@@ -365,7 +365,7 @@ const documentSystemSlice = createSlice({
         // 2. Current folder
         if (currentFolder) {
           const { id, parentId } = currentFolder;
-          const normalizedParentId = parentId || "root";
+          const normalizedParentId = parentId || state.currentFolderId;
 
           ensureDocument(state, id, {
             ...currentFolder,
@@ -378,7 +378,7 @@ const documentSystemSlice = createSlice({
 
         // 3. Child folders
         const childDocuments = [...folders, ...files].map((doc) => {
-          const normalizedParentId = doc.parentId || "root";
+          const normalizedParentId = doc.parentId || state.currentFolderId;
           ensureDocument(state, doc.id, {
             ...doc,
             id: doc.id,
