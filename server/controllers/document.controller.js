@@ -9,7 +9,7 @@ import { PutObjectCommand, DeleteObjectsCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { asyncHandler } from "../middlewares/error.middleware.js";
 
-//Helpers 
+//Helpers
 const splitByType = (docs) => {
   const folders = [];
   const files = [];
@@ -41,7 +41,7 @@ async function buildBreadcrumbs(parentId, userId) {
     breadcrumbs.unshift({
       id: ancestor._id,
       name: ancestor.name,
-      parentId: ancestor.parentId || "root",
+      parentId: ancestor.parentId || "root", // TODO:
     });
     tempParentId = ancestor.parentId;
   }

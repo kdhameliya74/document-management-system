@@ -2,7 +2,7 @@ import React, { useEffect, useMemo } from "react";
 import { Share2 } from "lucide-react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { fetchDocuments } from "@/store/documentSystemSlice";
+import { fetchDocuments, setSelectedId } from "@/store/documentSystemSlice";
 import { APP_VIEWS_MAP } from "@/helpers/constants";
 import ROUTES from "@/utils/routes";
 
@@ -19,8 +19,10 @@ const SharePage = () => {
   const { folderId } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  
-  const { documents, isLoading, selectedId, currentFolderId } = useSelector((state) => state.documentSystem);
+
+  const { documents, isLoading, selectedId, currentFolderId } = useSelector(
+    (state) => state.documentSystem,
+  );
 
   const normalizedFolderId = folderId || APP_VIEWS_MAP.SHARED;
   const currentFolder = documents[normalizedFolderId];

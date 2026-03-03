@@ -13,12 +13,10 @@ const Breadcrumb = ({ mode, currentFolderId }) => {
   const crumbs = React.useMemo(() => {
     const crumbs = [];
     let currentId = currentFolderId;
-
     while (currentId && documents[currentId]) {
       crumbs.unshift(documents[currentId]);
       currentId = documents[currentId].parentId;
     }
-
     return crumbs;
   }, [currentFolderId, documents]);
 

@@ -1,14 +1,10 @@
 import React from "react";
 
-const EmptyState = ({ 
-  icon, 
-  title, 
-  description, 
-  actions = [], 
-  className = "" 
-}) => {
+const EmptyState = ({ icon, title, description, actions = [], className = "" }) => {
   return (
-    <div className={`flex-1 flex flex-col items-center justify-center text-text-muted text-center p-12 animate-in fade-in zoom-in-95 duration-700 ${className}`}>
+    <div
+      className={`flex-1 flex flex-col items-center justify-center text-text-muted text-center p-12 animate-in fade-in zoom-in-95 duration-700 ${className}`}
+    >
       <div className="w-[180px] h-[180px] bg-bg-panel/40 rounded-[3rem] flex items-center justify-center mb-10 text-text-muted/20 border border-border-main shadow-inner relative group">
         <div className="absolute inset-0 bg-primary/5 blur-3xl rounded-full opacity-50 group-hover:bg-primary/10 transition-colors" />
         <div className="relative z-10 group-hover:scale-110 transition-transform duration-500 text-primary/30">
@@ -19,9 +15,7 @@ const EmptyState = ({
         </div>
       </div>
 
-      <h3 className="text-3xl font-black text-text-main mb-3 tracking-tight">
-        {title}
-      </h3>
+      <h3 className="text-3xl font-black text-text-main mb-3 tracking-tight">{title}</h3>
       <p className="max-w-[400px] text-text-dim text-sm font-medium leading-relaxed mb-10">
         {description}
       </p>

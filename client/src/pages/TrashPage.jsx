@@ -23,7 +23,6 @@ import ResourceNotFound from "@/components/common/ResourceNotFound";
 import EmptyState from "@/components/common/EmptyState";
 import PageHeader from "@/components/common/PageHeader";
 
-
 const TrashPage = () => {
   /* -------------------------------- hooks -------------------------------- */
   const navigate = useNavigate();

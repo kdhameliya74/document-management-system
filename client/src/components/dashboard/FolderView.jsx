@@ -28,7 +28,7 @@ const FolderView = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const { documents, selectedId, isLoading, currentFolderId } = useSelector((state) => state.documentSystem);
+  const { documents, selectedId, isLoading } = useSelector((state) => state.documentSystem);
 
   const normalizedFolderId = folderId || APP_VIEWS_MAP.FOLDERS;
   const currentFolder = documents[normalizedFolderId];
