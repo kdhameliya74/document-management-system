@@ -44,6 +44,9 @@ const initialState = {
   showDetails: false,
   isLoading: false,
   error: null,
+  activeModal: null, // 'createFolder' | 'upload' | 'edit' | 'delete' | 'move' | 'share'
+  modalProps: {},
+  contextMenu: null, // { x: number, y: number, item: object, type: string }
 };
 
 /*
@@ -301,6 +304,18 @@ const documentsSlice = createSlice({
     setShowDetails: (state, action) => {
       state.showDetails = action.payload;
     },
+    setActiveModal: (state, action) => {
+      state.activeModal = action.payload;
+    },
+    setModalProps: (state, action) => {
+      state.modalProps = action.payload;
+    },
+    setContextMenu: (state, action) => {
+      state.contextMenu = action.payload;
+    },
+    clearContextMenu: (state) => {
+      state.contextMenu = null;
+    },
     renameItem: (state, action) => {
       const { id, type, newName } = action.payload;
       if (type === "folder" && state.documents[id]) {
@@ -311,7 +326,7 @@ const documentsSlice = createSlice({
     },
     // fetch documents and files
     // Mock version history
-    addFileVersion: () => {},
+    addFileVersion: () => { },
   },
   extraReducers: (builder) => {
     builder
@@ -489,6 +504,10 @@ export const {
   setCurrentFolder,
   setSelectedId,
   setShowDetails,
+  setActiveModal,
+  setModalProps,
+  setContextMenu,
+  clearContextMenu,
   addFile,
   renameItem,
   deleteItem,

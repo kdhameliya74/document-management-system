@@ -7,17 +7,17 @@ import Loading from "@/components/common/Loading";
 import PageHeader from "@/components/common/PageHeader";
 
 import ROUTES from "@/utils/routes";
-import { setSelectedId, fetchDocuments, deleteDocument } from "@/store/documents.slice";
+import {
+  setSelectedId,
+  fetchDocuments,
+  setActiveModal,
+  setModalProps,
+} from "@/store/documents.slice";
 
 import FolderItem from "@/components/dashboard/FolderItem";
 import FileItem from "@/components/dashboard/FileItem";
 import Breadcrumb from "@/components/dashboard/Breadcrumb";
 import ContextMenu from "@/components/common/ContextMenu";
-import FolderModal from "@/components/modals/FolderModal";
-import UploadFileModal from "@/components/modals/UploadFileModal";
-import DeleteModal from "@/components/modals/DeleteModal";
-import MoveModal from "@/components/modals/MoveModal";
-import SharingModal from "@/components/modals/SharingModal";
 import EmptyState from "@/components/common/EmptyState";
 import useFileFolderContextMenu from "@/hooks/useFileFolderContextMenu";
 import ResourceNotFound from "@/components/common/ResourceNotFound";
@@ -39,80 +39,31 @@ const FolderView = () => {
   const [showNewDropdown, setShowNewDropdown] = useState(false);
   const dropdownRef = useRef(null);
 
-  const {
-    contextMenu,
-    activeModal,
-    setActiveModal,
-    selectedItem,
-    selectedItemType,
-    handleContextMenu,
-    closeContextMenu,
-    getContextMenuItems,
-  } = useFileFolderContextMenu();
+  const { contextMenu, handleContextMenu, closeContextMenu, getContextMenuItems } =
+    useFileFolderContextMenu();
 
-  /* -------------------- Modals -------------------- */
-
-  const MODALS_MAP = useMemo(
-    () => ({
-      createFolder: {
-        Component: FolderModal,
-        props: { currentFolderId: folderId },
-      },
-      upload: {
-        Component: UploadFileModal,
-        props: { currentFolderId: folderId },
-      },
-      edit: {
-        Component: FolderModal,
-        props: {
-          currentFolderId: folderId,
-          documentItem: selectedItem,
-          docType: selectedItemType,
-          mode: DOCUMENT_MODES.UPDATE,
-        },
-      },
-      delete: {
-        Component: DeleteModal,
-        props: {
-          item: selectedItem,
-          itemType: selectedItemType,
-          note: "You can restore this item from your Trash folder later if you change your mind.",
-          onDelete: async () => await dispatch(deleteDocument(selectedItem.id)).unwrap(),
-        },
-      },
-      move: {
-        Component: MoveModal,
-        props: {
-          item: selectedItem,
-        },
-      },
-      share: {
-        Component: SharingModal,
-        props: {
-          item: selectedItem,
-        },
-      },
-    }),
-    [folderId, selectedItem, selectedItemType, dispatch],
-  );
+  /* -------------------- Dropdown Logic -------------------- */
+  const handleOpenModal = (modalType) => {
+    dispatch(setActiveModal(modalType));
+    dispatch(setModalProps({})); // No specific item for "New" actions
+    setShowNewDropdown(false);
+  };
 
   const DROPDOWN_ITEMS = useMemo(
     () => [
       {
         label: "New Folder",
         icon: <FolderPlus size={16} />,
-        onClick: () => setActiveModal("createFolder"),
+        onClick: () => handleOpenModal("createFolder"),
       },
       {
         label: "Upload File",
         icon: <Upload size={16} />,
-        onClick: () => setActiveModal("upload"),
+        onClick: () => handleOpenModal("upload"),
       },
     ],
-    [setActiveModal],
+    [], // eslint-disable-line
   );
-
-  const ActiveModal = MODALS_MAP[activeModal]?.Component;
 
   /* -------------------- Fetch Logic -------------------- */
 
@@ -159,11 +110,6 @@ const FolderView = () => {
     dispatch(setSelectedId(id));
   };
 
-  const handleClickOutsideMain = () => {
-    dispatch(setSelectedId(null));
-    closeContextMenu();
-  };
-
   /* -------------------- Render Guards -------------------- */
 
   // 🔥 Full page loader (initial load)
@@ -185,7 +131,7 @@ const FolderView = () => {
   /* -------------------- Render -------------------- */
 
   return (
-    <div className="relative h-full flex flex-col px-8 py-6" onClick={handleClickOutsideMain}>
+    <div className="relative h-full flex flex-col px-8 py-6">
       {/* Header */}
       <PageHeader>
         <PageHeader.Left
@@ -244,11 +190,11 @@ const FolderView = () => {
             actions={[
               {
                 label: "Upload File",
-                onClick: () => setActiveModal("upload"),
+                onClick: () => handleOpenModal("upload"),
               },
               {
                 label: "Create Folder",
-                onClick: () => setActiveModal("createFolder"),
+                onClick: () => handleOpenModal("createFolder"),
                 variant: "secondary",
               },
             ]}
@@ -287,15 +233,6 @@ const FolderView = () => {
           y={contextMenu.y}
           items={getContextMenuItems()}
           onClose={closeContextMenu}
-        />
-      )}
-
-      {/* Active Modal */}
-      {ActiveModal && (
-        <ActiveModal
-          {...MODALS_MAP[activeModal]?.props}
-          isOpen
-          onClose={() => setActiveModal(null)}
         />
       )}
     </div>
