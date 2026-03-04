@@ -10,7 +10,7 @@ export const FOLDER_MAX_NAME_LENGTH = 20;
 export const FILE_MAX_NAME_LENGTH = 20;
 
 export const PAGE_HEADERS = Object.freeze({
-  MY_DRIVE: "My Drive",
+  ROOT: "My Drive",
   TRASH: "Trash",
   SHARED: "Shared",
 });

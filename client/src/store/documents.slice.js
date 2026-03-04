@@ -6,6 +6,7 @@ import {
   DEFAULT_MESSAGES,
   FOLDER_MESSAGES,
   SHARE_MESSAGES,
+  PAGE_HEADERS,
 } from "@/helpers/constants";
 import { logError } from "@/helpers/utils";
 
@@ -13,19 +14,19 @@ const initialState = {
   documents: {
     root: {
       id: "root",
-      name: "My Drive",
+      name: PAGE_HEADERS.ROOT,
       parentId: null,
       childDocuments: [],
     },
     shared: {
       id: "shared",
-      name: "Shared",
+      name: PAGE_HEADERS.SHARED,
       parentId: null,
       childDocuments: [],
     },
     trash: {
       id: "trash",
-      name: "Trash",
+      name: PAGE_HEADERS.TRASH,
       parentId: null,
       childDocuments: [],
     },
@@ -33,18 +34,18 @@ const initialState = {
   trashDocuments: {
     trash: {
       id: "trash",
-      name: "Trash",
+      name: PAGE_HEADERS.TRASH,
       parentId: null,
       childDocuments: [],
       path: "",
     },
   },
-  currentFolderId: "root",
+  currentFolderId: "root", // root | shared | trash
   selectedId: null,
   showDetails: false,
   isLoading: false,
   error: null,
-  activeModal: null, // 'createFolder' | 'upload' | 'edit' | 'delete' | 'move' | 'share'
+  activeModal: null, // 'createFolder' | 'upload' | 'edit' | 'delete' | 'move' | 'share' | 'Download'
   modalProps: {},
   contextMenu: null, // { x: number, y: number, item: object, type: string }
 };
@@ -326,7 +327,7 @@ const documentsSlice = createSlice({
     },
     // fetch documents and files
     // Mock version history
-    addFileVersion: () => { },
+    addFileVersion: () => {},
   },
   extraReducers: (builder) => {
     builder

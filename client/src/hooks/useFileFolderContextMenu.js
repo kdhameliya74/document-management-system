@@ -1,5 +1,6 @@
 import { useSelector, useDispatch } from "react-redux";
 import { Trash, Eye, Share, Download, FolderPen, Move, ArchiveRestore, Trash2 } from "lucide-react";
+
 import {
   setSelectedId,
   setShowDetails,
@@ -8,25 +9,12 @@ import {
   setContextMenu,
   clearContextMenu,
 } from "@/store/documents.slice";
-import { APP_VIEWS_MAP, TRASH_MENU_ACTIONS } from "@/helpers/constants";
 
-const useFileFolderContextMenu = (menuFor = "dashbaord", onMenuAction) => {
+import { TRASH_MENU_ACTIONS } from "@/helpers/constants";
+
+const useFileFolderContextMenu = (menuFor = "dashboard", onMenuAction) => {
   const dispatch = useDispatch();
   const { contextMenu } = useSelector((state) => state.documentSystem);
-
-  const handleContextMenu = (e, item, type) => {
-    e.preventDefault();
-    e.stopPropagation();
-    dispatch(setSelectedId(item.id));
-    dispatch(
-      setContextMenu({
-        x: e.clientX,
-        y: e.clientY,
-        item,
-        type,
-      }),
-    );
-  };
 
   const closeContextMenu = () => dispatch(clearContextMenu());
 
@@ -44,105 +32,91 @@ const useFileFolderContextMenu = (menuFor = "dashbaord", onMenuAction) => {
   };
 
   const onMenuActionHandler = async (action) => {
-    if (!onMenuAction) return;
+    if (!onMenuAction || !contextMenu) return;
     await onMenuAction(contextMenu.item, action);
+    closeContextMenu();
   };
 
+  const handleContextMenu = (e, item, type) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dispatch(setSelectedId(item.id));
+    dispatch(
+      setContextMenu({
+        x: e.clientX,
+        y: e.clientY,
+        item,
+        type,
+      }),
+    );
+  };
+
+  const ACTIONS = {
+    edit: {
+      label: "Edit",
+      icon: FolderPen,
+      disabled: !contextMenu?.item?.permissions?.canEdit,
+      onClick: () => openModal("edit"),
+    },
+    move: {
+      label: "Move",
+      icon: Move,
+      disabled: !contextMenu?.item?.permissions?.canEdit,
+      onClick: () => openModal("move"),
+    },
+    viewDetails: {
+      label: "View Details",
+      icon: Eye,
+      disabled: !contextMenu?.item?.permissions?.canView,
+      onClick: () => {
+        dispatch(setShowDetails(true));
+        closeContextMenu();
+      },
+    },
+    download: {
+      label: "Download",
+      icon: Download,
+      disabled: !contextMenu?.item?.permissions?.canDownload,
+      onClick: () => {
+        alert("Download functionality coming soon!");
+        closeContextMenu();
+      },
+    },
+    delete: {
+      label: "Delete",
+      icon: Trash,
+      disabled: !contextMenu?.item?.permissions?.canDelete,
+      onClick: () => openModal("delete"),
+    },
+    share: {
+      label: "Share",
+      icon: Share,
+      disabled: !contextMenu?.item?.permissions?.canShare,
+      onClick: () => openModal("share"),
+    },
+    restore: {
+      label: "Restore",
+      icon: ArchiveRestore,
+      onClick: () => onMenuActionHandler(TRASH_MENU_ACTIONS.RESTORE),
+    },
+    deleteForever: {
+      label: "Delete Forever",
+      icon: Trash2,
+      onClick: () => onMenuActionHandler(TRASH_MENU_ACTIONS.DELETE),
+    },
+  };
+
+  const MENU_CONFIG = {
+    dashboard: ["edit", "move", "share", "download", "viewDetails", "delete"],
+    shared: ["edit", "share", "download", "viewDetails"],
+    trash: ["restore", "deleteForever"],
+  };
   const getContextMenuItems = () => {
     if (!contextMenu) return [];
-    if (menuFor == "trash") {
-      return [
-        {
-          label: "Restore",
-          icon: ArchiveRestore,
-          onClick: () => onMenuActionHandler(TRASH_MENU_ACTIONS.RESTORE),
-        },
-        {
-          label: "Delete forever",
-          icon: Trash2,
-          onClick: () => onMenuActionHandler(TRASH_MENU_ACTIONS.DELETE),
-        },
-      ];
-    }
-    if (menuFor === "share") {
-      return [
-        {
-          label: "Edit",
-          icon: FolderPen,
-          onClick: () => openModal("edit"),
-        },
-        {
-          label: "View Details",
-          icon: Eye,
-          onClick: () => {
-            dispatch(setShowDetails(true));
-            closeContextMenu();
-          },
-        },
-        {
-          label: "Download",
-          icon: Download,
-          onClick: () => {
-            alert("Download functionality coming soon!");
-            closeContextMenu();
-          },
-        },
-        {
-          label: "Delete",
-          icon: Trash,
-          onClick: () => openModal("delete"),
-        },
-      ];
-    }
-    if (menuFor === "dashbaord" || menuFor === APP_VIEWS_MAP.SHARED) {
-      const items = [
-        {
-          label: "Edit",
-          icon: FolderPen,
-          onClick: () => openModal("edit"),
-        },
-        {
-          label: "View Details",
-          icon: Eye,
-          onClick: () => {
-            dispatch(setShowDetails(true));
-            closeContextMenu();
-          },
-        },
-        {
-          label: "Download",
-          icon: Download,
-          onClick: () => {
-            alert("Download functionality coming soon!");
-            closeContextMenu();
-          },
-        },
-        {
-          label: "Delete",
-          icon: Trash,
-          onClick: () => openModal("delete"),
-        },
-      ];
 
-      if (menuFor === "dashbaord") {
-        items.splice(
-          1,
-          0,
-          {
-            label: "Move",
-            icon: Move,
-            onClick: () => openModal("move"),
-          },
-          {
-            label: "Share",
-            icon: Share,
-            onClick: () => openModal("share"),
-          },
-        );
-      }
+    const config = MENU_CONFIG[menuFor] || [];
 
-      return items;
-    }
+    return config.map((actionKey) => ACTIONS[actionKey]);
   };
 
   return {

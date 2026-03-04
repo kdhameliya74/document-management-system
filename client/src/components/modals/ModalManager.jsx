@@ -63,11 +63,7 @@ const ModalManager = () => {
   const { Component, props } = activeModalConfig;
 
   return (
-    <Component
-      {...props}
-      isOpen={!!activeModal}
-      onClose={() => dispatch(setActiveModal(null))}
-    />
+    <Component {...props} isOpen={!!activeModal} onClose={() => dispatch(setActiveModal(null))} />
   );
 };
 

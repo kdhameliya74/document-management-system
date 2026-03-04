@@ -125,7 +125,6 @@ documentSchema.index({ uploadStatus: 1 });
 // Recent documents
 documentSchema.index({ owner: 1, updatedAt: -1 });
 
-
 // ─── Path computation (pre-validate)
 documentSchema.pre("validate", async function () {
   const isNew = this.isNew;

@@ -4,18 +4,21 @@ import Document from "../models/Document.model.js";
 import User from "../models/User.model.js";
 import { DOC_TYPES } from "../constants/Shared.js";
 import { FILE_UPLOAD_STATUS } from "../constants/File.js";
-import { shortId, environment } from "../utils/helper.util.js";
+import { shortId, environment, buildCapabilities, getEffectivePermission } from "../utils/helper.util.js";
 import { PutObjectCommand, DeleteObjectsCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { asyncHandler } from "../middlewares/error.middleware.js";
 
 //Helpers
-const splitByType = (docs) => {
+const splitByType = (docs, userId, permission) => {
   const folders = [];
   const files = [];
 
   for (const doc of docs) {
     const transformed = { ...doc, id: doc._id.toString() };
+    if (permission && userId) {
+      transformed.permissions = buildCapabilities(getEffectivePermission(doc, userId));
+    }
     if (doc.docType === DOC_TYPES.FOLDER) {
       folders.push(transformed);
     } else {
@@ -102,7 +105,7 @@ async function listSharedDocuments(req, res, baseFilter) {
       });
     }
 
-    const { folders, files } = splitByType(sharedItems);
+    const { folders, files } = splitByType(sharedItems, userId, true);
     return res.status(200).json({
       success: true,
       currentFolder,
@@ -121,7 +124,7 @@ async function listSharedDocuments(req, res, baseFilter) {
 
   const rootShared = documents.filter((d) => !d.parentId || !sharedIds.has(d.parentId.toString()));
 
-  const { folders, files } = splitByType(rootShared);
+  const { folders, files } = splitByType(rootShared, userId, true);
   return res.status(200).json({
     success: true,
     breadcrumbs: [],
@@ -171,7 +174,7 @@ export const listDocuments = asyncHandler(async (req, res) => {
     });
   }
 
-  const { folders, files } = splitByType(items);
+  const { folders, files } = splitByType(items, userId, true);
 
   return res.status(200).json({
     success: true,
