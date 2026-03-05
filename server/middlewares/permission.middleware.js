@@ -29,23 +29,32 @@ export const checkPermission = (capability, idSource = "params", idKey = "id") =
       return next();
     }
 
-    // 2. Check shared permissions
-    const sharedUser = document.sharedWith.find(
-      (share) => share.user && share.user.toString() === userId,
-    );
-
-    if (sharedUser) {
-      const userCapabilities = PERMISSION_CAPABILITIES[sharedUser.permission] || [];
-      if (userCapabilities.includes(capability)) {
-        req.document = document;
-        return next();
-      }
+    // 2. Ancestor / Inheritance Logic
+    const parts = document.path.split("/").filter(Boolean);
+    const ancestorPaths = [];
+    let currentPath = "";
+    for (const part of parts) {
+      currentPath += `/${part}`;
+      ancestorPaths.push(currentPath);
     }
 
-    // 3. Check public access (only for view/download)
-    if (document.isPublic && ["view", "download"].includes(capability)) {
-      req.document = document;
-      return next();
+    // Fetch all documents in the hierarchy (target + all parents)
+    const hierarchy = await Document.find({
+      path: { $in: ancestorPaths },
+      owner: document.owner,
+      isTrashed: false,
+    }).select("sharedWith isPublic owner");
+
+    const { getHighestPermissionLevel } = await import("../utils/helper.util.js");
+    const effectivePermission = getHighestPermissionLevel(hierarchy, userId);
+
+    if (effectivePermission) {
+      const userCapabilities = PERMISSION_CAPABILITIES[effectivePermission] || [];
+      if (userCapabilities.includes(capability)) {
+        req.document = document;
+        req.effectivePermission = effectivePermission;
+        return next();
+      }
     }
 
     // 4. No permission

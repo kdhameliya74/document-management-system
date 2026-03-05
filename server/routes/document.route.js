@@ -8,7 +8,6 @@ import {
   getDocumentById,
   updateDocument,
   trashDocument,
-  listTrash,
   restoreDocument,
   getPresignedUrls,
   confirmUpload,
@@ -21,7 +20,6 @@ const router = express.Router();
 
 //List documents
 router.get("/", protect, validateId("parentId", "query"), listDocuments);
-router.get("/trash", protect, validateId("parentId", "query"), listTrash);
 
 //Upload documents
 router.post("/upload-urls", protect, getPresignedUrls);
