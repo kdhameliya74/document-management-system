@@ -2,27 +2,32 @@ import mongoose from "mongoose";
 import s3Client from "../config/s3.js";
 import Document from "../models/Document.model.js";
 import User from "../models/User.model.js";
-import { DOC_TYPES } from "../constants/Shared.js";
+import { DOC_TYPES, PERMISSION_LEVELS } from "../constants/Shared.js";
 import { FILE_UPLOAD_STATUS } from "../constants/File.js";
 import {
   shortId,
   environment,
   buildCapabilities,
   getEffectivePermission,
+  comparePermissions,
+  getHighestPermissionLevel,
 } from "../utils/helper.util.js";
 import { PutObjectCommand, DeleteObjectsCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { asyncHandler } from "../middlewares/error.middleware.js";
 
 //Helpers
-const splitByType = (docs, userId, permission) => {
+const splitByType = (docs, userId, parentPermission) => {
   const folders = [];
   const files = [];
 
   for (const doc of docs) {
     const transformed = { ...doc, id: doc._id.toString() };
-    if (permission && userId) {
-      transformed.permissions = buildCapabilities(getEffectivePermission(doc, userId));
+    if (userId) {
+      const ownPermission = getEffectivePermission(doc, userId);
+      const effectivePermission = comparePermissions(ownPermission, parentPermission);
+      transformed.permission = effectivePermission;
+      transformed.permissions = buildCapabilities(effectivePermission);
     }
     if (doc.docType === DOC_TYPES.FOLDER) {
       folders.push(transformed);
@@ -110,7 +115,24 @@ async function listSharedDocuments(req, res, baseFilter) {
       });
     }
 
-    const { folders, files } = splitByType(sharedItems, userId, true);
+    let parentPermission = null;
+    if (currentFolder) {
+      const parts = currentFolder.path.split("/").filter(Boolean);
+      const ancestorPaths = [];
+      let tempPath = "";
+      for (const part of parts) {
+        tempPath += `/${part}`;
+        ancestorPaths.push(tempPath);
+      }
+      const hierarchy = await Document.find({
+        path: { $in: ancestorPaths },
+        owner: currentFolder.owner,
+        isTrashed: false,
+      }).select("sharedWith isPublic owner");
+      parentPermission = getHighestPermissionLevel(hierarchy, userId);
+    }
+
+    const { folders, files } = splitByType(sharedItems, userId, parentPermission);
     return res.status(200).json({
       success: true,
       currentFolder,
@@ -129,7 +151,7 @@ async function listSharedDocuments(req, res, baseFilter) {
 
   const rootShared = documents.filter((d) => !d.parentId || !sharedIds.has(d.parentId.toString()));
 
-  const { folders, files } = splitByType(rootShared, userId, true);
+  const { folders, files } = splitByType(rootShared, userId, null);
   return res.status(200).json({
     success: true,
     breadcrumbs: [],
@@ -179,7 +201,7 @@ export const listDocuments = asyncHandler(async (req, res) => {
     });
   }
 
-  const { folders, files } = splitByType(items, userId, true);
+  const { folders, files } = splitByType(items, userId, PERMISSION_LEVELS.ADMIN);
 
   return res.status(200).json({
     success: true,
@@ -318,7 +340,7 @@ export const listTrash = asyncHandler(async (req, res) => {
       }),
     ]);
 
-    const { folders, files } = splitByType(trashedItems);
+    const { folders, files } = splitByType(trashedItems, req.user.id, PERMISSION_LEVELS.ADMIN);
     return res.status(200).json({
       success: true,
       currentFolder,
@@ -339,7 +361,7 @@ export const listTrash = asyncHandler(async (req, res) => {
     (d) => !d.parentId || !trashedIds.has(d.parentId.toString()),
   );
 
-  const { folders, files } = splitByType(rootTrash);
+  const { folders, files } = splitByType(rootTrash, req.user.id, PERMISSION_LEVELS.ADMIN);
   return res.status(200).json({
     success: true,
     folders,

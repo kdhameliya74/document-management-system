@@ -18,14 +18,30 @@ export const getEffectivePermission = (doc, userId) => {
   if (doc.owner.toString() === userId.toString()) {
     return PERMISSION_LEVELS.ADMIN;
   }
-  if (doc.isPublic) {
-    return PERMISSION_LEVELS.VIEW;
-  }
   const shared = doc.sharedWith.find((s) => s.user?.toString() === userId.toString());
 
-  if (!shared) return null;
+  if (shared) return shared.permission;
+  if (doc.isPublic) return PERMISSION_LEVELS.VIEW;
 
-  return shared.permission;
+  return null;
+};
+
+export const getHighestPermissionLevel = (hierarchy, userId) => {
+  let highestRank = -1;
+  let highestLevel = null;
+
+  for (const doc of hierarchy) {
+    const level = getEffectivePermission(doc, userId);
+    if (level) {
+      const rank = PERMISSION_RANK[level.toUpperCase()];
+      if (rank > highestRank) {
+        highestRank = rank;
+        highestLevel = level;
+      }
+    }
+  }
+
+  return highestLevel;
 };
 
 export const buildCapabilities = (permission) => {
@@ -42,4 +58,13 @@ export const buildCapabilities = (permission) => {
     canMove: rank >= PERMISSION_RANK.EDIT,
     canDownload: rank >= PERMISSION_RANK.VIEW,
   };
+};
+export const comparePermissions = (p1, p2) => {
+  if (!p1) return p2;
+  if (!p2) return p1;
+
+  const r1 = PERMISSION_RANK[p1.toUpperCase()] || 0;
+  const r2 = PERMISSION_RANK[p2.toUpperCase()] || 0;
+
+  return r1 >= r2 ? p1 : p2;
 };
