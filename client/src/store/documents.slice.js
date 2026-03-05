@@ -7,6 +7,7 @@ import {
   FOLDER_MESSAGES,
   SHARE_MESSAGES,
   PAGE_HEADERS,
+  ERROR_CODES_WITH_MESSAGES,
 } from "@/helpers/constants";
 import { logError } from "@/helpers/utils";
 
@@ -131,7 +132,7 @@ export const updateDocument = createAsyncThunk(
       };
     } catch (err) {
       logError(err);
-      return rejectWithValue(FOLDER_MESSAGES.DOCUMENT_SAVE_FAILED);
+      return rejectWithValue(ERROR_CODES_WITH_MESSAGES[err?.code] || FOLDER_MESSAGES.DOCUMENT_SAVE_FAILED);
     }
   },
 );
@@ -152,7 +153,7 @@ export const deleteDocument = createAsyncThunk(
       };
     } catch (err) {
       logError(err);
-      return rejectWithValue(TRASH_MESSAGES.DELETE_ERROR);
+      return rejectWithValue(ERROR_CODES_WITH_MESSAGES[err?.code] || TRASH_MESSAGES.DELETE_ERROR);
     }
   },
 );
@@ -173,7 +174,7 @@ export const restoreDocument = createAsyncThunk(
       };
     } catch (err) {
       logError(err);
-      return rejectWithValue(TRASH_MESSAGES.RESTORE_ERROR);
+      return rejectWithValue(ERROR_CODES_WITH_MESSAGES[err?.code] || TRASH_MESSAGES.RESTORE_ERROR);
     }
   },
 );
@@ -189,7 +190,7 @@ export const permenantDeleteDocument = createAsyncThunk(
       };
     } catch (err) {
       logError(err);
-      return rejectWithValue(TRASH_MESSAGES.DELETE_ERROR);
+      return rejectWithValue(ERROR_CODES_WITH_MESSAGES[err?.code] || TRASH_MESSAGES.DELETE_ERROR);
     }
   },
 );
@@ -212,7 +213,7 @@ export const getTrashedDocument = createAsyncThunk(
       };
     } catch (err) {
       logError(err);
-      return rejectWithValue(DEFAULT_MESSAGES.FAILED_TO_FETCH_DOCUMENTS);
+      return rejectWithValue(ERROR_CODES_WITH_MESSAGES[err?.code] || DEFAULT_MESSAGES.FAILED_TO_FETCH_DOCUMENTS);
     }
   },
 );
@@ -233,7 +234,7 @@ export const moveDocument = createAsyncThunk(
       };
     } catch (err) {
       logError(err);
-      return rejectWithValue(DEFAULT_MESSAGES.DOCUMENT_MOVE_FAILED);
+      return rejectWithValue(ERROR_CODES_WITH_MESSAGES[err?.code] || DEFAULT_MESSAGES.DOCUMENT_MOVE_FAILED);
     }
   },
 );
@@ -254,7 +255,7 @@ export const shareDocument = createAsyncThunk(
       };
     } catch (err) {
       logError(err);
-      return rejectWithValue(SHARE_MESSAGES.SHARE_FAILED);
+      return rejectWithValue(ERROR_CODES_WITH_MESSAGES[err?.code] || SHARE_MESSAGES.SHARE_FAILED);
     }
   },
 );
@@ -327,7 +328,7 @@ const documentsSlice = createSlice({
     },
     // fetch documents and files
     // Mock version history
-    addFileVersion: () => {},
+    addFileVersion: () => { },
   },
   extraReducers: (builder) => {
     builder

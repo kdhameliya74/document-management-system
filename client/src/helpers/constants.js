@@ -47,6 +47,10 @@ export const DEFAULT_MESSAGES = Object.freeze({
   INVALID_EMAIL: "Please enter a valid email address.",
 });
 
+export const ERROR_CODES_WITH_MESSAGES = Object.freeze({
+  PERMISSION_DENIED: "You do not have permission to perform this action.",
+});
+
 export const FOLDER_MESSAGES = Object.freeze({
   NAME_REQUIRED: "Folder name is required.",
   NAME_DUPLICATE: "A folder with this name already exists.",
