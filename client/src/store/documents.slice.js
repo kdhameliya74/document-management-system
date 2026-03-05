@@ -309,7 +309,7 @@ const documentsSlice = createSlice({
     },
     // fetch documents and files
     // Mock version history
-    addFileVersion: () => { },
+    addFileVersion: () => {},
   },
   extraReducers: (builder) => {
     builder
@@ -394,7 +394,6 @@ const documentsSlice = createSlice({
       .addCase(deleteDocument.fulfilled, (state, action) => {
         const { id } = action.payload;
         if (state.documents[id]) {
-
           const parent = state.documents[id].parentId || state.currentFolderId;
           if (parent) {
             const newChildDocuments = state.documents[parent].childDocuments.filter(
