@@ -1,15 +1,7 @@
 import React, { useEffect, useRef } from "react";
-import { TriangleAlert } from "lucide-react";
-
-const SEVERITY_COLORS = {
-  warning: "text-yellow-500",
-  error: "text-red-500",
-  info: "text-grey-500",
-};
 
 const ContextMenu = ({ x, y, items, onClose }) => {
   const menuRef = useRef(null);
-
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -33,7 +25,8 @@ const ContextMenu = ({ x, y, items, onClose }) => {
         return (
           <button
             key={index}
-            className="flex items-center w-full py-2.5 px-4 text-left text-sm text-text-main transition-all duration-200 hover:bg-white/5 rounded-xl cursor-pointer group"
+            disabled={item.disabled}
+            className="flex items-center w-full py-2.5 px-4 text-left text-sm text-text-main transition-all duration-200 hover:bg-white/5 rounded-xl cursor-pointer group disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={() => {
               item.onClick();
               onClose();

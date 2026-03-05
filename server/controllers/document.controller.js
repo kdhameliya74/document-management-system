@@ -4,18 +4,26 @@ import Document from "../models/Document.model.js";
 import User from "../models/User.model.js";
 import { DOC_TYPES } from "../constants/Shared.js";
 import { FILE_UPLOAD_STATUS } from "../constants/File.js";
-import { shortId, environment } from "../utils/helper.util.js";
+import {
+  shortId,
+  environment,
+  buildCapabilities,
+  getEffectivePermission,
+} from "../utils/helper.util.js";
 import { PutObjectCommand, DeleteObjectsCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { asyncHandler } from "../middlewares/error.middleware.js";
 
 //Helpers
-const splitByType = (docs) => {
+const splitByType = (docs, userId, permission) => {
   const folders = [];
   const files = [];
 
   for (const doc of docs) {
     const transformed = { ...doc, id: doc._id.toString() };
+    if (permission && userId) {
+      transformed.permissions = buildCapabilities(getEffectivePermission(doc, userId));
+    }
     if (doc.docType === DOC_TYPES.FOLDER) {
       folders.push(transformed);
     } else {
@@ -102,7 +110,7 @@ async function listSharedDocuments(req, res, baseFilter) {
       });
     }
 
-    const { folders, files } = splitByType(sharedItems);
+    const { folders, files } = splitByType(sharedItems, userId, true);
     return res.status(200).json({
       success: true,
       currentFolder,
@@ -121,7 +129,7 @@ async function listSharedDocuments(req, res, baseFilter) {
 
   const rootShared = documents.filter((d) => !d.parentId || !sharedIds.has(d.parentId.toString()));
 
-  const { folders, files } = splitByType(rootShared);
+  const { folders, files } = splitByType(rootShared, userId, true);
   return res.status(200).json({
     success: true,
     breadcrumbs: [],
@@ -171,7 +179,7 @@ export const listDocuments = asyncHandler(async (req, res) => {
     });
   }
 
-  const { folders, files } = splitByType(items);
+  const { folders, files } = splitByType(items, userId, true);
 
   return res.status(200).json({
     success: true,
@@ -236,26 +244,12 @@ export const createFolder = asyncHandler(async (req, res) => {
 
 // @route   GET /api/documents/:id
 export const getDocumentById = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  const userId = req.user.id;
-
-  const doc = await Document.findOne({ _id: id, owner: userId });
-  if (!doc) {
-    return res.status(404).json({ success: false, message: "Document not found" });
-  }
-
-  return res.status(200).json({ success: true, document: doc });
+  return res.status(200).json({ success: true, document: req.document });
 });
 
 // @route   PATCH /api/documents/:id
 export const updateDocument = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  const userId = req.user.id;
-
-  const doc = await Document.findOne({ _id: id, owner: userId });
-  if (!doc) {
-    return res.status(404).json({ success: false, message: "Document not found" });
-  }
+  const doc = req.document;
 
   // Per-docType allowed field whitelist
   const commonAllowed = ["name", "isStarred", "description", "tags", "isPublic"];
@@ -290,20 +284,14 @@ export const updateDocument = asyncHandler(async (req, res) => {
 
 // @route   DELETE /api/documents/:id
 export const trashDocument = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  const userId = req.user.id;
-
-  const doc = await Document.findOne({ _id: id, owner: userId });
-  if (!doc) {
-    return res.status(404).json({ success: false, message: "Document not found" });
-  }
+  const doc = req.document;
 
   const trashedAt = new Date();
   const pathRegex = new RegExp(`^${doc.path.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(/|$)`);
 
-  // Soft-delete doc itself + all descendants (same owner, not already trashed)
+  // Soft-delete doc itself + all descendants (not already trashed)
   await Document.updateMany(
-    { owner: userId, path: { $regex: pathRegex }, isTrashed: false },
+    { path: { $regex: pathRegex }, isTrashed: false },
     { $set: { isTrashed: true, trashedAt } },
   );
 
@@ -361,18 +349,12 @@ export const listTrash = asyncHandler(async (req, res) => {
 
 // @route   PATCH /api/documents/:id/restore
 export const restoreDocument = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  const userId = req.user.id;
-
-  const doc = await Document.findOne({ _id: id, owner: userId, isTrashed: true });
-  if (!doc) {
-    return res.status(404).json({ success: false, message: "Document not found in trash" });
-  }
+  const doc = req.document;
 
   const pathRegex = new RegExp(`^${doc.path.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(/|$)`);
 
   await Document.updateMany(
-    { owner: userId, path: { $regex: pathRegex }, isTrashed: true },
+    { path: { $regex: pathRegex }, isTrashed: true },
     { $set: { isTrashed: false, trashedAt: null } },
   );
 
@@ -381,13 +363,7 @@ export const restoreDocument = asyncHandler(async (req, res) => {
 
 // @route   DELETE /api/documents/:id
 export const permanentDelete = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  const userId = req.user.id;
-
-  const targetDoc = await Document.findOne({ _id: id, owner: userId });
-  if (!targetDoc) {
-    return res.status(404).json({ success: false, message: "Document not found or access denied" });
-  }
+  const targetDoc = req.document;
 
   const isFolder = targetDoc.docType === DOC_TYPES.FOLDER;
   let docsToDelete = [targetDoc];
@@ -396,7 +372,6 @@ export const permanentDelete = asyncHandler(async (req, res) => {
     const escapedPath = targetDoc.path.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     const pathRegex = new RegExp(`^${escapedPath}/`);
     const descendants = await Document.find({
-      owner: userId,
       path: { $regex: pathRegex },
     }).select("_id storageKey docType");
     docsToDelete = [...docsToDelete, ...descendants];
@@ -510,13 +485,7 @@ export const confirmUpload = asyncHandler(async (req, res) => {
 // @route   PATCH /api/documents/:id/move
 export const moveDocument = asyncHandler(async (req, res) => {
   const { parentId } = req.body;
-  const { id } = req.params;
-  const owner = req.user.id;
-
-  const document = await Document.findOne({ _id: id, owner });
-  if (!document) {
-    return res.status(404).json({ success: false, message: "Document not found" });
-  }
+  const document = req.document;
   const currentParent = document.parentId?.toString() || null;
   const targetParent = parentId || null;
 
@@ -527,7 +496,7 @@ export const moveDocument = asyncHandler(async (req, res) => {
   if (targetParent) {
     const targetFolder = await Document.findOne({
       _id: targetParent,
-      owner,
+      owner: req.user.id,
       docType: DOC_TYPES.FOLDER,
       isTrashed: false,
     });
@@ -547,15 +516,9 @@ export const moveDocument = asyncHandler(async (req, res) => {
 
 // @route   POST /api/documents/:id/share
 export const shareDocument = asyncHandler(async (req, res) => {
-  const { id } = req.params;
   const { collaborators } = req.body;
 
-  const exists = await Document.exists({
-    _id: id,
-    owner: req.user.id,
-  });
-
-  if (!exists) {
+  if (!req.document) {
     return res.status(404).json({
       success: false,
       message: "Document not found",
@@ -606,7 +569,7 @@ export const shareDocument = asyncHandler(async (req, res) => {
   }
 
   await Document.updateOne(
-    { _id: id, owner: req.user.id },
+    { _id: req.document._id },
     {
       $addToSet: {
         sharedWith: {

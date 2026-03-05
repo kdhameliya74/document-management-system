@@ -125,22 +125,6 @@ documentSchema.index({ uploadStatus: 1 });
 // Recent documents
 documentSchema.index({ owner: 1, updatedAt: -1 });
 
-// ─── Access control helper
-documentSchema.methods.hasAccess = function (userId, requiredPermission = PERMISSION_LEVELS.VIEW) {
-  if (this.owner.toString() === userId.toString()) return true;
-  if (this.isPublic && requiredPermission === PERMISSION_LEVELS.VIEW) return true;
-
-  const sharedUser = this.sharedWith.find((share) => share.user.toString() === userId.toString());
-  if (!sharedUser) return false;
-
-  const permissionRank = {
-    [PERMISSION_LEVELS.VIEW]: 1,
-    [PERMISSION_LEVELS.EDIT]: 2,
-    [PERMISSION_LEVELS.ADMIN]: 3,
-  };
-  return permissionRank[sharedUser.permission] >= permissionRank[requiredPermission];
-};
-
 // ─── Path computation (pre-validate)
 documentSchema.pre("validate", async function () {
   const isNew = this.isNew;

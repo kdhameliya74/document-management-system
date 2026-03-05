@@ -6,6 +6,8 @@ import {
   DEFAULT_MESSAGES,
   FOLDER_MESSAGES,
   SHARE_MESSAGES,
+  PAGE_HEADERS,
+  ERROR_CODES_WITH_MESSAGES,
 } from "@/helpers/constants";
 import { logError } from "@/helpers/utils";
 
@@ -13,19 +15,19 @@ const initialState = {
   documents: {
     root: {
       id: "root",
-      name: "My Drive",
+      name: PAGE_HEADERS.ROOT,
       parentId: null,
       childDocuments: [],
     },
     shared: {
       id: "shared",
-      name: "Shared",
+      name: PAGE_HEADERS.SHARED,
       parentId: null,
       childDocuments: [],
     },
     trash: {
       id: "trash",
-      name: "Trash",
+      name: PAGE_HEADERS.TRASH,
       parentId: null,
       childDocuments: [],
     },
@@ -33,17 +35,20 @@ const initialState = {
   trashDocuments: {
     trash: {
       id: "trash",
-      name: "Trash",
+      name: PAGE_HEADERS.TRASH,
       parentId: null,
       childDocuments: [],
       path: "",
     },
   },
-  currentFolderId: "root",
+  currentFolderId: "root", // root | shared | trash
   selectedId: null,
   showDetails: false,
   isLoading: false,
   error: null,
+  activeModal: null, // 'createFolder' | 'upload' | 'edit' | 'delete' | 'move' | 'share' | 'Download'
+  modalProps: {},
+  contextMenu: null, // { x: number, y: number, item: object, type: string }
 };
 
 /*
@@ -127,7 +132,9 @@ export const updateDocument = createAsyncThunk(
       };
     } catch (err) {
       logError(err);
-      return rejectWithValue(FOLDER_MESSAGES.DOCUMENT_SAVE_FAILED);
+      return rejectWithValue(
+        ERROR_CODES_WITH_MESSAGES[err?.code] || FOLDER_MESSAGES.DOCUMENT_SAVE_FAILED,
+      );
     }
   },
 );
@@ -148,7 +155,7 @@ export const deleteDocument = createAsyncThunk(
       };
     } catch (err) {
       logError(err);
-      return rejectWithValue(TRASH_MESSAGES.DELETE_ERROR);
+      return rejectWithValue(ERROR_CODES_WITH_MESSAGES[err?.code] || TRASH_MESSAGES.DELETE_ERROR);
     }
   },
 );
@@ -169,7 +176,7 @@ export const restoreDocument = createAsyncThunk(
       };
     } catch (err) {
       logError(err);
-      return rejectWithValue(TRASH_MESSAGES.RESTORE_ERROR);
+      return rejectWithValue(ERROR_CODES_WITH_MESSAGES[err?.code] || TRASH_MESSAGES.RESTORE_ERROR);
     }
   },
 );
@@ -185,7 +192,7 @@ export const permenantDeleteDocument = createAsyncThunk(
       };
     } catch (err) {
       logError(err);
-      return rejectWithValue(TRASH_MESSAGES.DELETE_ERROR);
+      return rejectWithValue(ERROR_CODES_WITH_MESSAGES[err?.code] || TRASH_MESSAGES.DELETE_ERROR);
     }
   },
 );
@@ -208,7 +215,9 @@ export const getTrashedDocument = createAsyncThunk(
       };
     } catch (err) {
       logError(err);
-      return rejectWithValue(DEFAULT_MESSAGES.FAILED_TO_FETCH_DOCUMENTS);
+      return rejectWithValue(
+        ERROR_CODES_WITH_MESSAGES[err?.code] || DEFAULT_MESSAGES.FAILED_TO_FETCH_DOCUMENTS,
+      );
     }
   },
 );
@@ -229,7 +238,9 @@ export const moveDocument = createAsyncThunk(
       };
     } catch (err) {
       logError(err);
-      return rejectWithValue(DEFAULT_MESSAGES.DOCUMENT_MOVE_FAILED);
+      return rejectWithValue(
+        ERROR_CODES_WITH_MESSAGES[err?.code] || DEFAULT_MESSAGES.DOCUMENT_MOVE_FAILED,
+      );
     }
   },
 );
@@ -250,7 +261,7 @@ export const shareDocument = createAsyncThunk(
       };
     } catch (err) {
       logError(err);
-      return rejectWithValue(SHARE_MESSAGES.SHARE_FAILED);
+      return rejectWithValue(ERROR_CODES_WITH_MESSAGES[err?.code] || SHARE_MESSAGES.SHARE_FAILED);
     }
   },
 );
@@ -300,6 +311,18 @@ const documentsSlice = createSlice({
     },
     setShowDetails: (state, action) => {
       state.showDetails = action.payload;
+    },
+    setActiveModal: (state, action) => {
+      state.activeModal = action.payload;
+    },
+    setModalProps: (state, action) => {
+      state.modalProps = action.payload;
+    },
+    setContextMenu: (state, action) => {
+      state.contextMenu = action.payload;
+    },
+    clearContextMenu: (state) => {
+      state.contextMenu = null;
     },
     renameItem: (state, action) => {
       const { id, type, newName } = action.payload;
@@ -489,6 +512,10 @@ export const {
   setCurrentFolder,
   setSelectedId,
   setShowDetails,
+  setActiveModal,
+  setModalProps,
+  setContextMenu,
+  clearContextMenu,
   addFile,
   renameItem,
   deleteItem,

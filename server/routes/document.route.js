@@ -1,6 +1,7 @@
 import express from "express";
-import { protect } from "../middlewares/auth.moddleware.js";
+import { protect } from "../middlewares/auth.middleware.js";
 import { validateId } from "../middlewares/validateId.middleware.js";
+import { checkPermission } from "../middlewares/permission.middleware.js";
 import {
   listDocuments,
   createFolder,
@@ -30,22 +31,28 @@ router.post("/upload-confirm", protect, confirmUpload);
 router.post("/folders", protect, createFolder);
 
 //Get document by id
-router.get("/:id", protect, validateId("id"), getDocumentById);
+router.get("/:id", protect, validateId("id"), checkPermission("view"), getDocumentById);
 
 //Update document
-router.patch("/:id", protect, validateId("id"), updateDocument);
+router.patch("/:id", protect, validateId("id"), checkPermission("edit"), updateDocument);
 
 //Delete document
-router.delete("/:id", protect, validateId("id"), trashDocument);
-router.delete("/:id/permenant", protect, validateId("id"), permanentDelete);
+router.delete("/:id", protect, validateId("id"), checkPermission("trash"), trashDocument);
+router.delete(
+  "/:id/permenant",
+  protect,
+  validateId("id"),
+  checkPermission("delete"),
+  permanentDelete,
+);
 
 //Restore document
-router.patch("/:id/restore", protect, validateId("id"), restoreDocument);
+router.patch("/:id/restore", protect, validateId("id"), checkPermission("edit"), restoreDocument);
 
 //Share document
-router.post("/:id/share", protect, validateId("id"), shareDocument);
+router.post("/:id/share", protect, validateId("id"), checkPermission("share"), shareDocument);
 
 //Move document
-router.patch("/:id/move", protect, validateId("id"), moveDocument);
+router.patch("/:id/move", protect, validateId("id"), checkPermission("move"), moveDocument);
 
 export default router;

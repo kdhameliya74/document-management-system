@@ -63,7 +63,7 @@ const SharePage = () => {
     useFileFolderContextMenu(APP_VIEWS_MAP.SHARED);
 
   const isEmpty = childDocuments.length === 0;
-  // 🔥 Full page loader (initial load)
+
   if (isInitialLoading) {
     return (
       <div className="h-full flex items-center justify-center">
@@ -72,18 +72,14 @@ const SharePage = () => {
     );
   }
 
-  // 🔥 404
   if (!isLoading && !currentFolder) {
     return <ResourceNotFound />;
   }
 
-  const handleClickOutsideMain = () => {
-    dispatch(setSelectedId(null));
-    closeContextMenu();
-  };
+  /* -------------------- Render -------------------- */
 
   return (
-    <div className="relative h-full flex flex-col px-8 py-6" onClick={handleClickOutsideMain}>
+    <div className="relative h-full flex flex-col px-8 py-6">
       <PageHeader>
         <PageHeader.Left title="Shared with me" subtitle="Viewing shared content" />
       </PageHeader>

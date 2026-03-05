@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { setCurrentFolder } from "@/store/documents.slice";
+import { setCurrentFolder, setSelectedId, clearContextMenu } from "@/store/documents.slice";
 import { APP_VIEWS_MAP } from "@/helpers/constants";
 
 import Sidebar from "@/components/layout/Sidebar";
@@ -12,6 +12,7 @@ import TrashPage from "@/pages/TrashPage";
 import SharePage from "@/pages/SharePage";
 import PageNotFound from "@/pages/PageNotFound";
 import ROUTES from "@/utils/routes";
+import ModalManager from "@/components/modals/ModalManager";
 
 const DashboardPage = () => {
   const location = useLocation();
@@ -24,8 +25,16 @@ const DashboardPage = () => {
     }
   }, [location.pathname, dispatch]);
 
+  const handleOutsideClick = () => {
+    dispatch(setSelectedId(null));
+    dispatch(clearContextMenu());
+  };
+
   return (
-    <div className="flex h-screen w-screen bg-bg-main overflow-hidden text-text-main">
+    <div
+      className="flex h-screen w-screen bg-bg-main overflow-hidden text-text-main"
+      onClick={handleOutsideClick}
+    >
       <Sidebar />
       <div className="flex-1 flex flex-col h-full overflow-hidden">
         <Header />
@@ -49,6 +58,7 @@ const DashboardPage = () => {
           </div>
           <RightSidebar />
         </div>
+        <ModalManager />
       </div>
     </div>
   );

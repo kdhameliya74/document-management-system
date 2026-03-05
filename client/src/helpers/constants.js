@@ -10,7 +10,7 @@ export const FOLDER_MAX_NAME_LENGTH = 20;
 export const FILE_MAX_NAME_LENGTH = 20;
 
 export const PAGE_HEADERS = Object.freeze({
-  MY_DRIVE: "My Drive",
+  ROOT: "My Drive",
   TRASH: "Trash",
   SHARED: "Shared",
 });
@@ -45,6 +45,10 @@ export const DEFAULT_MESSAGES = Object.freeze({
   DOCUMENT_MOVE_FAILED: "Failed to move document!",
   DOCUMENT_MOVE_SUCCESS: "Document moved successfully!",
   INVALID_EMAIL: "Please enter a valid email address.",
+});
+
+export const ERROR_CODES_WITH_MESSAGES = Object.freeze({
+  PERMISSION_DENIED: "You do not have permission to perform this action.",
 });
 
 export const FOLDER_MESSAGES = Object.freeze({
