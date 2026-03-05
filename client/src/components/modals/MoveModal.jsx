@@ -27,7 +27,7 @@ const MoveModal = ({ isOpen, onClose, item }) => {
       setIsLoading(true);
       try {
         const pId = parentId === "root" ? null : parentId;
-        const data = await DocumentService.getAll({parentId: pId, mode: "move" });
+        const data = await DocumentService.getAll({ parentId: pId, mode: "move" });
 
         setFoldersCache((prev) => ({
           ...prev,

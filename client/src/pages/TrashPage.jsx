@@ -34,9 +34,7 @@ const TrashPage = () => {
 
   const { folderId = "trash" } = useParams();
 
-  const { documents, selectedId, isLoading } = useSelector(
-    (state) => state.documentSystem
-  );
+  const { documents, selectedId, isLoading } = useSelector((state) => state.documentSystem);
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
@@ -53,17 +51,15 @@ const TrashPage = () => {
   const childDocuments = useMemo(() => {
     if (!currentFolder?.childDocuments) return [];
 
-    return currentFolder.childDocuments
-      .map((id) => documents[id])
-      .filter(Boolean);
-  }, [currentFolder?.childDocuments, documents]);
+    return currentFolder.childDocuments.map((id) => documents[id]).filter(Boolean);
+  }, [currentFolder, documents]);
 
   const isEmpty = hasLoadedFolder && childDocuments.length === 0;
 
   const currentPath = useMemo(() => {
     if (!currentFolder?.path) return [];
     return currentFolder.path.split("/").filter(Boolean);
-  }, [currentFolder?.path]);
+  }, [currentFolder]);
 
   /* ------------------------------ actions -------------------------------- */
 
@@ -78,7 +74,7 @@ const TrashPage = () => {
         toast.error(err, { id: toastId });
       }
     },
-    [dispatch]
+    [dispatch],
   );
 
   const contextMenuHandler = useCallback(
@@ -100,7 +96,7 @@ const TrashPage = () => {
 
       await actionsMap[action]?.();
     },
-    [handleAsyncAction]
+    [handleAsyncAction],
   );
 
   const {
@@ -138,7 +134,7 @@ const TrashPage = () => {
           fetchDocuments({
             parentId,
             mode: APP_VIEWS_MAP.TRASH,
-          })
+          }),
         ).unwrap();
       } catch (err) {
         toast.error(err);
@@ -171,7 +167,7 @@ const TrashPage = () => {
               onSelect={handleSelect}
               onContextMenu={handleContextMenu}
             />
-          )
+          ),
         )}
       </div>
     </div>
@@ -195,15 +191,9 @@ const TrashPage = () => {
 
   return (
     <>
-      <div
-        className="relative h-full flex flex-col px-8 py-6"
-        onClick={handleClickOutside}
-      >
+      <div className="relative h-full flex flex-col px-8 py-6" onClick={handleClickOutside}>
         <PageHeader>
-          <PageHeader.Left
-            title="Trash"
-            subtitle="Manage your trashed folders and documents"
-          />
+          <PageHeader.Left title="Trash" subtitle="Manage your trashed folders and documents" />
         </PageHeader>
 
         {/* Breadcrumb */}
@@ -236,9 +226,7 @@ const TrashPage = () => {
 
               <span
                 className={`text-sm ${
-                  index === currentPath.length - 1
-                    ? "text-white border-b"
-                    : ""
+                  index === currentPath.length - 1 ? "text-white border-b" : ""
                 }`}
               >
                 {truncateFolderName(path)}
@@ -256,11 +244,7 @@ const TrashPage = () => {
         {!isLoading && isEmpty && (
           <EmptyState
             icon={<Trash2 />}
-            title={
-              folderId === "trash"
-                ? "Trash is empty"
-                : "This folder is empty"
-            }
+            title={folderId === "trash" ? "Trash is empty" : "This folder is empty"}
             description={
               folderId === "trash"
                 ? "Items moved to trash appear here."
@@ -285,15 +269,14 @@ const TrashPage = () => {
 
         {/* Context Menu */}
 
-        {contextMenu &&
-          location.pathname.startsWith(ROUTES.APP.TRASH) && (
-            <ContextMenu
-              x={contextMenu.x}
-              y={contextMenu.y}
-              items={getContextMenuItems()}
-              onClose={closeContextMenu}
-            />
-          )}
+        {contextMenu && location.pathname.startsWith(ROUTES.APP.TRASH) && (
+          <ContextMenu
+            x={contextMenu.x}
+            y={contextMenu.y}
+            items={getContextMenuItems()}
+            onClose={closeContextMenu}
+          />
+        )}
       </div>
 
       {/* Delete Modal */}
@@ -320,9 +303,7 @@ const TrashPage = () => {
           <div className="bg-red-500/5 border border-red-500/10 rounded-2xl p-6">
             <p className="text-text-main text-base leading-relaxed">
               {selectedItem?.name && (
-                <span className="font-medium text-red-400">
-                  "{selectedItem?.name}"
-                </span>
+                <span className="font-medium text-red-400">"{selectedItem?.name}"</span>
               )}{" "}
               will be deleted forever. This action cannot be undone.
             </p>

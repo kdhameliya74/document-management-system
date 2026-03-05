@@ -136,8 +136,7 @@ const listTrash = async (req, res, baseFilter) => {
     folders,
     files,
   });
-}
-
+};
 
 async function listSharedDocuments(req, res, baseFilter) {
   const userId = req.user.id;
