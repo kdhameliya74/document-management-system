@@ -4,7 +4,12 @@ import Document from "../models/Document.model.js";
 import User from "../models/User.model.js";
 import { DOC_TYPES } from "../constants/Shared.js";
 import { FILE_UPLOAD_STATUS } from "../constants/File.js";
-import { shortId, environment, buildCapabilities, getEffectivePermission } from "../utils/helper.util.js";
+import {
+  shortId,
+  environment,
+  buildCapabilities,
+  getEffectivePermission,
+} from "../utils/helper.util.js";
 import { PutObjectCommand, DeleteObjectsCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { asyncHandler } from "../middlewares/error.middleware.js";
@@ -279,7 +284,6 @@ export const updateDocument = asyncHandler(async (req, res) => {
 
 // @route   DELETE /api/documents/:id
 export const trashDocument = asyncHandler(async (req, res) => {
-  const { id } = req.params;
   const doc = req.document;
 
   const trashedAt = new Date();
@@ -492,7 +496,7 @@ export const moveDocument = asyncHandler(async (req, res) => {
   if (targetParent) {
     const targetFolder = await Document.findOne({
       _id: targetParent,
-      owner,
+      owner: req.user.id,
       docType: DOC_TYPES.FOLDER,
       isTrashed: false,
     });

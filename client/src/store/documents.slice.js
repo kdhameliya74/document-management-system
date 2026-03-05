@@ -132,7 +132,9 @@ export const updateDocument = createAsyncThunk(
       };
     } catch (err) {
       logError(err);
-      return rejectWithValue(ERROR_CODES_WITH_MESSAGES[err?.code] || FOLDER_MESSAGES.DOCUMENT_SAVE_FAILED);
+      return rejectWithValue(
+        ERROR_CODES_WITH_MESSAGES[err?.code] || FOLDER_MESSAGES.DOCUMENT_SAVE_FAILED,
+      );
     }
   },
 );
@@ -213,7 +215,9 @@ export const getTrashedDocument = createAsyncThunk(
       };
     } catch (err) {
       logError(err);
-      return rejectWithValue(ERROR_CODES_WITH_MESSAGES[err?.code] || DEFAULT_MESSAGES.FAILED_TO_FETCH_DOCUMENTS);
+      return rejectWithValue(
+        ERROR_CODES_WITH_MESSAGES[err?.code] || DEFAULT_MESSAGES.FAILED_TO_FETCH_DOCUMENTS,
+      );
     }
   },
 );
@@ -234,7 +238,9 @@ export const moveDocument = createAsyncThunk(
       };
     } catch (err) {
       logError(err);
-      return rejectWithValue(ERROR_CODES_WITH_MESSAGES[err?.code] || DEFAULT_MESSAGES.DOCUMENT_MOVE_FAILED);
+      return rejectWithValue(
+        ERROR_CODES_WITH_MESSAGES[err?.code] || DEFAULT_MESSAGES.DOCUMENT_MOVE_FAILED,
+      );
     }
   },
 );
@@ -328,7 +334,7 @@ const documentsSlice = createSlice({
     },
     // fetch documents and files
     // Mock version history
-    addFileVersion: () => { },
+    addFileVersion: () => {},
   },
   extraReducers: (builder) => {
     builder

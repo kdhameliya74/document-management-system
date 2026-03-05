@@ -49,21 +49,18 @@ const FolderView = () => {
     setShowNewDropdown(false);
   };
 
-  const DROPDOWN_ITEMS = useMemo(
-    () => [
-      {
-        label: "New Folder",
-        icon: <FolderPlus size={16} />,
-        onClick: () => handleOpenModal("createFolder"),
-      },
-      {
-        label: "Upload File",
-        icon: <Upload size={16} />,
-        onClick: () => handleOpenModal("upload"),
-      },
-    ],
-    [], // eslint-disable-line
-  );
+  const DROPDOWN_ITEMS = [
+    {
+      label: "New Folder",
+      icon: <FolderPlus size={16} />,
+      action: "createFolder",
+    },
+    {
+      label: "Upload File",
+      icon: <Upload size={16} />,
+      action: "upload",
+    },
+  ];
 
   /* -------------------- Fetch Logic -------------------- */
 
@@ -163,7 +160,7 @@ const FolderView = () => {
                     key={index}
                     className="flex cursor-pointer items-center gap-3 w-full p-2.5 text-left hover:bg-white/5 rounded-xl text-sm"
                     onClick={() => {
-                      item.onClick();
+                      handleOpenModal(item.action);
                       setShowNewDropdown(false);
                     }}
                   >

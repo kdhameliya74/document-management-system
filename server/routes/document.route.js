@@ -38,7 +38,13 @@ router.patch("/:id", protect, validateId("id"), checkPermission("edit"), updateD
 
 //Delete document
 router.delete("/:id", protect, validateId("id"), checkPermission("trash"), trashDocument);
-router.delete("/:id/permenant", protect, validateId("id"), checkPermission("delete"), permanentDelete);
+router.delete(
+  "/:id/permenant",
+  protect,
+  validateId("id"),
+  checkPermission("delete"),
+  permanentDelete,
+);
 
 //Restore document
 router.patch("/:id/restore", protect, validateId("id"), checkPermission("edit"), restoreDocument);

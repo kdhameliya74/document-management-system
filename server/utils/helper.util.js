@@ -21,14 +21,12 @@ export const getEffectivePermission = (doc, userId) => {
   if (doc.isPublic) {
     return PERMISSION_LEVELS.VIEW;
   }
-  const shared = doc.sharedWith.find(
-    (s) => s.user?.toString() === userId.toString()
-  );
+  const shared = doc.sharedWith.find((s) => s.user?.toString() === userId.toString());
 
   if (!shared) return null;
 
   return shared.permission;
-}
+};
 
 export const buildCapabilities = (permission) => {
   if (!permission) return null;
@@ -44,4 +42,4 @@ export const buildCapabilities = (permission) => {
     canMove: rank >= PERMISSION_RANK.EDIT,
     canDownload: rank >= PERMISSION_RANK.VIEW,
   };
-}
+};
