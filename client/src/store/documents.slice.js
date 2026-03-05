@@ -199,31 +199,6 @@ export const permenantDeleteDocument = createAsyncThunk(
 
 /*
 |--------------------------------------------------------------------------
-| getTrashedDocument
-|--------------------------------------------------------------------------
-*/
-export const getTrashedDocument = createAsyncThunk(
-  "documents/trash",
-  async (parentId, { rejectWithValue }) => {
-    try {
-      const data = await DocumentService.getTrash(parentId);
-      return {
-        folders: data.folders,
-        files: data.files,
-        currentFolder: data.currentFolder,
-        parentId: parentId || "trash",
-      };
-    } catch (err) {
-      logError(err);
-      return rejectWithValue(
-        ERROR_CODES_WITH_MESSAGES[err?.code] || DEFAULT_MESSAGES.FAILED_TO_FETCH_DOCUMENTS,
-      );
-    }
-  },
-);
-
-/*
-|--------------------------------------------------------------------------
 | moveDocument
 |--------------------------------------------------------------------------
 */
@@ -334,7 +309,7 @@ const documentsSlice = createSlice({
     },
     // fetch documents and files
     // Mock version history
-    addFileVersion: () => {},
+    addFileVersion: () => { },
   },
   extraReducers: (builder) => {
     builder
@@ -420,7 +395,13 @@ const documentsSlice = createSlice({
         const { id } = action.payload;
         if (state.documents[id]) {
           const { [id]: _, ...restDocs } = state.documents;
-          state.documents = { ...restDocs };
+          const parent = state.documents[id].parentId || state.currentFolderId;
+          if (parent) {
+            const newChildDocuments = state.documents[parent].childDocuments.filter(
+              (docId) => docId !== id,
+            );
+            state.documents[parent].childDocuments = newChildDocuments;
+          }
         }
       })
       .addCase(permenantDeleteDocument.fulfilled, (state, action) => {
@@ -430,54 +411,13 @@ const documentsSlice = createSlice({
           state.trashDocuments = { ...restDocs };
         }
       })
-      .addCase(getTrashedDocument.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
-      })
-      .addCase(getTrashedDocument.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.payload;
-      })
-      .addCase(getTrashedDocument.fulfilled, (state, action) => {
-        state.isLoading = false;
-        const topParent = "trash";
-        const { folders, files, currentFolder, parentId } = action.payload;
-
-        // 2. Current folder
-        if (currentFolder) {
-          const { id, parentId } = currentFolder;
-          const normalizedParentId = parentId || topParent;
-          const data = {
-            ...currentFolder,
-            id,
-            parentId: normalizedParentId,
-          };
-          ensureDocument(state, id, data, topParent);
-
-          linkChildToParent(state, normalizedParentId, id, topParent);
-        }
-
-        // 3. Child folders
-        const childDocuments = [...folders, ...files].map((doc) => {
-          const normalizedParentId = doc.parentId || topParent;
-          const data = {
-            ...doc,
-            id: doc.id,
-            parentId: normalizedParentId,
-          };
-          ensureDocument(state, doc.id, data, topParent);
-          return doc.id;
-        });
-
-        if (state.trashDocuments[parentId]) {
-          state.trashDocuments[parentId].childDocuments = childDocuments;
-        }
-      })
       .addCase(restoreDocument.fulfilled, (state, action) => {
         const { id } = action.payload;
-        if (state.trashDocuments[id]) {
-          const { [id]: _, ...restDocs } = state.trashDocuments;
-          state.trashDocuments = { ...restDocs };
+        if (state.documents[id]) {
+          state.documents[id].isTrashed = false;
+          state.documents.trash.childDocuments = state.documents.trash.childDocuments.filter(
+            (docId) => docId !== id,
+          );
         }
       })
       .addCase(uploadFileMeta.fulfilled, (state, action) => {

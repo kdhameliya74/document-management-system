@@ -91,6 +91,54 @@ async function moveTreeList(req, res, baseFilter) {
   res.status(200).json({ success: true, folders });
 }
 
+const listTrash = async (req, res, baseFilter) => {
+  const ownerId = new mongoose.Types.ObjectId(req.user.id);
+  const { parentId } = baseFilter;
+
+  if (parentId) {
+    const [trashedItems, currentFolder] = await Promise.all([
+      Document.find({
+        ...baseFilter,
+        isTrashed: true,
+      }).lean(),
+
+      Document.findOne({
+        _id: parentId,
+        owner: ownerId,
+        isTrashed: true,
+      }),
+    ]);
+
+    const { folders, files } = splitByType(trashedItems, req.user.id, PERMISSION_LEVELS.ADMIN);
+    return res.status(200).json({
+      success: true,
+      currentFolder,
+      folders,
+      files,
+    });
+  }
+
+  // Root trash
+  const trashedItems = await Document.find({
+    owner: ownerId,
+    isTrashed: true,
+  }).lean();
+
+  const trashedIds = new Set(trashedItems.map((d) => d._id.toString()));
+
+  const rootTrash = trashedItems.filter(
+    (d) => !d.parentId || !trashedIds.has(d.parentId.toString()),
+  );
+
+  const { folders, files } = splitByType(rootTrash, req.user.id, PERMISSION_LEVELS.ADMIN);
+  return res.status(200).json({
+    success: true,
+    folders,
+    files,
+  });
+}
+
+
 async function listSharedDocuments(req, res, baseFilter) {
   const userId = req.user.id;
   const { parentId } = req.query;
@@ -175,10 +223,11 @@ export const listDocuments = asyncHandler(async (req, res) => {
     isTrashed: false,
   };
 
-  if (["move", "shared"].includes(mode)) {
+  if (["move", "shared", "trash"].includes(mode)) {
     const modeActions = {
       move: moveTreeList,
       shared: listSharedDocuments,
+      trash: listTrash,
     };
     return modeActions[mode](req, res, baseFilter);
   }
@@ -318,55 +367,6 @@ export const trashDocument = asyncHandler(async (req, res) => {
   );
 
   return res.status(200).json({ success: true, message: "Document moved to trash successfully" });
-});
-
-// @route   PATCH /api/documents/trash
-export const listTrash = asyncHandler(async (req, res) => {
-  const ownerId = new mongoose.Types.ObjectId(req.user.id);
-  const { parentId } = req.query;
-
-  if (parentId) {
-    const [trashedItems, currentFolder] = await Promise.all([
-      Document.find({
-        parentId,
-        owner: ownerId,
-        isTrashed: true,
-      }).lean(),
-
-      Document.findOne({
-        _id: parentId,
-        owner: ownerId,
-        isTrashed: true,
-      }),
-    ]);
-
-    const { folders, files } = splitByType(trashedItems, req.user.id, PERMISSION_LEVELS.ADMIN);
-    return res.status(200).json({
-      success: true,
-      currentFolder,
-      folders,
-      files,
-    });
-  }
-
-  // Root trash
-  const trashedItems = await Document.find({
-    owner: ownerId,
-    isTrashed: true,
-  }).lean();
-
-  const trashedIds = new Set(trashedItems.map((d) => d._id.toString()));
-
-  const rootTrash = trashedItems.filter(
-    (d) => !d.parentId || !trashedIds.has(d.parentId.toString()),
-  );
-
-  const { folders, files } = splitByType(rootTrash, req.user.id, PERMISSION_LEVELS.ADMIN);
-  return res.status(200).json({
-    success: true,
-    folders,
-    files,
-  });
 });
 
 // @route   PATCH /api/documents/:id/restore

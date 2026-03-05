@@ -22,11 +22,6 @@ const DocumentService = {
     return response.data;
   },
 
-  getTrash: async (parentId) => {
-    const response = await api.get("/documents/trash", { params: { parentId } });
-    return response.data;
-  },
-
   restoreDocument: async (docId) => {
     const response = await api.patch(`/documents/${docId}/restore`);
     return response.data;
