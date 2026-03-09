@@ -1,10 +1,12 @@
 import React from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { FileText, Folder, Download, Trash2, Share2, Clock, Info, User, X } from "lucide-react";
-import { deleteItem, setShowDetails } from "@/store/documents.slice";
+import { Folder, Download, Trash2, Share2, Clock, Info, X, Pencil, Eye } from "lucide-react";
+import { setShowDetails, setActiveModal, setModalProps } from "@/store/documents.slice";
 import { format } from "date-fns";
 
-import DeleteModal from "@/components/modals/DeleteModal";
+import FileIcon from "@/components/common/FileIcon";
+import { truncateName } from "@/helpers/utils";
+import { FOLDER_COLORS } from "@/helpers/constants";
 
 const RightSidebar = () => {
   const dispatch = useDispatch();
@@ -16,35 +18,78 @@ const RightSidebar = () => {
   const currentFolder = documents[currentFolderId];
   const selectedItem = selectedId ? documents[selectedId] : currentFolder;
 
-  const [isDeleting, setIsDeleting] = React.useState(false);
-
-  // Only show if showDetails is true AND we have an item to show
   if (!showDetails || !selectedItem) return null;
 
-  const isFolder = !!documents[selectedItem.id];
+  const isFolder = selectedItem.docType === "folder";
   const type = isFolder ? "folder" : "file";
 
-  const handleDelete = async () => {
-    return new Promise((resolve) => {
-      dispatch(
-        deleteItem({
-          id: selectedItem.id,
-          type,
-          parentId: selectedItem.parentId,
-        }),
-      );
-      dispatch(setShowDetails(false));
-      resolve({ success: true, message: "Item moved to trash" });
-    });
-  };
+  const isOwner = selectedItem?.owner === user?.id || selectedItem?.owner?.id === user?.id;
+  const permissions =
+    selectedItem?.permissions ||
+    (isOwner
+      ? {
+          canView: true,
+          canEdit: true,
+          canDelete: true,
+          canShare: true,
+          canMove: true,
+          canDownload: true,
+        }
+      : {});
+
+  const ACTION_CONFIG = [
+    {
+      id: "view",
+      icon: Eye,
+      title: "View",
+      show: permissions?.canView,
+      onClick: () => alert("View Document functionality coming soon!"),
+    },
+    {
+      id: "edit",
+      icon: Pencil,
+      title: "Edit",
+      show: permissions?.canEdit,
+      onClick: () => {
+        dispatch(setModalProps({ item: selectedItem, itemType: type }));
+        dispatch(setActiveModal("edit"));
+      },
+    },
+    {
+      id: "share",
+      icon: Share2,
+      title: "Share",
+      show: permissions?.canShare,
+      onClick: () => {
+        dispatch(setModalProps({ item: selectedItem, itemType: type }));
+        dispatch(setActiveModal("share"));
+      },
+    },
+    {
+      id: "download",
+      icon: Download,
+      title: "Download",
+      show: permissions?.canDownload && !isFolder,
+      onClick: () => alert("Download functionality coming soon!"),
+    },
+    {
+      id: "delete",
+      icon: Trash2,
+      title: "Delete",
+      show: permissions?.canDelete,
+      className: "hover:text-error hover:bg-error/10",
+      onClick: () => {
+        dispatch(setModalProps({ item: selectedItem, itemType: type }));
+        dispatch(setActiveModal("delete"));
+      },
+    },
+  ];
 
   return (
     <>
-      <div className="w-[320px] bg-bg-panel/60 backdrop-blur-xl border-l border-border-main flex flex-col h-full overflow-hidden relative text-text-main animate-in slide-in-from-right duration-500">
-        <div className="p-7 border-b border-border-muted flex items-center justify-between">
-          <h3 className="text-xl font-black tracking-tight">
-            {isFolder ? "Folder Information" : "File Information"}
-          </h3>
+      <div className="w-[320px] absolute right-0 bg-bg-panel/60 backdrop-blur-xl border-l border-border-main flex flex-col h-full overflow-hidden text-text-main animate-in slide-in-from-right duration-500 z-50">
+        <div className="p-5 border-b border-border-muted flex items-center justify-between">
+          <h3 className="text-xl font-black tracking-tight">{truncateName(selectedItem, 20)}</h3>
           <button
             onClick={() => dispatch(setShowDetails(false))}
             className="p-2 rounded-xl text-text-muted hover:text-text-main hover:bg-bg-hover transition-all cursor-pointer"
@@ -53,54 +98,49 @@ const RightSidebar = () => {
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-7">
-          <div className="flex flex-col items-center mb-10 text-center">
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-5">
+          <div className="flex flex-col items-center mb-5 text-center">
             <div className="w-[140px] h-[140px] bg-bg-hover rounded-[2.5rem] flex items-center justify-center mb-6 border border-border-main shadow-inner relative group">
               <div className="absolute inset-0 bg-primary/5 blur-3xl rounded-full opacity-50" />
               {isFolder ? (
                 <Folder
                   size={80}
-                  fill="#6366f1"
-                  color="#6366f1"
+                  fill={selectedItem.color || FOLDER_COLORS.DEFAULT}
+                  color={selectedItem.color || FOLDER_COLORS.DEFAULT}
                   strokeWidth={1}
                   className="relative z-10 drop-shadow-2xl"
                 />
               ) : (
-                <FileText
+                <FileIcon
+                  mimeType={selectedItem.mimeType}
                   size={80}
-                  className="text-primary/60 relative z-10 drop-shadow-xl"
                   strokeWidth={1.5}
+                  className="text-primary/60 relative z-10 drop-shadow-xl"
                 />
               )}
             </div>
             <h4 className="text-lg font-bold mb-1 break-words max-w-full px-2 leading-tight">
               {selectedItem.name}
             </h4>
-            <div className="px-3 py-1 bg-primary/10 rounded-full text-[10px] font-black text-primary uppercase tracking-widest border border-primary/20">
-              {isFolder ? "Folder" : selectedItem.type || "Document"}
-            </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 mb-10">
-            <button className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border border-border-muted bg-bg-panel/50 hover:bg-bg-hover hover:border-primary/50 transition-all duration-300 group cursor-pointer">
-              <div className="w-10 h-10 rounded-xl bg-bg-hover flex items-center justify-center text-text-dim group-hover:text-primary transition-colors">
-                <Download size={20} strokeWidth={2} />
-              </div>
-              <span className="text-xs font-bold text-text-muted group-hover:text-text-main">
-                Download
-              </span>
-            </button>
-            <button className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border border-border-muted bg-bg-panel/50 hover:bg-bg-hover hover:border-primary/50 transition-all duration-300 group cursor-pointer">
-              <div className="w-10 h-10 rounded-xl bg-bg-hover flex items-center justify-center text-text-dim group-hover:text-primary transition-colors">
-                <Share2 size={20} strokeWidth={2} />
-              </div>
-              <span className="text-xs font-bold text-text-muted group-hover:text-text-main">
-                Share
-              </span>
-            </button>
+          <div className="flex items-center justify-center gap-2 mb-6 p-2">
+            {ACTION_CONFIG.filter((action) => action.show).map((action) => (
+              <button
+                key={action.id}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  action.onClick(e);
+                }}
+                className={`sidebar-item ${action.className || ""}`}
+                title={action.title}
+              >
+                <action.icon size={18} />
+              </button>
+            ))}
           </div>
 
-          <div className="flex flex-col gap-6 p-6 rounded-3xl bg-bg-panel/50 border border-border-muted/50">
+          <div className="flex flex-col gap-4 p-5 rounded-3xl bg-bg-panel/50 border border-border-muted/50">
             <div className="flex gap-4 items-start">
               <div className="w-8 h-8 rounded-lg bg-bg-hover flex items-center justify-center text-primary/70">
                 <Info size={16} />
@@ -109,8 +149,8 @@ const RightSidebar = () => {
                 <span className="text-[10px] font-black uppercase tracking-[0.15em] text-text-dim mb-1">
                   Type
                 </span>
-                <span className="text-sm font-bold text-text-main">
-                  {isFolder ? "Folder" : selectedItem.type || "Document"}
+                <span className="text-sm font-bold text-text-main uppercase">
+                  {isFolder ? "Folder" : selectedItem.extension || "Document"}
                 </span>
               </div>
             </div>
@@ -131,60 +171,38 @@ const RightSidebar = () => {
               </div>
             )}
 
-            <div className="flex gap-4 items-start">
-              <div className="w-8 h-8 rounded-lg bg-bg-hover flex items-center justify-center text-primary/70">
-                <Clock size={16} />
+            {selectedItem?.createdAt && (
+              <div className="flex gap-4 items-start">
+                <div className="w-8 h-8 rounded-lg bg-bg-hover flex items-center justify-center text-primary/70">
+                  <Clock size={16} />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-black uppercase tracking-[0.15em] text-text-dim mb-1">
+                    Created
+                  </span>
+                  <span className="text-sm font-bold text-text-main">
+                    {format(new Date(selectedItem.createdAt), "MMM d, yyyy")}
+                  </span>
+                </div>
               </div>
-              <div className="flex flex-col">
-                <span className="text-[10px] font-black uppercase tracking-[0.15em] text-text-dim mb-1">
-                  Created
-                </span>
-                <span className="text-sm font-bold text-text-main">
-                  {selectedItem.createdAt
-                    ? format(new Date(selectedItem.createdAt), "MMM d, yyyy")
-                    : "No Date"}
-                </span>
-              </div>
-            </div>
+            )}
 
             <div className="flex gap-4 items-start">
-              <div className="w-8 h-8 rounded-lg bg-bg-hover flex items-center justify-center text-primary/70">
-                <User size={16} />
+              <div className="w-8 h-8 text-sm rounded-lg bg-bg-hover flex items-center justify-center text-primary/70">
+                {isOwner ? user?.firstName?.charAt(0) : selectedItem?.owner?.name?.charAt(0)}
               </div>
               <div className="flex flex-col">
                 <span className="text-[10px] font-black uppercase tracking-[0.15em] text-text-dim mb-1">
                   Owner
                 </span>
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center text-[10px] text-white font-bold">
-                    {user?.name?.charAt(0) || "M"}
-                  </div>
-                  <span className="text-sm font-bold text-text-main">{user?.name || "Me"}</span>
+                <div className="flex items-center gap-2 text-sm font-bold text-text-main">
+                  {isOwner ? user?.fullName || user?.firstName : selectedItem?.owner?.name || ""}
                 </div>
               </div>
             </div>
           </div>
         </div>
-
-        {selectedItem.id !== "root" && (
-          <div className="p-7 border-t border-border-muted">
-            <button
-              className="w-full flex items-center justify-center gap-2 py-4 px-6 border border-red-500/30 rounded-2xl font-bold text-sm transition-all duration-300 bg-red-500/5 text-red-400 hover:bg-red-500 hover:text-white hover:border-red-500 shadow-sm cursor-pointer"
-              onClick={() => setIsDeleting(true)}
-            >
-              <Trash2 size={18} strokeWidth={2.5} />
-              <span>Move to Trash</span>
-            </button>
-          </div>
-        )}
       </div>
-
-      <DeleteModal
-        isOpen={isDeleting}
-        onClose={() => setIsDeleting(false)}
-        onDelete={handleDelete}
-        item={selectedItem}
-      />
     </>
   );
 };

@@ -32,15 +32,6 @@ const initialState = {
       childDocuments: [],
     },
   },
-  trashDocuments: {
-    trash: {
-      id: "trash",
-      name: PAGE_HEADERS.TRASH,
-      parentId: null,
-      childDocuments: [],
-      path: "",
-    },
-  },
   currentFolderId: "root", // root | shared | trash
   selectedId: null,
   showDetails: false,
@@ -152,6 +143,7 @@ export const deleteDocument = createAsyncThunk(
       return {
         ...data,
         id,
+        message: TRASH_MESSAGES.DELETE_SUCCESS,
       };
     } catch (err) {
       logError(err);
@@ -299,14 +291,6 @@ const documentsSlice = createSlice({
     clearContextMenu: (state) => {
       state.contextMenu = null;
     },
-    renameItem: (state, action) => {
-      const { id, type, newName } = action.payload;
-      if (type === "folder" && state.documents[id]) {
-        state.documents[id].name = newName;
-      } else if (type === "file" && state.files[id]) {
-        state.files[id].name = newName;
-      }
-    },
     // fetch documents and files
     // Mock version history
     addFileVersion: () => {},
@@ -331,7 +315,6 @@ const documentsSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchDocuments.fulfilled, (state, action) => {
-        state.isLoading = false;
         const { folders, files, currentFolder, breadcrumbs, parentId, mode } = action.payload;
         const rootId = mode || "root";
 
@@ -380,6 +363,7 @@ const documentsSlice = createSlice({
         if (state.documents[parentId]) {
           state.documents[parentId].childDocuments = childDocuments;
         }
+        state.isLoading = false;
       })
       .addCase(fetchDocuments.rejected, (state, action) => {
         state.isLoading = false;
@@ -405,9 +389,9 @@ const documentsSlice = createSlice({
       })
       .addCase(permenantDeleteDocument.fulfilled, (state, action) => {
         const { id } = action.payload;
-        if (state.trashDocuments[id]) {
-          const { [id]: _, ...restDocs } = state.trashDocuments;
-          state.trashDocuments = { ...restDocs };
+        if (state.documents[id]) {
+          const { [id]: _, ...restDocs } = state.documents;
+          state.documents = { ...restDocs };
         }
       })
       .addCase(restoreDocument.fulfilled, (state, action) => {
@@ -456,7 +440,6 @@ export const {
   setContextMenu,
   clearContextMenu,
   addFile,
-  renameItem,
   deleteItem,
   addFileVersion,
 } = documentsSlice.actions;

@@ -9,6 +9,8 @@ const Footer = ({ children }) => children;
 
 const DeleteModal = ({
   isOpen,
+  onSuccess,
+  onFailed,
   onClose,
   onDelete,
   note,
@@ -38,8 +40,10 @@ const DeleteModal = ({
       if (data?.success) {
         toast.success(data.message);
       }
+      onSuccess?.(data);
     } catch (err) {
-      toast.error(err || "Item is not deleted!");
+      onFailed?.(err);
+      toast.error(err);
     } finally {
       setIsLoading(false);
       onClose();

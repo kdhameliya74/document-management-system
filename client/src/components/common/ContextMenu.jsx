@@ -27,8 +27,8 @@ const ContextMenu = ({ x, y, items, onClose }) => {
             key={index}
             disabled={item.disabled}
             className="flex items-center w-full py-2.5 px-4 text-left text-sm text-text-main transition-all duration-200 hover:bg-white/5 rounded-xl cursor-pointer group disabled:opacity-50 disabled:cursor-not-allowed"
-            onClick={() => {
-              item.onClick();
+            onClick={(e) => {
+              item.onClick(e);
               onClose();
             }}
           >
