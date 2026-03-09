@@ -32,15 +32,6 @@ const initialState = {
       childDocuments: [],
     },
   },
-  trashDocuments: {
-    trash: {
-      id: "trash",
-      name: PAGE_HEADERS.TRASH,
-      parentId: null,
-      childDocuments: [],
-      path: "",
-    },
-  },
   currentFolderId: "root", // root | shared | trash
   selectedId: null,
   showDetails: false,
@@ -309,7 +300,7 @@ const documentsSlice = createSlice({
     },
     // fetch documents and files
     // Mock version history
-    addFileVersion: () => {},
+    addFileVersion: () => { },
   },
   extraReducers: (builder) => {
     builder
@@ -331,7 +322,6 @@ const documentsSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchDocuments.fulfilled, (state, action) => {
-        state.isLoading = false;
         const { folders, files, currentFolder, breadcrumbs, parentId, mode } = action.payload;
         const rootId = mode || "root";
 
@@ -380,6 +370,7 @@ const documentsSlice = createSlice({
         if (state.documents[parentId]) {
           state.documents[parentId].childDocuments = childDocuments;
         }
+        state.isLoading = false;
       })
       .addCase(fetchDocuments.rejected, (state, action) => {
         state.isLoading = false;
@@ -405,9 +396,9 @@ const documentsSlice = createSlice({
       })
       .addCase(permenantDeleteDocument.fulfilled, (state, action) => {
         const { id } = action.payload;
-        if (state.trashDocuments[id]) {
-          const { [id]: _, ...restDocs } = state.trashDocuments;
-          state.trashDocuments = { ...restDocs };
+        if (state.documents[id]) {
+          const { [id]: _, ...restDocs } = state.documents;
+          state.documents = { ...restDocs };
         }
       })
       .addCase(restoreDocument.fulfilled, (state, action) => {
