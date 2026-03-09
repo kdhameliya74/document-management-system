@@ -3,17 +3,15 @@ import { useSelector, useDispatch } from "react-redux";
 import {
   Folder,
   Download,
-  Move,
   Trash2,
   Share2,
   Clock,
   Info,
-  User,
   X,
   Pencil,
   Eye,
 } from "lucide-react";
-import { deleteItem, setShowDetails, setActiveModal, setModalProps } from "@/store/documents.slice";
+import { setShowDetails, setActiveModal, setModalProps } from "@/store/documents.slice";
 import { format } from "date-fns";
 
 import FileIcon from "@/components/common/FileIcon";
@@ -35,7 +33,7 @@ const RightSidebar = () => {
   const isFolder = selectedItem.docType === "folder";
   const type = isFolder ? "folder" : "file";
 
-  const isOwner = selectedItem?.owner === user?.id || selectedItem?.owner?._id === user?.id;
+  const isOwner = selectedItem?.owner === user?.id || selectedItem?.owner?.id === user?.id;
   const permissions =
     selectedItem?.permissions ||
     (isOwner
@@ -201,14 +199,14 @@ const RightSidebar = () => {
 
             <div className="flex gap-4 items-start">
               <div className="w-8 h-8 text-sm rounded-lg bg-bg-hover flex items-center justify-center text-primary/70">
-                {user?.firstName?.charAt(0) + user?.lastName?.charAt(0)}
+                {isOwner ? user?.firstName?.charAt(0) : selectedItem?.owner?.name?.charAt(0)}
               </div>
               <div className="flex flex-col">
                 <span className="text-[10px] font-black uppercase tracking-[0.15em] text-text-dim mb-1">
                   Owner
                 </span>
                 <div className="flex items-center gap-2 text-sm font-bold text-text-main">
-                  {user?.fullName || user?.firstName}
+                  {isOwner ? (user?.fullName || user?.firstName) : (selectedItem?.owner?.name || "")}
                 </div>
               </div>
             </div>

@@ -26,8 +26,11 @@ const splitByType = (docs, userId, parentPermission) => {
     if (userId) {
       const ownPermission = getEffectivePermission(doc, userId);
       const effectivePermission = comparePermissions(ownPermission, parentPermission);
-      transformed.permission = effectivePermission;
       transformed.permissions = buildCapabilities(effectivePermission);
+      transformed.owner = {
+        id: doc.owner._id.toString(),
+        name: `${doc.owner.firstName} ${doc.owner.lastName}`,
+      }
     }
     if (doc.docType === DOC_TYPES.FOLDER) {
       folders.push(transformed);
@@ -142,12 +145,18 @@ async function listSharedDocuments(req, res, baseFilter) {
   const userId = req.user.id;
   const { parentId } = req.query;
 
+  const populateOwner = {
+    path: "owner",
+    select: "firstName lastName",
+    options: { lean: true },
+  };
+
   if (parentId) {
     const [sharedItems, currentFolder] = await Promise.all([
       Document.find({
         parentId: baseFilter.parentId,
         isTrashed: baseFilter.isTrashed,
-      }).lean(),
+      }).populate(populateOwner).lean(),
       parentId
         ? Document.findOne({ _id: baseFilter.parentId, isTrashed: baseFilter.isTrashed })
         : Promise.resolve(null),
@@ -175,7 +184,8 @@ async function listSharedDocuments(req, res, baseFilter) {
         path: { $in: ancestorPaths },
         owner: currentFolder.owner,
         isTrashed: false,
-      }).select("sharedWith isPublic owner");
+      })
+        .select("sharedWith isPublic owner");
       parentPermission = getHighestPermissionLevel(hierarchy, userId);
     }
 
@@ -192,7 +202,9 @@ async function listSharedDocuments(req, res, baseFilter) {
   const documents = await Document.find({
     isTrashed: baseFilter.isTrashed,
     "sharedWith.user": userId,
-  }).lean();
+  })
+    .populate(populateOwner)
+    .lean();
 
   const sharedIds = new Set(documents.map((d) => d._id.toString()));
 
