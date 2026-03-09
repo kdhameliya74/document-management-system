@@ -143,6 +143,7 @@ export const deleteDocument = createAsyncThunk(
       return {
         ...data,
         id,
+        message: TRASH_MESSAGES.DELETE_SUCCESS,
       };
     } catch (err) {
       logError(err);
@@ -292,7 +293,7 @@ const documentsSlice = createSlice({
     },
     // fetch documents and files
     // Mock version history
-    addFileVersion: () => { },
+    addFileVersion: () => {},
   },
   extraReducers: (builder) => {
     builder

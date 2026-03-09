@@ -1,7 +1,12 @@
 import { useEffect } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { setCurrentFolder, setSelectedId, clearContextMenu, setShowDetails } from "@/store/documents.slice";
+import {
+  setCurrentFolder,
+  setSelectedId,
+  clearContextMenu,
+  setShowDetails,
+} from "@/store/documents.slice";
 import { APP_VIEWS_MAP } from "@/helpers/constants";
 
 import Sidebar from "@/components/layout/Sidebar";
@@ -27,7 +32,7 @@ const DashboardPage = () => {
   }, [location.pathname, dispatch]);
 
   const handleOutsideClick = () => {
-    if(showDetails) {
+    if (showDetails) {
       dispatch(setShowDetails(false));
     }
     dispatch(setSelectedId(null));

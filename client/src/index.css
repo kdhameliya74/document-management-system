@@ -6,17 +6,26 @@
   --color-secondary: #0ea5e9;
 
   /* Modern Zinc Dark Palette */
-  --color-bg-main: #09090b; /* Zinc-950 */
-  --color-bg-panel: #18181b; /* Zinc-900 */
-  --color-bg-muted: #18181b; /* Zinc-900 */
-  --color-bg-hover: #27272a; /* Zinc-800 */
+  --color-bg-main: #09090b;
+  /* Zinc-950 */
+  --color-bg-panel: #18181b;
+  /* Zinc-900 */
+  --color-bg-muted: #18181b;
+  /* Zinc-900 */
+  --color-bg-hover: #27272a;
+  /* Zinc-800 */
 
-  --color-border-main: #27272a; /* Zinc-800 */
-  --color-border-muted: #1e1e21; /* Subtle divider */
+  --color-border-main: #27272a;
+  /* Zinc-800 */
+  --color-border-muted: #1e1e21;
+  /* Subtle divider */
 
-  --color-text-main: #f4f4f5; /* Zinc-100 */
-  --color-text-muted: #a1a1aa; /* Zinc-400 */
-  --color-text-dim: #71717a; /* Zinc-500 */
+  --color-text-main: #f4f4f5;
+  /* Zinc-100 */
+  --color-text-muted: #a1a1aa;
+  /* Zinc-400 */
+  --color-text-dim: #71717a;
+  /* Zinc-500 */
 
   --font-sans:
     "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
@@ -31,6 +40,12 @@
 
   --shadow-premium: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
   --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+@layer components {
+  .sidebar-item {
+    @apply p-2 rounded-xl border border-border-muted text-text-muted cursor-pointer transition-all hover:text-primary hover:bg-primary/10;
+  }
 }
 
 body {
@@ -60,19 +75,22 @@ body {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #3f3f46; /* Zinc-700 */
+  background: #3f3f46;
+  /* Zinc-700 */
 }
 
 /* Glassmorphism Utilities */
 .glass-panel {
-  background-color: rgba(24, 24, 27, 0.6); /* Zinc-900 with alpha */
+  background-color: rgba(24, 24, 27, 0.6);
+  /* Zinc-900 with alpha */
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .glass-card {
-  background-color: rgba(39, 39, 42, 0.4); /* Zinc-800 with alpha */
+  background-color: rgba(39, 39, 42, 0.4);
+  /* Zinc-800 with alpha */
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.03);

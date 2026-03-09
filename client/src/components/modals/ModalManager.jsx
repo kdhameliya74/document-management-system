@@ -1,17 +1,20 @@
 import React, { useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { setActiveModal, deleteDocument } from "@/store/documents.slice";
-import { DOCUMENT_MODES } from "@/helpers/constants";
+import { setActiveModal, deleteDocument, setShowDetails } from "@/store/documents.slice";
+import { DOCUMENT_MODES, TRASH_MESSAGES } from "@/helpers/constants";
 
 import FolderModal from "@/components/modals/FolderModal";
 import UploadFileModal from "@/components/modals/UploadFileModal";
 import DeleteModal from "@/components/modals/DeleteModal";
 import MoveModal from "@/components/modals/MoveModal";
 import SharingModal from "@/components/modals/SharingModal";
+import toast from "react-hot-toast";
 
 const ModalManager = () => {
   const dispatch = useDispatch();
-  const { activeModal, modalProps, currentFolderId } = useSelector((state) => state.documentSystem);
+  const { activeModal, modalProps, currentFolderId, showDetails } = useSelector(
+    (state) => state.documentSystem,
+  );
 
   const MODALS_MAP = useMemo(
     () => ({
@@ -39,6 +42,11 @@ const ModalManager = () => {
           itemType: modalProps.itemType,
           note: "You can restore this item from your Trash folder later if you change your mind.",
           onDelete: async () => await dispatch(deleteDocument(modalProps.item.id)).unwrap(),
+          onSuccess: () => {
+            if (showDetails) {
+              dispatch(setShowDetails(false));
+            }
+          },
         },
       },
       move: {

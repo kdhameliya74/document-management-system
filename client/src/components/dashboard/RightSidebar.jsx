@@ -1,11 +1,22 @@
 import React from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { Folder, Download, Move, Trash2, Share2, Clock, Info, User, X } from "lucide-react";
-import { deleteItem, setShowDetails } from "@/store/documents.slice";
+import {
+  Folder,
+  Download,
+  Move,
+  Trash2,
+  Share2,
+  Clock,
+  Info,
+  User,
+  X,
+  Pencil,
+  Eye,
+} from "lucide-react";
+import { deleteItem, setShowDetails, setActiveModal, setModalProps } from "@/store/documents.slice";
 import { format } from "date-fns";
 
 import FileIcon from "@/components/common/FileIcon";
-import DeleteModal from "@/components/modals/DeleteModal";
 import { truncateName } from "@/helpers/utils";
 import { FOLDER_COLORS } from "@/helpers/constants";
 
@@ -19,34 +30,78 @@ const RightSidebar = () => {
   const currentFolder = documents[currentFolderId];
   const selectedItem = selectedId ? documents[selectedId] : currentFolder;
 
-  const [isDeleting, setIsDeleting] = React.useState(false);
-
   if (!showDetails || !selectedItem) return null;
 
   const isFolder = selectedItem.docType === "folder";
   const type = isFolder ? "folder" : "file";
 
-  const handleDelete = async () => {
-    return new Promise((resolve) => {
-      dispatch(
-        deleteItem({
-          id: selectedItem.id,
-          type,
-          parentId: selectedItem.parentId,
-        }),
-      );
-      dispatch(setShowDetails(false));
-      resolve({ success: true, message: "Item moved to trash" });
-    });
-  };
+  const isOwner = selectedItem?.owner === user?.id || selectedItem?.owner?._id === user?.id;
+  const permissions =
+    selectedItem?.permissions ||
+    (isOwner
+      ? {
+          canView: true,
+          canEdit: true,
+          canDelete: true,
+          canShare: true,
+          canMove: true,
+          canDownload: true,
+        }
+      : {});
+
+  const ACTION_CONFIG = [
+    {
+      id: "view",
+      icon: Eye,
+      title: "View",
+      show: permissions?.canView,
+      onClick: () => alert("View Document functionality coming soon!"),
+    },
+    {
+      id: "edit",
+      icon: Pencil,
+      title: "Edit",
+      show: permissions?.canEdit,
+      onClick: () => {
+        dispatch(setModalProps({ item: selectedItem, itemType: type }));
+        dispatch(setActiveModal("edit"));
+      },
+    },
+    {
+      id: "share",
+      icon: Share2,
+      title: "Share",
+      show: permissions?.canShare,
+      onClick: () => {
+        dispatch(setModalProps({ item: selectedItem, itemType: type }));
+        dispatch(setActiveModal("share"));
+      },
+    },
+    {
+      id: "download",
+      icon: Download,
+      title: "Download",
+      show: permissions?.canDownload && !isFolder,
+      onClick: () => alert("Download functionality coming soon!"),
+    },
+    {
+      id: "delete",
+      icon: Trash2,
+      title: "Delete",
+      show: permissions?.canDelete,
+      className: "hover:text-error hover:bg-error/10",
+      onClick: () => {
+        dispatch(setModalProps({ item: selectedItem, itemType: type }));
+        dispatch(setActiveModal("delete"));
+      },
+    },
+  ];
 
   return (
     <>
       <div className="w-[320px] absolute right-0 bg-bg-panel/60 backdrop-blur-xl border-l border-border-main flex flex-col h-full overflow-hidden text-text-main animate-in slide-in-from-right duration-500 z-50">
         <div className="p-5 border-b border-border-muted flex items-center justify-between">
-          <h3 className="text-xl font-black tracking-tight">
-            {truncateName(selectedItem, 20)}
-          </h3>
+          <h3 className="text-xl font-black tracking-tight">{truncateName(selectedItem, 20)}</h3>
           <button
             onClick={() => dispatch(setShowDetails(false))}
             className="p-2 rounded-xl text-text-muted hover:text-text-main hover:bg-bg-hover transition-all cursor-pointer"
@@ -81,10 +136,21 @@ const RightSidebar = () => {
             </h4>
           </div>
 
-          <div className="flex gap-4">
-              edit | download | share | move | delete | view Document 
+          <div className="flex items-center justify-center gap-2 mb-6 p-2">
+            {ACTION_CONFIG.filter((action) => action.show).map((action) => (
+              <button
+                key={action.id}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  action.onClick(e);
+                }}
+                className={`sidebar-item ${action.className || ""}`}
+                title={action.title}
+              >
+                <action.icon size={18} />
+              </button>
+            ))}
           </div>
-
 
           <div className="flex flex-col gap-4 p-5 rounded-3xl bg-bg-panel/50 border border-border-muted/50">
             <div className="flex gap-4 items-start">
@@ -117,48 +183,38 @@ const RightSidebar = () => {
               </div>
             )}
 
-            <div className="flex gap-4 items-start">
-              <div className="w-8 h-8 rounded-lg bg-bg-hover flex items-center justify-center text-primary/70">
-                <Clock size={16} />
+            {selectedItem?.createdAt && (
+              <div className="flex gap-4 items-start">
+                <div className="w-8 h-8 rounded-lg bg-bg-hover flex items-center justify-center text-primary/70">
+                  <Clock size={16} />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-black uppercase tracking-[0.15em] text-text-dim mb-1">
+                    Created
+                  </span>
+                  <span className="text-sm font-bold text-text-main">
+                    {format(new Date(selectedItem.createdAt), "MMM d, yyyy")}
+                  </span>
+                </div>
               </div>
-              <div className="flex flex-col">
-                <span className="text-[10px] font-black uppercase tracking-[0.15em] text-text-dim mb-1">
-                  Created
-                </span>
-                <span className="text-sm font-bold text-text-main">
-                  {selectedItem.createdAt
-                    ? format(new Date(selectedItem.createdAt), "MMM d, yyyy")
-                    : "No Date"}
-                </span>
-              </div>
-            </div>
+            )}
 
             <div className="flex gap-4 items-start">
-              <div className="w-8 h-8 rounded-lg bg-bg-hover flex items-center justify-center text-primary/70">
-                <User size={16} />
+              <div className="w-8 h-8 text-sm rounded-lg bg-bg-hover flex items-center justify-center text-primary/70">
+                {user?.firstName?.charAt(0) + user?.lastName?.charAt(0)}
               </div>
               <div className="flex flex-col">
                 <span className="text-[10px] font-black uppercase tracking-[0.15em] text-text-dim mb-1">
                   Owner
                 </span>
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center text-[10px] text-white font-bold">
-                    {user?.name?.charAt(0) || "M"}
-                  </div>
-                  <span className="text-sm font-bold text-text-main">{user?.name || "Me"}</span>
+                <div className="flex items-center gap-2 text-sm font-bold text-text-main">
+                  {user?.fullName || user?.firstName}
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-
-      <DeleteModal
-        isOpen={isDeleting}
-        onClose={() => setIsDeleting(false)}
-        onDelete={handleDelete}
-        item={selectedItem}
-      />
     </>
   );
 };
