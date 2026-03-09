@@ -41,6 +41,7 @@ const useFileFolderContextMenu = (menuFor = "dashboard", onMenuAction) => {
     e.preventDefault();
     e.stopPropagation();
     dispatch(setSelectedId(item.id));
+    dispatch(setShowDetails(false));
     dispatch(
       setContextMenu({
         x: e.clientX,
@@ -68,7 +69,8 @@ const useFileFolderContextMenu = (menuFor = "dashboard", onMenuAction) => {
       label: "View Details",
       icon: Eye,
       disabled: !contextMenu?.item?.permissions?.canView,
-      onClick: () => {
+      onClick: (e) => {
+        e.stopPropagation();
         dispatch(setShowDetails(true));
         closeContextMenu();
       },

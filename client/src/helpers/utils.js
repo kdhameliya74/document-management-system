@@ -10,6 +10,13 @@ export const logError = (err) => {
   }
 };
 
+export const truncateName = (item, maxLength) => {
+  if (item.docType === "folder") {
+    return truncateFolderName(item.name, maxLength);
+  }
+  return truncateFileName(item.name, maxLength);
+};
+
 export const truncateFileName = (name) => {
   const maxLength = FILE_MAX_NAME_LENGTH;
   if (name.length <= maxLength) return name;

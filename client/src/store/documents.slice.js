@@ -290,14 +290,6 @@ const documentsSlice = createSlice({
     clearContextMenu: (state) => {
       state.contextMenu = null;
     },
-    renameItem: (state, action) => {
-      const { id, type, newName } = action.payload;
-      if (type === "folder" && state.documents[id]) {
-        state.documents[id].name = newName;
-      } else if (type === "file" && state.files[id]) {
-        state.files[id].name = newName;
-      }
-    },
     // fetch documents and files
     // Mock version history
     addFileVersion: () => { },
@@ -447,7 +439,6 @@ export const {
   setContextMenu,
   clearContextMenu,
   addFile,
-  renameItem,
   deleteItem,
   addFileVersion,
 } = documentsSlice.actions;
