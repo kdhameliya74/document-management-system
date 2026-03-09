@@ -8,7 +8,6 @@ import UploadFileModal from "@/components/modals/UploadFileModal";
 import DeleteModal from "@/components/modals/DeleteModal";
 import MoveModal from "@/components/modals/MoveModal";
 import SharingModal from "@/components/modals/SharingModal";
-import toast from "react-hot-toast";
 
 const ModalManager = () => {
   const dispatch = useDispatch();
@@ -62,7 +61,7 @@ const ModalManager = () => {
         },
       },
     }),
-    [currentFolderId, modalProps, dispatch],
+    [currentFolderId, modalProps, dispatch, showDetails],
   );
 
   const activeModalConfig = MODALS_MAP[activeModal];

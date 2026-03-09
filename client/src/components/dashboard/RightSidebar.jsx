@@ -1,16 +1,6 @@
 import React from "react";
 import { useSelector, useDispatch } from "react-redux";
-import {
-  Folder,
-  Download,
-  Trash2,
-  Share2,
-  Clock,
-  Info,
-  X,
-  Pencil,
-  Eye,
-} from "lucide-react";
+import { Folder, Download, Trash2, Share2, Clock, Info, X, Pencil, Eye } from "lucide-react";
 import { setShowDetails, setActiveModal, setModalProps } from "@/store/documents.slice";
 import { format } from "date-fns";
 
@@ -206,7 +196,7 @@ const RightSidebar = () => {
                   Owner
                 </span>
                 <div className="flex items-center gap-2 text-sm font-bold text-text-main">
-                  {isOwner ? (user?.fullName || user?.firstName) : (selectedItem?.owner?.name || "")}
+                  {isOwner ? user?.fullName || user?.firstName : selectedItem?.owner?.name || ""}
                 </div>
               </div>
             </div>

@@ -30,7 +30,7 @@ const splitByType = (docs, userId, parentPermission) => {
       transformed.owner = {
         id: doc.owner._id.toString(),
         name: `${doc.owner.firstName} ${doc.owner.lastName}`,
-      }
+      };
     }
     if (doc.docType === DOC_TYPES.FOLDER) {
       folders.push(transformed);
@@ -156,7 +156,9 @@ async function listSharedDocuments(req, res, baseFilter) {
       Document.find({
         parentId: baseFilter.parentId,
         isTrashed: baseFilter.isTrashed,
-      }).populate(populateOwner).lean(),
+      })
+        .populate(populateOwner)
+        .lean(),
       parentId
         ? Document.findOne({ _id: baseFilter.parentId, isTrashed: baseFilter.isTrashed })
         : Promise.resolve(null),
@@ -184,8 +186,7 @@ async function listSharedDocuments(req, res, baseFilter) {
         path: { $in: ancestorPaths },
         owner: currentFolder.owner,
         isTrashed: false,
-      })
-        .select("sharedWith isPublic owner");
+      }).select("sharedWith isPublic owner");
       parentPermission = getHighestPermissionLevel(hierarchy, userId);
     }
 
