@@ -13,7 +13,7 @@ import {
 /**
  * Map file MIME types to icon components and colors
  */
-const FILE_TYPE_MAP = [
+const FILE_ICONS_MAP = [
   {
     test: (type) => type.startsWith("text/plain"),
     Icon: File,
@@ -99,6 +99,8 @@ const FILE_TYPE_MAP = [
 ];
 
 export const getFileIcon = (mimeType = "") => {
-  const match = FILE_TYPE_MAP.find((item) => item.test(mimeType));
+  const match = FILE_ICONS_MAP.find((item) => item.test(mimeType));
   return match ? match : { Icon: File, className: "text-slate-500" };
 };
+
+export const VIEWABLE_FILE_TYPES = ["image/", "video/", "audio/", "application/pdf"];

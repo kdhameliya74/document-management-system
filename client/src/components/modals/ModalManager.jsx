@@ -1,13 +1,16 @@
 import React, { useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { setActiveModal, deleteDocument, setShowDetails } from "@/store/documents.slice";
-import { DOCUMENT_MODES, TRASH_MESSAGES } from "@/helpers/constants";
+import { deleteDocument, setShowDetails, closeModal } from "@/store/documents.slice";
+import { DOCUMENT_MODES, FOLDER_MESSAGES, FILE_MESSAGES } from "@/helpers/constants";
+import { Folder, Upload, Trash2, Move, Share2, Edit } from "lucide-react";
 
+import Modal from "@/components/common/Modal";
 import FolderModal from "@/components/modals/FolderModal";
 import UploadFileModal from "@/components/modals/UploadFileModal";
 import DeleteModal from "@/components/modals/DeleteModal";
 import MoveModal from "@/components/modals/MoveModal";
 import SharingModal from "@/components/modals/SharingModal";
+import FileViewer from "@/components/modals/FileViewer";
 
 const ModalManager = () => {
   const dispatch = useDispatch();
@@ -19,14 +22,20 @@ const ModalManager = () => {
     () => ({
       createFolder: {
         Component: FolderModal,
+        title: FOLDER_MESSAGES.CREATE_TITLE,
+        icon: <Folder className="text-text-muted" />,
         props: { currentFolderId },
       },
       upload: {
         Component: UploadFileModal,
+        title: FILE_MESSAGES.UPLOAD_TITLE,
+        icon: <Upload className="text-text-muted" />,
         props: { currentFolderId },
       },
       edit: {
         Component: FolderModal,
+        title: FOLDER_MESSAGES.UPDATE_TITLE,
+        icon: <Edit className="text-text-muted" />,
         props: {
           currentFolderId,
           documentItem: modalProps.item,
@@ -36,6 +45,8 @@ const ModalManager = () => {
       },
       delete: {
         Component: DeleteModal,
+        title: modalProps.itemType === "folder" ? "Delete Folder" : "Delete File",
+        icon: <Trash2 className="bg-red-500/10 text-red-500" />,
         props: {
           item: modalProps.item,
           itemType: modalProps.itemType,
@@ -50,12 +61,16 @@ const ModalManager = () => {
       },
       move: {
         Component: MoveModal,
+        title: `Move "${modalProps.item?.name || "Item"}"`,
+        icon: <Move size={18} className="text-primary" />,
         props: {
           item: modalProps.item,
         },
       },
       share: {
         Component: SharingModal,
+        title: `Share "${modalProps.item?.name}"`,
+        icon: <Share2 className="text-text-muted" />,
         props: {
           item: modalProps.item,
         },
@@ -65,12 +80,21 @@ const ModalManager = () => {
   );
 
   const activeModalConfig = MODALS_MAP[activeModal];
+
+  if (activeModal === "view") {
+    return (
+      <FileViewer isOpen={true} file={modalProps.item} onClose={() => dispatch(closeModal())} />
+    );
+  }
+
   if (!activeModalConfig) return null;
 
-  const { Component, props } = activeModalConfig;
+  const { Component, props, title, icon } = activeModalConfig;
 
   return (
-    <Component {...props} isOpen={!!activeModal} onClose={() => dispatch(setActiveModal(null))} />
+    <Modal isOpen={!!activeModal} onClose={() => dispatch(closeModal())} title={title} icon={icon}>
+      <Component {...props} onClose={() => dispatch(closeModal())} />
+    </Modal>
   );
 };
 

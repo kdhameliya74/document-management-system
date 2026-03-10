@@ -42,8 +42,11 @@ const RightSidebar = () => {
       id: "view",
       icon: Eye,
       title: "View",
-      show: permissions?.canView,
-      onClick: () => alert("View Document functionality coming soon!"),
+      show: permissions?.canView && !isFolder,
+      onClick: () => {
+        dispatch(setModalProps({ item: selectedItem, itemType: type, source: "sidebar" }));
+        dispatch(setActiveModal("view"));
+      },
     },
     {
       id: "edit",
@@ -51,7 +54,7 @@ const RightSidebar = () => {
       title: "Edit",
       show: permissions?.canEdit,
       onClick: () => {
-        dispatch(setModalProps({ item: selectedItem, itemType: type }));
+        dispatch(setModalProps({ item: selectedItem, itemType: type, source: "sidebar" }));
         dispatch(setActiveModal("edit"));
       },
     },
@@ -61,7 +64,7 @@ const RightSidebar = () => {
       title: "Share",
       show: permissions?.canShare,
       onClick: () => {
-        dispatch(setModalProps({ item: selectedItem, itemType: type }));
+        dispatch(setModalProps({ item: selectedItem, itemType: type, source: "sidebar" }));
         dispatch(setActiveModal("share"));
       },
     },
@@ -79,7 +82,7 @@ const RightSidebar = () => {
       show: permissions?.canDelete,
       className: "hover:text-error hover:bg-error/10",
       onClick: () => {
-        dispatch(setModalProps({ item: selectedItem, itemType: type }));
+        dispatch(setModalProps({ item: selectedItem, itemType: type, source: "sidebar" }));
         dispatch(setActiveModal("delete"));
       },
     },

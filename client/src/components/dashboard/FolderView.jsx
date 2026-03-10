@@ -215,6 +215,10 @@ const FolderView = () => {
                     isSelected={selectedId === document.id}
                     onSelect={handleSelect}
                     onContextMenu={handleContextMenu}
+                    onDoubleClick={() => {
+                      dispatch(setModalProps({ item: document, itemType: "file", source: "view" }));
+                      dispatch(setActiveModal("view"));
+                    }}
                   />
                 ),
               )}

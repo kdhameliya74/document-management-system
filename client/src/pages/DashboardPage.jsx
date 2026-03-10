@@ -1,12 +1,7 @@
 import { useEffect } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  setCurrentFolder,
-  setSelectedId,
-  clearContextMenu,
-  setShowDetails,
-} from "@/store/documents.slice";
+import { setCurrentFolder, clearUISelection } from "@/store/documents.slice";
 import { APP_VIEWS_MAP } from "@/helpers/constants";
 
 import Sidebar from "@/components/layout/Sidebar";
@@ -22,7 +17,7 @@ import ModalManager from "@/components/modals/ModalManager";
 const DashboardPage = () => {
   const location = useLocation();
   const dispatch = useDispatch();
-  const { showDetails } = useSelector((state) => state.documentSystem);
+  const { showDetails, activeModal, selectedId } = useSelector((state) => state.documentSystem);
 
   useEffect(() => {
     const type = location.pathname.substring(1).split("/")[1];
@@ -32,11 +27,11 @@ const DashboardPage = () => {
   }, [location.pathname, dispatch]);
 
   const handleOutsideClick = () => {
-    if (showDetails) {
-      dispatch(setShowDetails(false));
+    if (activeModal) return;
+
+    if (showDetails || selectedId) {
+      dispatch(clearUISelection());
     }
-    dispatch(setSelectedId(null));
-    dispatch(clearContextMenu());
   };
 
   return (

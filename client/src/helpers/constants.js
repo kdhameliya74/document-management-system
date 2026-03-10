@@ -75,6 +75,10 @@ export const FILE_MESSAGES = Object.freeze({
   UPLOAD_SUCCESS: "File uploaded successfully.",
   UPLOAD_LOADING: "Uploading file. This may take a moment…",
   UPLOAD_FAILED: "Failed to save file details",
+
+  DOWNLOAD_FAILED: "Failed to download file",
+  DOWNLOAD_SUCCESS: "File downloaded successfully.",
+  DOWNLOAD_LOADING: "Downloading file. This may take a moment…",
 });
 
 export const PERMISSION_LEVELS = Object.freeze({

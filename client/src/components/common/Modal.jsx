@@ -7,7 +7,7 @@ const Modal = ({ isOpen, onClose, title, icon: Icon, children }) => {
   return (
     <AnimatePresence>
       <div
-        className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-[1000] p-4"
+        className="fixed inset-0 bg-black/80 backdrop-blur-[2px] flex items-center justify-center z-[1000] p-4"
         onClick={onClose}
       >
         <motion.div

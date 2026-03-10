@@ -9,6 +9,8 @@ import {
   restoreDocument,
   permenantDeleteDocument,
   fetchDocuments,
+  setModalProps,
+  setActiveModal,
 } from "@/store/documents.slice";
 
 import { truncateFolderName } from "@/helpers/utils.js";
@@ -166,6 +168,10 @@ const TrashPage = () => {
               isSelected={selectedId === document.id}
               onSelect={handleSelect}
               onContextMenu={handleContextMenu}
+              onDoubleClick={() => {
+                dispatch(setModalProps({ item: document, itemType: "file", source: "trash" }));
+                dispatch(setActiveModal("view"));
+              }}
             />
           ),
         )}

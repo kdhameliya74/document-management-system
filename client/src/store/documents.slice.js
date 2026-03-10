@@ -233,6 +233,23 @@ export const shareDocument = createAsyncThunk(
   },
 );
 
+/*
+|--------------------------------------------------------------------------
+| getPreviewUrl
+|--------------------------------------------------------------------------
+*/
+export const getPreviewUrl = createAsyncThunk(
+  "documents/sync-url",
+  async (docId, { rejectWithValue }) => {
+    try {
+      return await DocumentService.getPreviewUrl(docId);
+    } catch (err) {
+      logError(err);
+      return rejectWithValue(ERROR_CODES_WITH_MESSAGES[err?.code] || FILE_MESSAGES.DOWNLOAD_FAILED);
+    }
+  },
+);
+
 const ensureDocument = (state, id, data, rootId) => {
   const docState = state.documents;
   const parentId = data.parentId;
@@ -291,9 +308,18 @@ const documentsSlice = createSlice({
     clearContextMenu: (state) => {
       state.contextMenu = null;
     },
-    // fetch documents and files
-    // Mock version history
-    addFileVersion: () => {},
+    closeModal: (state) => {
+      if (state.modalProps?.source === "contextMenu" || state.modalProps?.source === "view") {
+        state.selectedId = null;
+      }
+      state.activeModal = null;
+      state.modalProps = {};
+    },
+    clearUISelection: (state) => {
+      state.showDetails = false;
+      state.selectedId = null;
+      state.contextMenu = null;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -436,11 +462,11 @@ export const {
   setSelectedId,
   setShowDetails,
   setActiveModal,
+  closeModal,
+  clearUISelection,
   setModalProps,
   setContextMenu,
   clearContextMenu,
-  addFile,
-  deleteItem,
   addFileVersion,
 } = documentsSlice.actions;
 export default documentsSlice.reducer;
