@@ -3,9 +3,6 @@ import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   setCurrentFolder,
-  setSelectedId,
-  clearContextMenu,
-  setShowDetails,
   clearUISelection,
 } from "@/store/documents.slice";
 import { APP_VIEWS_MAP } from "@/helpers/constants";
@@ -35,8 +32,6 @@ const DashboardPage = () => {
   }, [location.pathname, dispatch]);
 
   const handleOutsideClick = () => {
-    // Modal has its own backdrop which covers this, so if this fires, no modal is open
-    // But just to be safe and explicit:
     if (activeModal) return;
 
     if (showDetails || selectedId) {
