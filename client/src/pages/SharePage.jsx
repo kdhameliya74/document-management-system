@@ -116,7 +116,9 @@ const SharePage = () => {
                     onSelect={handleSelect}
                     onContextMenu={handleContextMenu}
                     onDoubleClick={() => {
-                      dispatch(setModalProps({ item: document, itemType: "file", source: "shared" }));
+                      dispatch(
+                        setModalProps({ item: document, itemType: "file", source: "shared" }),
+                      );
                       dispatch(setActiveModal("view"));
                     }}
                   />

@@ -1,10 +1,7 @@
 import { useEffect } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  setCurrentFolder,
-  clearUISelection,
-} from "@/store/documents.slice";
+import { setCurrentFolder, clearUISelection } from "@/store/documents.slice";
 import { APP_VIEWS_MAP } from "@/helpers/constants";
 
 import Sidebar from "@/components/layout/Sidebar";
@@ -20,9 +17,7 @@ import ModalManager from "@/components/modals/ModalManager";
 const DashboardPage = () => {
   const location = useLocation();
   const dispatch = useDispatch();
-  const { showDetails, activeModal, selectedId } = useSelector(
-    (state) => state.documentSystem,
-  );
+  const { showDetails, activeModal, selectedId } = useSelector((state) => state.documentSystem);
 
   useEffect(() => {
     const type = location.pathname.substring(1).split("/")[1];

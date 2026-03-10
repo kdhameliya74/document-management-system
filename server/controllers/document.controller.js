@@ -12,7 +12,7 @@ import {
   comparePermissions,
   getHighestPermissionLevel,
 } from "../utils/helper.util.js";
-import { PutObjectCommand, DeleteObjectsCommand } from "@aws-sdk/client-s3";
+import { PutObjectCommand, DeleteObjectsCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { asyncHandler } from "../middlewares/error.middleware.js";
 
@@ -617,4 +617,22 @@ export const shareDocument = asyncHandler(async (req, res) => {
     success: true,
     message: "Document shared successfully",
   });
+});
+
+export const getPreviewUrl = asyncHandler(async (req, res) => {
+  const { document } = req;
+  const { storageKey, bucket } = document;
+
+  if (!storageKey) {
+    return res.status(400).json({ success: false, message: "File key not found" });
+  }
+
+  const command = new GetObjectCommand({
+    Bucket: bucket,
+    Key: storageKey,
+  });
+
+  const url = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
+
+  res.status(200).json({ success: true, url });
 });

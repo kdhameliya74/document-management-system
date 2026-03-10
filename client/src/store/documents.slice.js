@@ -233,6 +233,23 @@ export const shareDocument = createAsyncThunk(
   },
 );
 
+/*
+|--------------------------------------------------------------------------
+| getPreviewUrl
+|--------------------------------------------------------------------------
+*/
+export const getPreviewUrl = createAsyncThunk(
+  "documents/sync-url",
+  async (docId, { rejectWithValue }) => {
+    try {
+      return await DocumentService.getPreviewUrl(docId);
+    } catch (err) {
+      logError(err);
+      return rejectWithValue(ERROR_CODES_WITH_MESSAGES[err?.code] || FILE_MESSAGES.DOWNLOAD_FAILED);
+    }
+  },
+);
+
 const ensureDocument = (state, id, data, rootId) => {
   const docState = state.documents;
   const parentId = data.parentId;

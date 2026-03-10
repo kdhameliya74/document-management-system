@@ -1,6 +1,11 @@
 import React, { useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { setActiveModal, deleteDocument, setShowDetails, closeModal } from "@/store/documents.slice";
+import {
+  setActiveModal,
+  deleteDocument,
+  setShowDetails,
+  closeModal,
+} from "@/store/documents.slice";
 import { DOCUMENT_MODES, FOLDER_MESSAGES, FILE_MESSAGES } from "@/helpers/constants";
 import { Folder, Upload, Trash2, Move, Share2, Edit } from "lucide-react";
 
@@ -83,11 +88,7 @@ const ModalManager = () => {
 
   if (activeModal === "view") {
     return (
-      <FileViewer
-        isOpen={true}
-        file={modalProps.item}
-        onClose={() => dispatch(closeModal())}
-      />
+      <FileViewer isOpen={true} file={modalProps.item} onClose={() => dispatch(closeModal())} />
     );
   }
 
@@ -96,12 +97,7 @@ const ModalManager = () => {
   const { Component, props, title, icon } = activeModalConfig;
 
   return (
-    <Modal
-      isOpen={!!activeModal}
-      onClose={() => dispatch(closeModal())}
-      title={title}
-      icon={icon}
-    >
+    <Modal isOpen={!!activeModal} onClose={() => dispatch(closeModal())} title={title} icon={icon}>
       <Component {...props} onClose={() => dispatch(closeModal())} />
     </Modal>
   );

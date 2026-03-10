@@ -83,3 +83,16 @@ export const isValidEmail = (email) => {
 
   return emailRegex.test(trimmedEmail);
 };
+
+export const getViewerType = (mimeType) => {
+  if (mimeType.startsWith("image/")) return "image";
+  if (mimeType.startsWith("video/")) return "video";
+  if (mimeType.startsWith("audio/")) return "audio";
+  if (mimeType === "application/pdf") return "pdf";
+  return null;
+};
+
+export const isViewableFile = (mimeType) => {
+  if (!mimeType) return false;
+  return !!getViewerType(mimeType);
+};

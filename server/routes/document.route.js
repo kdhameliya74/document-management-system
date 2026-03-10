@@ -14,6 +14,7 @@ import {
   permanentDelete,
   moveDocument,
   shareDocument,
+  getPreviewUrl
 } from "../controllers/document.controller.js";
 
 const router = express.Router();
@@ -52,5 +53,8 @@ router.post("/:id/share", protect, validateId("id"), checkPermission("share"), s
 
 //Move document
 router.patch("/:id/move", protect, validateId("id"), checkPermission("move"), moveDocument);
+
+//Get preview url
+router.get("/:id/preview", protect, validateId("id"), checkPermission("download"), getPreviewUrl);
 
 export default router;
