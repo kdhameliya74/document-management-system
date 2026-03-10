@@ -9,6 +9,8 @@ import {
   restoreDocument,
   permenantDeleteDocument,
   fetchDocuments,
+  setModalProps,
+  setActiveModal,
 } from "@/store/documents.slice";
 
 import { truncateFolderName } from "@/helpers/utils.js";

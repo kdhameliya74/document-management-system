@@ -1,26 +1,15 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Folder, Loader, Edit } from "lucide-react";
+import { Loader } from "lucide-react";
 import { FOLDER_COLORS, FOLDER_MESSAGES, DOCUMENT_MODES } from "@/helpers/constants.js";
 
 import { createFolder, updateDocument } from "@/store/documents.slice";
 import toast from "react-hot-toast";
 import { getBaseName, getFileExtension, getDocumentFlags } from "@/helpers/utils";
 
-const FolderModal = ({
-  documentItem,
-  isOpen,
-  onClose,
-  currentFolderId,
-  mode = DOCUMENT_MODES.CREATE,
-}) => {
+const FolderModal = ({ documentItem, onClose, currentFolderId, mode = DOCUMENT_MODES.CREATE }) => {
   const { isCreate, isUpdate, isFolder, isFile } = getDocumentFlags(mode, documentItem?.docType);
   const parentFolderId = currentFolderId === "root" ? null : currentFolderId;
-
-  const modalProps = {
-    title: isCreate ? FOLDER_MESSAGES.CREATE_TITLE : FOLDER_MESSAGES.UPDATE_TITLE,
-    icon: isCreate ? <Folder className="text-text-muted" /> : <Edit className="text-text-muted" />,
-  };
 
   const [isLoading, setIsLoading] = useState(false);
   const getInitialFileName = () => {

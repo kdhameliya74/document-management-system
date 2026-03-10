@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Loader, Trash2, AlertCircle } from "lucide-react";
 import toast from "react-hot-toast";
 
-const Header = ({ children }) => children;
 const Body = ({ children }) => children;
 const Footer = ({ children }) => children;
 
@@ -19,13 +18,11 @@ const DeleteModal = ({
   const [isLoading, setIsLoading] = useState(false);
 
   // Extract slots from children
-  let headerSlot = null;
   let bodySlot = null;
   let footerSlot = null;
 
   React.Children.forEach(children, (child) => {
     if (!React.isValidElement(child)) return;
-    if (child.type === Header) headerSlot = child;
     else if (child.type === Body) bodySlot = child;
     else if (child.type === Footer) footerSlot = child;
   });
@@ -105,7 +102,6 @@ const DeleteModal = ({
   );
 };
 
-DeleteModal.Header = Header;
 DeleteModal.Body = Body;
 DeleteModal.Footer = Footer;
 

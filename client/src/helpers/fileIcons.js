@@ -103,10 +103,4 @@ export const getFileIcon = (mimeType = "") => {
   return match ? match : { Icon: File, className: "text-slate-500" };
 };
 
-
-export const VIEWABLE_FILE_TYPES = [
-  "image/",
-  "video/",
-  "audio/",
-  "application/pdf",
-];
+export const VIEWABLE_FILE_TYPES = ["image/", "video/", "audio/", "application/pdf"];

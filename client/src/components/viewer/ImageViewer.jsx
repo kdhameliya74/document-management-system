@@ -14,4 +14,3 @@ const ImageViewer = ({ url, name }) => (
 );
 
 export default ImageViewer;
-

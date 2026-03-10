@@ -309,7 +309,7 @@ const documentsSlice = createSlice({
       state.contextMenu = null;
     },
     closeModal: (state) => {
-      if (state.modalProps?.source === "contextMenu") {
+      if (state.modalProps?.source === "contextMenu" || state.modalProps?.source === "view") {
         state.selectedId = null;
       }
       state.activeModal = null;

@@ -1,11 +1,6 @@
 import React, { useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import {
-  setActiveModal,
-  deleteDocument,
-  setShowDetails,
-  closeModal,
-} from "@/store/documents.slice";
+import { deleteDocument, setShowDetails, closeModal } from "@/store/documents.slice";
 import { DOCUMENT_MODES, FOLDER_MESSAGES, FILE_MESSAGES } from "@/helpers/constants";
 import { Folder, Upload, Trash2, Move, Share2, Edit } from "lucide-react";
 
@@ -51,7 +46,7 @@ const ModalManager = () => {
       delete: {
         Component: DeleteModal,
         title: modalProps.itemType === "folder" ? "Delete Folder" : "Delete File",
-        icon: <Trash2 className="text-red-400" />,
+        icon: <Trash2 className="bg-red-500/10 text-red-500" />,
         props: {
           item: modalProps.item,
           itemType: modalProps.itemType,

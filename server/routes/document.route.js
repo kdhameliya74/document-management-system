@@ -14,7 +14,7 @@ import {
   permanentDelete,
   moveDocument,
   shareDocument,
-  getPreviewUrl
+  getPreviewUrl,
 } from "../controllers/document.controller.js";
 
 const router = express.Router();
