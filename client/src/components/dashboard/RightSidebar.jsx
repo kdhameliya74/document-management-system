@@ -42,8 +42,11 @@ const RightSidebar = () => {
       id: "view",
       icon: Eye,
       title: "View",
-      show: permissions?.canView,
-      onClick: () => alert("View Document functionality coming soon!"),
+      show: permissions?.canView && !isFolder,
+      onClick: () => {
+        dispatch(setModalProps({ item: selectedItem, itemType: type, source: "sidebar" }));
+        dispatch(setActiveModal("view"));
+      },
     },
     {
       id: "edit",

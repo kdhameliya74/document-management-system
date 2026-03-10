@@ -166,6 +166,10 @@ const TrashPage = () => {
               isSelected={selectedId === document.id}
               onSelect={handleSelect}
               onContextMenu={handleContextMenu}
+              onDoubleClick={() => {
+                dispatch(setModalProps({ item: document, itemType: "file", source: "trash" }));
+                dispatch(setActiveModal("view"));
+              }}
             />
           ),
         )}

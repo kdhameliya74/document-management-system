@@ -10,6 +10,7 @@ import UploadFileModal from "@/components/modals/UploadFileModal";
 import DeleteModal from "@/components/modals/DeleteModal";
 import MoveModal from "@/components/modals/MoveModal";
 import SharingModal from "@/components/modals/SharingModal";
+import FileViewer from "@/components/modals/FileViewer";
 
 const ModalManager = () => {
   const dispatch = useDispatch();
@@ -79,6 +80,17 @@ const ModalManager = () => {
   );
 
   const activeModalConfig = MODALS_MAP[activeModal];
+
+  if (activeModal === "view") {
+    return (
+      <FileViewer
+        isOpen={true}
+        file={modalProps.item}
+        onClose={() => dispatch(closeModal())}
+      />
+    );
+  }
+
   if (!activeModalConfig) return null;
 
   const { Component, props, title, icon } = activeModalConfig;

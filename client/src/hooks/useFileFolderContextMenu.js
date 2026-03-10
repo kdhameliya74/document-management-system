@@ -54,6 +54,12 @@ const useFileFolderContextMenu = (menuFor = "dashboard", onMenuAction) => {
   };
 
   const ACTIONS = {
+    view: {
+      label: "View",
+      icon: Eye,
+      disabled: !contextMenu?.item?.permissions?.canView || contextMenu?.type === "folder",
+      onClick: () => openModal("view"),
+    },
     edit: {
       label: "Edit",
       icon: FolderPen,
@@ -110,8 +116,8 @@ const useFileFolderContextMenu = (menuFor = "dashboard", onMenuAction) => {
   };
 
   const MENU_CONFIG = {
-    dashboard: ["edit", "move", "share", "download", "viewDetails", "delete"],
-    shared: ["edit", "share", "download", "viewDetails"],
+    dashboard: ["view", "edit", "move", "share", "download", "viewDetails", "delete"],
+    shared: ["view", "edit", "share", "download", "viewDetails"],
     trash: ["restore", "deleteForever"],
   };
   const getContextMenuItems = () => {

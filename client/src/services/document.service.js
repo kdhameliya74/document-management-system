@@ -58,6 +58,11 @@ const DocumentService = {
     const response = await api.post(`/documents/${docId}/share`, { collaborators });
     return response.data;
   },
+
+  getDownloadUrl: async (docId) => {
+    const response = await api.get(`/documents/${docId}/download-url`);
+    return response.data;
+  },
 };
 
 export default DocumentService;

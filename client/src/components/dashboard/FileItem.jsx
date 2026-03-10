@@ -3,7 +3,7 @@ import FileIcon from "@/components/common/FileIcon";
 import { getBaseName, getFileExtension } from "@/helpers/utils.js";
 import { getFileIcon } from "@/helpers/fileIcons.js";
 
-const FileItem = ({ file, isSelected, onSelect, onContextMenu }) => {
+const FileItem = ({ file, isSelected, onSelect, onContextMenu, onDoubleClick }) => {
   const displayName = getBaseName(file.name);
   const extension = getFileExtension(file.name);
   const { className: colorClass } = getFileIcon(file.mimeType);
@@ -20,6 +20,11 @@ const FileItem = ({ file, isSelected, onSelect, onContextMenu }) => {
       onClick={(e) => {
         e.stopPropagation();
         onSelect(file.id);
+      }}
+      onDoubleClick={(e) => {
+        e.stopPropagation();
+        onSelect(file.id); // Ensure it's selected
+        onDoubleClick && onDoubleClick(file);
       }}
       onContextMenu={(e) => onContextMenu(e, file, "file")}
       title={file.name}
