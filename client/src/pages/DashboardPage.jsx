@@ -6,6 +6,7 @@ import {
   setSelectedId,
   clearContextMenu,
   setShowDetails,
+  clearUISelection,
 } from "@/store/documents.slice";
 import { APP_VIEWS_MAP } from "@/helpers/constants";
 
@@ -22,7 +23,9 @@ import ModalManager from "@/components/modals/ModalManager";
 const DashboardPage = () => {
   const location = useLocation();
   const dispatch = useDispatch();
-  const { showDetails } = useSelector((state) => state.documentSystem);
+  const { showDetails, activeModal, selectedId } = useSelector(
+    (state) => state.documentSystem,
+  );
 
   useEffect(() => {
     const type = location.pathname.substring(1).split("/")[1];
@@ -32,11 +35,13 @@ const DashboardPage = () => {
   }, [location.pathname, dispatch]);
 
   const handleOutsideClick = () => {
-    if (showDetails) {
-      dispatch(setShowDetails(false));
+    // Modal has its own backdrop which covers this, so if this fires, no modal is open
+    // But just to be safe and explicit:
+    if (activeModal) return;
+
+    if (showDetails || selectedId) {
+      dispatch(clearUISelection());
     }
-    dispatch(setSelectedId(null));
-    dispatch(clearContextMenu());
   };
 
   return (

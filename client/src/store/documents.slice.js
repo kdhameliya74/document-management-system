@@ -291,9 +291,18 @@ const documentsSlice = createSlice({
     clearContextMenu: (state) => {
       state.contextMenu = null;
     },
-    // fetch documents and files
-    // Mock version history
-    addFileVersion: () => {},
+    closeModal: (state) => {
+      if (state.modalProps?.source === "contextMenu") {
+        state.selectedId = null;
+      }
+      state.activeModal = null;
+      state.modalProps = {};
+    },
+    clearUISelection: (state) => {
+      state.showDetails = false;
+      state.selectedId = null;
+      state.contextMenu = null;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -436,11 +445,11 @@ export const {
   setSelectedId,
   setShowDetails,
   setActiveModal,
+  closeModal,
+  clearUISelection,
   setModalProps,
   setContextMenu,
   clearContextMenu,
-  addFile,
-  deleteItem,
   addFileVersion,
 } = documentsSlice.actions;
 export default documentsSlice.reducer;

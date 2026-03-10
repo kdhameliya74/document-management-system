@@ -24,6 +24,7 @@ const useFileFolderContextMenu = (menuFor = "dashboard", onMenuAction) => {
         setModalProps({
           item: contextMenu.item,
           itemType: contextMenu.type,
+          source: "contextMenu",
         }),
       );
     }

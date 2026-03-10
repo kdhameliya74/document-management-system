@@ -1,22 +1,19 @@
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
-import { renameItem } from "@/store/documents.slice";
-import { FileText } from "lucide-react";
-import Modal from "@/components/common/Modal";
+import { updateDocument } from "@/store/documents.slice";
 
-const RenameModal = ({ isOpen, onClose, item, itemType }) => {
+const RenameModal = ({ onClose, item, itemType }) => {
   const [newName, setNewName] = useState(() => item?.name ?? "");
   const dispatch = useDispatch();
 
-  const handleRename = () => {
+  const handleRename = async () => {
     if (newName.trim() && item) {
-      dispatch(
-        renameItem({
+      await dispatch(
+        updateDocument({
           id: item.id,
-          type: itemType,
-          newName: newName,
+          name: newName.trim(),
         }),
-      );
+      ).unwrap();
       onClose();
     }
   };
@@ -32,7 +29,7 @@ const RenameModal = ({ isOpen, onClose, item, itemType }) => {
     onClose();
   };
 
-  <Modal isOpen={isOpen} onClose={handleClose} title="Rename Item" icon={<FileText />}>
+  return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-2">
         <label className="text-[10px] font-black uppercase tracking-[0.2em] text-text-dim px-1">
@@ -65,7 +62,7 @@ const RenameModal = ({ isOpen, onClose, item, itemType }) => {
         </button>
       </div>
     </div>
-  </Modal>;
+  );
 };
 
 export default RenameModal;

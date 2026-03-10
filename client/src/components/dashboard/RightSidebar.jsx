@@ -51,7 +51,7 @@ const RightSidebar = () => {
       title: "Edit",
       show: permissions?.canEdit,
       onClick: () => {
-        dispatch(setModalProps({ item: selectedItem, itemType: type }));
+        dispatch(setModalProps({ item: selectedItem, itemType: type, source: "sidebar" }));
         dispatch(setActiveModal("edit"));
       },
     },
@@ -61,7 +61,7 @@ const RightSidebar = () => {
       title: "Share",
       show: permissions?.canShare,
       onClick: () => {
-        dispatch(setModalProps({ item: selectedItem, itemType: type }));
+        dispatch(setModalProps({ item: selectedItem, itemType: type, source: "sidebar" }));
         dispatch(setActiveModal("share"));
       },
     },
@@ -79,7 +79,7 @@ const RightSidebar = () => {
       show: permissions?.canDelete,
       className: "hover:text-error hover:bg-error/10",
       onClick: () => {
-        dispatch(setModalProps({ item: selectedItem, itemType: type }));
+        dispatch(setModalProps({ item: selectedItem, itemType: type, source: "sidebar" }));
         dispatch(setActiveModal("delete"));
       },
     },
