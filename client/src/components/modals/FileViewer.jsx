@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { X, Download, Maximize2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useFilePreview } from "@/hooks/useFilePreview";
@@ -20,9 +20,13 @@ const VIEWER_COMPONENTS = {
 const FileViewer = ({ isOpen, onClose, file }) => {
   const isViewable = isViewableFile(file?.mimeType);
 
-  const { previewUrl, loading, downloadFile } = useFilePreview(file, isViewable);
+  const { previewUrl, loading, downloadFile, loadPreview } = useFilePreview(file, isViewable);
 
   if (!isOpen || !file) return null;
+
+  useEffect(() => {
+    loadPreview();
+  }, [loadPreview]);
 
   const viewerType = getViewerType(file?.mimeType);
 

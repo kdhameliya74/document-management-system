@@ -11,10 +11,12 @@ import {
 } from "@/store/documents.slice";
 
 import { TRASH_MENU_ACTIONS } from "@/helpers/constants";
+import { useFilePreview } from "./useFilePreview";
 
 const useFileFolderContextMenu = (menuFor = "dashboard", onMenuAction) => {
   const dispatch = useDispatch();
   const { contextMenu } = useSelector((state) => state.documentSystem);
+  const { downloadFile } = useFilePreview(contextMenu?.item);
 
   const closeContextMenu = () => dispatch(clearContextMenu());
 
@@ -87,7 +89,9 @@ const useFileFolderContextMenu = (menuFor = "dashboard", onMenuAction) => {
       icon: Download,
       disabled: !contextMenu?.item?.permissions?.canDownload,
       onClick: () => {
-        alert("Download functionality coming soon!");
+        if (contextMenu?.item?.docType !== "folder") {
+          downloadFile();
+        }
         closeContextMenu();
       },
     },

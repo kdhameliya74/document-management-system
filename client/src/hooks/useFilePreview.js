@@ -16,14 +16,20 @@ export function useFilePreview(file, isViewable) {
     } else {
       const toastId = toast.loading(FILE_MESSAGES.DOWNLOAD_LOADING);
       getFileUrl().then((res) => {
-        window.open(res.url, "_blank");
+        if (res.url) {
+          window.open(res.url, "_blank");
+        } else {
+          toast.error(FILE_MESSAGES.DOWNLOAD_FAILED, { id: toastId });
+        }
       }).catch((err) => {
         toast.error(err, { id: toastId });
-      }).finally(() => {
-        toast.dismiss(toastId);
-      });
+      })
     }
   };
+
+  const downloadFolders = () => {
+
+  }
 
   const getFileUrl = async () => {
     return await dispatch(getURL(file.id)).unwrap();
@@ -42,9 +48,5 @@ export function useFilePreview(file, isViewable) {
     }
   }, [file?.id, isViewable, dispatch]);
 
-  useEffect(() => {
-    loadPreview();
-  }, [loadPreview]);
-
-  return { previewUrl, loading, retry: loadPreview, downloadFile, getFileUrl };
+  return { previewUrl, loading, loadPreview, downloadFile, getFileUrl };
 }
