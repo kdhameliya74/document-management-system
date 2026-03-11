@@ -24,24 +24,25 @@ const FileViewer = ({ isOpen, onClose, file }) => {
   const [loading, setLoading] = useState(false);
   const { downloadFile, getFileUrl } = useDownloadDocument();
 
-  if (!isOpen || !file) return null;
-
-  const getURL = async () => {
-    try {
-      setLoading(true);
-      const res = await getFileUrl(file.id);
-      setPreviewUrl(res.url);
-    } catch(err) {
-      toast.error(err)
-    } finally {
-      setLoading(false);
-    }
-  }
-
   useEffect(() => {
+    if (!file?.id) return;
+    const getURL = async () => {
+      if (!file?.id) return;
+      try {
+        setLoading(true);
+        const res = await getFileUrl(file.id);
+        setPreviewUrl(res.url);
+      } catch (err) {
+        toast.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
     getURL();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [file]);
 
+  if (!isOpen || !file) return null;
   const viewerType = getViewerType(file?.mimeType);
 
   const renderContent = () => {
@@ -65,7 +66,7 @@ const FileViewer = ({ isOpen, onClose, file }) => {
           <div className="flex gap-4 relative z-10">
             <button
               className="px-8 py-4 bg-primary text-white rounded-2xl hover:scale-105 transition-all font-black text-sm tracking-widest uppercase shadow-xl shadow-primary/20 flex items-center gap-2 cursor-pointer"
-              onClick={() => downloadFile({docId: file.id, force: true})}
+              onClick={() => downloadFile({ docId: file.id, force: true })}
             >
               <Download size={18} />
               Download Now
