@@ -15,6 +15,7 @@ import {
 import { PutObjectCommand, DeleteObjectsCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { asyncHandler } from "../middlewares/error.middleware.js";
+import console from "console";
 
 //Helpers
 const splitByType = (docs, userId, parentPermission) => {
@@ -619,7 +620,9 @@ export const shareDocument = asyncHandler(async (req, res) => {
   });
 });
 
-export const getPreviewUrl = asyncHandler(async (req, res) => {
+// @route   GET /api/documents/:id/download
+// @route   GET /api/documents/:id/preview
+export const getDocumentURL = asyncHandler(async (req, res) => {
   const { document } = req;
   const { storageKey, bucket } = document;
 
@@ -630,9 +633,13 @@ export const getPreviewUrl = asyncHandler(async (req, res) => {
   const command = new GetObjectCommand({
     Bucket: bucket,
     Key: storageKey,
+    ResponseContentDisposition: `attachment; filename="${document.name}"`,
   });
 
   const url = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
 
+  if (!url) {
+    res.status(400).json({ success: false, message: "URL not found" });
+  }
   res.status(200).json({ success: true, url });
 });

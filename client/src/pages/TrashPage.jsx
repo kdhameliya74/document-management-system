@@ -17,7 +17,7 @@ import { truncateFolderName } from "@/helpers/utils.js";
 import { APP_VIEWS_MAP, TRASH_MENU_ACTIONS, TRASH_MESSAGES } from "@/helpers/constants";
 import ROUTES from "@/utils/routes";
 
-import useFileFolderContextMenu from "@/hooks/useFileFolderContextMenu";
+import useDocumentContextMenu from "@/hooks/useDocumentContextMenu";
 
 import ContextMenu from "@/components/common/ContextMenu";
 import FolderItem from "@/components/dashboard/FolderItem";
@@ -107,7 +107,7 @@ const TrashPage = () => {
     handleContextMenu,
     closeContextMenu,
     getContextMenuItems,
-  } = useFileFolderContextMenu("trash", contextMenuHandler);
+  } = useDocumentContextMenu("trash", contextMenuHandler);
 
   /* ------------------------------ handlers ------------------------------- */
 
