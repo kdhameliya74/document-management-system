@@ -638,5 +638,8 @@ export const getDocumentURL = asyncHandler(async (req, res) => {
 
   const url = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
 
+  if (!url) {
+    res.status(400).json({ success: false, message: "URL not found" });
+  }
   res.status(200).json({ success: true, url });
 });

@@ -19,7 +19,7 @@ import FileItem from "@/components/dashboard/FileItem";
 import Breadcrumb from "@/components/dashboard/Breadcrumb";
 import ContextMenu from "@/components/common/ContextMenu";
 import EmptyState from "@/components/common/EmptyState";
-import useFileFolderContextMenu from "@/hooks/useFileFolderContextMenu";
+import useDocumentContextMenu from "@/hooks/useDocumentContextMenu";
 import ResourceNotFound from "@/components/common/ResourceNotFound";
 import toast from "react-hot-toast";
 
@@ -40,7 +40,7 @@ const FolderView = () => {
   const dropdownRef = useRef(null);
 
   const { contextMenu, handleContextMenu, closeContextMenu, getContextMenuItems } =
-    useFileFolderContextMenu();
+    useDocumentContextMenu();
 
   /* -------------------- Dropdown Logic -------------------- */
   const handleOpenModal = (modalType) => {

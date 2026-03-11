@@ -11,12 +11,12 @@ import {
 } from "@/store/documents.slice";
 
 import { TRASH_MENU_ACTIONS } from "@/helpers/constants";
-import { useFilePreview } from "./useFilePreview";
+import { useDownloadDocument } from "./useDownloadDocument";
 
-const useFileFolderContextMenu = (menuFor = "dashboard", onMenuAction) => {
+const useDocumentContextMenu = (menuFor = "dashboard", onMenuAction) => {
   const dispatch = useDispatch();
   const { contextMenu } = useSelector((state) => state.documentSystem);
-  const { downloadFile } = useFilePreview(contextMenu?.item);
+  const { downloadFile } = useDownloadDocument(contextMenu?.item);
 
   const closeContextMenu = () => dispatch(clearContextMenu());
 
@@ -90,7 +90,7 @@ const useFileFolderContextMenu = (menuFor = "dashboard", onMenuAction) => {
       disabled: !contextMenu?.item?.permissions?.canDownload,
       onClick: () => {
         if (contextMenu?.item?.docType !== "folder") {
-          downloadFile();
+          downloadFile({ docId: contextMenu?.item?.id, force: true });
         }
         closeContextMenu();
       },
@@ -140,4 +140,4 @@ const useFileFolderContextMenu = (menuFor = "dashboard", onMenuAction) => {
   };
 };
 
-export default useFileFolderContextMenu;
+export default useDocumentContextMenu;

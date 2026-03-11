@@ -20,7 +20,7 @@ import FileItem from "@/components/dashboard/FileItem";
 import Breadcrumb from "@/components/dashboard/Breadcrumb";
 import ResourceNotFound from "@/components/common/ResourceNotFound";
 import ContextMenu from "@/components/common/ContextMenu";
-import useFileFolderContextMenu from "@/hooks/useFileFolderContextMenu";
+import useDocumentContextMenu from "@/hooks/useDocumentContextMenu";
 
 const SharePage = () => {
   const { folderId } = useParams();
@@ -65,7 +65,7 @@ const SharePage = () => {
   );
 
   const { contextMenu, handleContextMenu, closeContextMenu, getContextMenuItems } =
-    useFileFolderContextMenu(APP_VIEWS_MAP.SHARED);
+    useDocumentContextMenu(APP_VIEWS_MAP.SHARED);
 
   const isEmpty = childDocuments.length === 0;
 
