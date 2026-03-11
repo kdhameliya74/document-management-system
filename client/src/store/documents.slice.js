@@ -235,14 +235,14 @@ export const shareDocument = createAsyncThunk(
 
 /*
 |--------------------------------------------------------------------------
-| getPreviewUrl
+| getURL
 |--------------------------------------------------------------------------
 */
-export const getPreviewUrl = createAsyncThunk(
-  "documents/sync-url",
+export const getURL = createAsyncThunk(
+  "documents/get-url",
   async (docId, { rejectWithValue }) => {
     try {
-      return await DocumentService.getPreviewUrl(docId);
+      return await DocumentService.getURL(docId);
     } catch (err) {
       logError(err);
       return rejectWithValue(ERROR_CODES_WITH_MESSAGES[err?.code] || FILE_MESSAGES.DOWNLOAD_FAILED);

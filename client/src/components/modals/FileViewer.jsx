@@ -20,7 +20,7 @@ const VIEWER_COMPONENTS = {
 const FileViewer = ({ isOpen, onClose, file }) => {
   const isViewable = isViewableFile(file?.mimeType);
 
-  const { previewUrl, loading } = useFilePreview(file, isViewable);
+  const { previewUrl, loading, downloadFile } = useFilePreview(file, isViewable);
 
   if (!isOpen || !file) return null;
 
@@ -47,7 +47,7 @@ const FileViewer = ({ isOpen, onClose, file }) => {
           <div className="flex gap-4 relative z-10">
             <button
               className="px-8 py-4 bg-primary text-white rounded-2xl hover:scale-105 transition-all font-black text-sm tracking-widest uppercase shadow-xl shadow-primary/20 flex items-center gap-2 cursor-pointer"
-              onClick={() => window.open(file.url, "_blank")}
+              onClick={downloadFile}
             >
               <Download size={18} />
               Download Now
@@ -105,7 +105,7 @@ const FileViewer = ({ isOpen, onClose, file }) => {
 
           <div className="flex items-center gap-3">
             <button
-              onClick={() => window.open(file.url || previewUrl, "_blank")}
+              onClick={downloadFile}
               className="px-6 py-3 bg-white/5 text-white/70 hover:text-white hover:bg-white/10 rounded-2xl transition-all font-bold text-sm border border-white/5 flex items-center gap-2.5 cursor-pointer"
               title="Download"
             >
@@ -122,7 +122,7 @@ const FileViewer = ({ isOpen, onClose, file }) => {
           transition={{ type: "spring", damping: 25, stiffness: 200 }}
           className="relative z-10 flex-1 flex items-center justify-center p-6 md:p-12 overflow-hidden"
         >
-          {loading ? <Loading /> : renderContent()}
+          {loading ? <Loading text="Downloading..." /> : renderContent()}
         </motion.div>
 
         {/* Bottom Metadata Bar */}

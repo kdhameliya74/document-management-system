@@ -59,12 +59,8 @@ const DocumentService = {
     return response.data;
   },
 
-  getDownloadUrl: async (docId) => {
-    const response = await api.get(`/documents/${docId}/download`);
-    return response.data;
-  },
-  getPreviewUrl: async (docId) => {
-    const response = await api.get(`/documents/${docId}/preview`);
+  getURL: async (docId) => {
+    const response = await api.get(`/documents/${docId}/url`);
     return response.data;
   },
 };
