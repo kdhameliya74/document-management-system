@@ -1,7 +1,11 @@
+import archiver from "archiver";
+import pLimit from "p-limit";
 import mongoose from "mongoose";
+
 import s3Client from "../config/s3.js";
 import Document from "../models/Document.model.js";
 import User from "../models/User.model.js";
+
 import { DOC_TYPES, PERMISSION_LEVELS } from "../constants/Shared.js";
 import { FILE_UPLOAD_STATUS } from "../constants/File.js";
 import {
@@ -15,8 +19,8 @@ import {
 import { PutObjectCommand, DeleteObjectsCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { asyncHandler } from "../middlewares/error.middleware.js";
-import console from "console";
 
+const CONCURRENT_DOWNLOADS = 10;
 //Helpers
 const splitByType = (docs, userId, parentPermission) => {
   const folders = [];
@@ -625,11 +629,9 @@ export const shareDocument = asyncHandler(async (req, res) => {
 export const getDocumentURL = asyncHandler(async (req, res) => {
   const { document } = req;
   const { storageKey, bucket } = document;
-
   if (!storageKey) {
     return res.status(400).json({ success: false, message: "File key not found" });
   }
-
   const command = new GetObjectCommand({
     Bucket: bucket,
     Key: storageKey,
@@ -642,4 +644,64 @@ export const getDocumentURL = asyncHandler(async (req, res) => {
     res.status(400).json({ success: false, message: "URL not found" });
   }
   res.status(200).json({ success: true, url });
+});
+
+export const downloadDocument = asyncHandler(async (req, res) => {
+  const { document } = req;
+  const archive = archiver("zip", { zlib: { level: 5 } });
+
+  res.setHeader("Content-Type", "application/zip");
+  res.setHeader("Content-Disposition", `attachment; filename="${document.name}.zip"`);
+
+  archive.on("error", (err) => {
+    console.error("Archive error:", err);
+    if (!res.headersSent) {
+      res.status(500).json({ success: false, message: "Failed to generate archive" });
+    } else {
+      res.end();
+    }
+  });
+
+  let allDocs;
+  try {
+    allDocs = await Document.find({
+      path: { $regex: `^${document.path}/` },
+      docType: DOC_TYPES.FILE,
+    })
+      .select("name path storageKey bucket")
+      .lean();
+  } catch (err) {
+    return res.status(500).json({ success: false, message: "Failed to fetch documents" });
+  }
+
+  if (!allDocs.length) {
+    return res.status(400).json({ success: false, message: "Folder is empty" });
+  }
+
+  archive.pipe(res);
+  const limit = pLimit(CONCURRENT_DOWNLOADS);
+
+  const tasks = allDocs.map((doc) =>
+    limit(async () => {
+      try {
+        const command = new GetObjectCommand({
+          Bucket: doc.bucket,
+          Key: doc.storageKey,
+        });
+
+        const s3Response = await s3Client.send(command);
+
+        const relativePath = doc.path.replace(/^\/+/, "").replace(/\/+/g, "/"); // remove leading slash and replace multiple slashes with single slash
+
+        archive.append(s3Response.Body, {
+          name: relativePath,
+        });
+      } catch (err) {
+        console.error("Failed to fetch file:", doc.storageKey, err.message);
+      }
+    })
+  );
+
+  await Promise.all(tasks);
+  await archive.finalize();
 });

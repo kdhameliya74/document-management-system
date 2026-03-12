@@ -79,6 +79,10 @@ export const FILE_MESSAGES = Object.freeze({
   DOWNLOAD_FAILED: "Failed to download file",
   DOWNLOAD_SUCCESS: "File downloaded successfully.",
   DOWNLOAD_LOADING: "Downloading file. This may take a moment…",
+
+  DOWNLOAD_ZIP_SUCCESS: "Folder zipped and downloaded.",
+  DOWNLOAD_ZIP_LOADING: "Zipping and downloading folder. This may take a moment…",
+  DOWNLOAD_ZIP_FAILED: "Failed to zip and download folder",
 });
 
 export const PERMISSION_LEVELS = Object.freeze({

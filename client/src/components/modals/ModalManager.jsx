@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import {  useLocation} from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { deleteDocument, setShowDetails, closeModal } from "@/store/documents.slice";
 import { DOCUMENT_MODES, FOLDER_MESSAGES, FILE_MESSAGES } from "@/helpers/constants";
 import { Folder, Upload, Trash2, Move, Share2, Edit } from "lucide-react";
