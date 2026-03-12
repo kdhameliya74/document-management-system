@@ -16,7 +16,7 @@ import { useDownloadDocument } from "./useDownloadDocument";
 const useDocumentContextMenu = (menuFor = "dashboard", onMenuAction) => {
   const dispatch = useDispatch();
   const { contextMenu } = useSelector((state) => state.documentSystem);
-  const { downloadFile } = useDownloadDocument(contextMenu?.item);
+  const { downloadFile, downloadFolder } = useDownloadDocument();
 
   const closeContextMenu = () => dispatch(clearContextMenu());
 
@@ -89,7 +89,12 @@ const useDocumentContextMenu = (menuFor = "dashboard", onMenuAction) => {
       icon: Download,
       disabled: !contextMenu?.item?.permissions?.canDownload,
       onClick: () => {
-        if (contextMenu?.item?.docType !== "folder") {
+        if (contextMenu?.item?.docType === "folder") {
+          downloadFolder({
+            docId: contextMenu?.item?.id,
+            name: contextMenu?.item?.name || "folder",
+          });
+        } else {
           downloadFile({ docId: contextMenu?.item?.id, force: true });
         }
         closeContextMenu();

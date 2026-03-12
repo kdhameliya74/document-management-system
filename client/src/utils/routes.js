@@ -19,13 +19,10 @@ const ROUTES = {
     SHARED_DYNAMIC: (folderId) => (folderId ? `/app/shared/${folderId}` : "/app/shared"),
 
     RELATIVE: {
-      FOLDERS: "folders",
-      FOLDER: "folders/:folderId",
-      TRASH: "trash",
-      TRASH_FOLDER: "trash/:folderId",
+      FOLDERS: "folders/:folderId?",
+      TRASH: "trash/:folderId?",
+      SHARED: "shared/:folderId?",
       RECENT: "recent",
-      SHARED: "shared",
-      SHARED_FOLDER: "shared/:folderId",
     },
   },
 };

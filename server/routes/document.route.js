@@ -15,6 +15,7 @@ import {
   moveDocument,
   shareDocument,
   getDocumentURL,
+  downloadDocument,
 } from "../controllers/document.controller.js";
 
 const router = express.Router();
@@ -56,5 +57,14 @@ router.patch("/:id/move", protect, validateId("id"), checkPermission("move"), mo
 
 //Get preview url
 router.get("/:id/url", protect, validateId("id"), checkPermission("download"), getDocumentURL);
+
+//Download document
+router.get(
+  "/:id/download",
+  protect,
+  validateId("id"),
+  checkPermission("download"),
+  downloadDocument,
+);
 
 export default router;

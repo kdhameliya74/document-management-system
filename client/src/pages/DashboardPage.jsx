@@ -46,17 +46,9 @@ const DashboardPage = () => {
           <div className="flex-1 overflow-y-auto p-6 relative">
             <Routes>
               <Route path="/" element={<Navigate to={ROUTES.APP.RELATIVE.FOLDERS} />} />
-
               <Route path={ROUTES.APP.RELATIVE.FOLDERS} element={<FolderView />} />
-              <Route path={ROUTES.APP.RELATIVE.FOLDER} element={<FolderView />} />
-
               <Route path={ROUTES.APP.RELATIVE.TRASH} element={<TrashPage />} />
-              <Route path={ROUTES.APP.RELATIVE.TRASH_FOLDER} element={<TrashPage />} />
-
               <Route path={ROUTES.APP.RELATIVE.SHARED} element={<SharePage />} />
-              <Route path={ROUTES.APP.RELATIVE.SHARED_FOLDER} element={<SharePage />} />
-
-              {/* Catch-all for dashboard sub-routes */}
               <Route path="*" element={<PageNotFound />} />
             </Routes>
           </div>

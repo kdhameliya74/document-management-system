@@ -7,12 +7,14 @@ import { format } from "date-fns";
 import FileIcon from "@/components/common/FileIcon";
 import { truncateName } from "@/helpers/utils";
 import { FOLDER_COLORS } from "@/helpers/constants";
+import { useDownloadDocument } from "@/hooks/useDownloadDocument";
 
 const RightSidebar = () => {
   const dispatch = useDispatch();
   const { documents, currentFolderId, selectedId, showDetails } = useSelector(
     (state) => state.documentSystem,
   );
+  const { downloadFile, downloadFolder } = useDownloadDocument();
   const { user } = useSelector((state) => state.auth);
 
   const currentFolder = documents[currentFolderId];
@@ -72,8 +74,14 @@ const RightSidebar = () => {
       id: "download",
       icon: Download,
       title: "Download",
-      show: permissions?.canDownload && !isFolder,
-      onClick: () => alert("Download functionality coming soon!"),
+      show: permissions?.canDownload,
+      onClick: () => {
+        if (isFolder) {
+          downloadFolder({ docId: selectedItem.id, name: selectedItem.name || "folder" });
+        } else {
+          downloadFile({ docId: selectedItem.id, force: true });
+        }
+      },
     },
     {
       id: "delete",
