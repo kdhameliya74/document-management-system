@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import {  useLocation} from "react-router-dom";
 import { deleteDocument, setShowDetails, closeModal } from "@/store/documents.slice";
 import { DOCUMENT_MODES, FOLDER_MESSAGES, FILE_MESSAGES } from "@/helpers/constants";
 import { Folder, Upload, Trash2, Move, Share2, Edit } from "lucide-react";
@@ -14,30 +15,32 @@ import FileViewer from "@/components/modals/FileViewer";
 
 const ModalManager = () => {
   const dispatch = useDispatch();
+  const location = useLocation();
   const { activeModal, modalProps, currentFolderId, showDetails } = useSelector(
     (state) => state.documentSystem,
   );
 
+  const folderId = location.pathname.split("/")[3]; // TODO: This is a hacky way to get the folder id, we should use react-router-dom to get the folder id
   const MODALS_MAP = useMemo(
     () => ({
       createFolder: {
         Component: FolderModal,
         title: FOLDER_MESSAGES.CREATE_TITLE,
         icon: <Folder className="text-text-muted" />,
-        props: { currentFolderId },
+        props: { currentFolderId: folderId || currentFolderId },
       },
       upload: {
         Component: UploadFileModal,
         title: FILE_MESSAGES.UPLOAD_TITLE,
         icon: <Upload className="text-text-muted" />,
-        props: { currentFolderId },
+        props: { currentFolderId: folderId || currentFolderId },
       },
       edit: {
         Component: FolderModal,
         title: FOLDER_MESSAGES.UPDATE_TITLE,
         icon: <Edit className="text-text-muted" />,
         props: {
-          currentFolderId,
+          currentFolderId: folderId || currentFolderId,
           documentItem: modalProps.item,
           docType: modalProps.itemType,
           mode: DOCUMENT_MODES.UPDATE,
