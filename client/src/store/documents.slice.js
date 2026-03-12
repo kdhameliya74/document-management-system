@@ -247,7 +247,6 @@ export const getURL = createAsyncThunk("documents/get-url", async (docId, { reje
   }
 });
 
-
 const ensureDocument = (state, id, data, rootId) => {
   const docState = state.documents;
   const parentId = data.parentId;

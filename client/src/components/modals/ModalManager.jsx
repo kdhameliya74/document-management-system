@@ -79,7 +79,7 @@ const ModalManager = () => {
         },
       },
     }),
-    [currentFolderId, modalProps, dispatch, showDetails],
+    [currentFolderId, modalProps, dispatch, showDetails, folderId],
   );
 
   const activeModalConfig = MODALS_MAP[activeModal];

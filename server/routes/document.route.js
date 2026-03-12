@@ -59,6 +59,12 @@ router.patch("/:id/move", protect, validateId("id"), checkPermission("move"), mo
 router.get("/:id/url", protect, validateId("id"), checkPermission("download"), getDocumentURL);
 
 //Download document
-router.get("/:id/download", protect, validateId("id"), checkPermission("download"), downloadDocument);
+router.get(
+  "/:id/download",
+  protect,
+  validateId("id"),
+  checkPermission("download"),
+  downloadDocument,
+);
 
 export default router;

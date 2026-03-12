@@ -670,7 +670,7 @@ export const downloadDocument = asyncHandler(async (req, res) => {
     })
       .select("name path storageKey bucket")
       .lean();
-  } catch (err) {
+  } catch (_) {
     return res.status(500).json({ success: false, message: "Failed to fetch documents" });
   }
 
@@ -699,7 +699,7 @@ export const downloadDocument = asyncHandler(async (req, res) => {
       } catch (err) {
         console.error("Failed to fetch file:", doc.storageKey, err.message);
       }
-    })
+    }),
   );
 
   await Promise.all(tasks);

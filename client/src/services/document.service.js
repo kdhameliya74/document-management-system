@@ -66,7 +66,7 @@ const DocumentService = {
 
   downloadZip: async (docId) => {
     const response = await api.get(`/documents/${docId}/download`, { responseType: "blob" });
-    return response
+    return response;
   },
 };
 

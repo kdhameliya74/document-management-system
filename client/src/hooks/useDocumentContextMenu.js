@@ -90,7 +90,10 @@ const useDocumentContextMenu = (menuFor = "dashboard", onMenuAction) => {
       disabled: !contextMenu?.item?.permissions?.canDownload,
       onClick: () => {
         if (contextMenu?.item?.docType === "folder") {
-          downloadFolder({ docId: contextMenu?.item?.id, name: contextMenu?.item?.name || "folder" })
+          downloadFolder({
+            docId: contextMenu?.item?.id,
+            name: contextMenu?.item?.name || "folder",
+          });
         } else {
           downloadFile({ docId: contextMenu?.item?.id, force: true });
         }

@@ -44,7 +44,7 @@ export function useDownloadDocument() {
       a.download = `${name}.zip`;
       a.click();
       URL.revokeObjectURL(url);
-      toast.success(FILE_MESSAGES.DOWNLOAD_ZIP_SUCCESS, { id: toastId })
+      toast.success(FILE_MESSAGES.DOWNLOAD_ZIP_SUCCESS, { id: toastId });
     } catch (err) {
       toast.error(err, { id: toastId });
     }

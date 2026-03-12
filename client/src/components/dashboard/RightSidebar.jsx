@@ -14,7 +14,7 @@ const RightSidebar = () => {
   const { documents, currentFolderId, selectedId, showDetails } = useSelector(
     (state) => state.documentSystem,
   );
-  const {downloadFile, downloadFolder} = useDownloadDocument();
+  const { downloadFile, downloadFolder } = useDownloadDocument();
   const { user } = useSelector((state) => state.auth);
 
   const currentFolder = documents[currentFolderId];
@@ -76,9 +76,9 @@ const RightSidebar = () => {
       title: "Download",
       show: permissions?.canDownload,
       onClick: () => {
-        if(isFolder){
+        if (isFolder) {
           downloadFolder({ docId: selectedItem.id, name: selectedItem.name || "folder" });
-        }else{
+        } else {
           downloadFile({ docId: selectedItem.id, force: true });
         }
       },
