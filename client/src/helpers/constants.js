@@ -98,6 +98,9 @@ export const SHARE_MESSAGES = Object.freeze({
 
 export const USER_PROFILE_MESSAGES = Object.freeze({
   AVATAR_SIZE_ERROR: "File size should be less than 2MB",
+  AVATAR_UPLOAD_ERROR: "Failed to upload avatar",
+  AVATAR_UPLOAD_SUCCESS: "Avatar uploaded successfully! Save changes to persist.",
+  AVATAR_UPLOAD_LOADING: "Uploading avatar...",
   UPDATE_SUCCESS: "Profile updated successfully",
   UPDATE_FAILED: "Failed to update profile",
   PASSWORD_MISMATCH: "Passwords do not match",

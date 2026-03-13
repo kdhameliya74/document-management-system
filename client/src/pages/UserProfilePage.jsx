@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Camera, User, Mail, Lock, CheckCircle, AlertCircle, Save, Loader2 } from "lucide-react";
+import { Camera, User, Mail, Lock, CheckCircle, Save, Loader, Calendar, Clock } from "lucide-react";
 import { updateProfile, changePassword } from "@/store/authSlice";
 import PageHeader from "@/components/common/PageHeader";
 import { USER_PROFILE_MESSAGES } from "@/helpers/constants";
 import toast from "react-hot-toast";
+import authService from "@/services/auth.service";
+import { format } from "date-fns";
 
 const UserProfilePage = () => {
   const dispatch = useDispatch();
@@ -15,10 +17,8 @@ const UserProfilePage = () => {
   const [details, setDetails] = useState({
     firstName: "",
     lastName: "",
-    username: "",
-    email: "",
-    avatar: "",
   });
+  const [avatarPreview, setAvatarPreview] = useState(null);
 
   const [passwords, setPasswords] = useState({
     currentPassword: "",
@@ -31,10 +31,8 @@ const UserProfilePage = () => {
       setDetails({
         firstName: user.firstName || "",
         lastName: user.lastName || "",
-        username: user.username || "",
-        email: user.email || "",
-        avatar: user.avatar || "",
       });
+      setAvatarPreview(user?.avatarUrl || null);
     }
   }, [user]);
 
@@ -47,18 +45,37 @@ const UserProfilePage = () => {
     setPasswords({ ...passwords, [e.target.name]: e.target.value });
   };
 
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
       if (file.size > 2 * 1024 * 1024) {
         toast.error(USER_PROFILE_MESSAGES.AVATAR_SIZE_ERROR);
         return;
       }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setDetails({ ...details, avatar: reader.result });
-      };
-      reader.readAsDataURL(file);
+      try {
+        const loadingToast = toast.loading(USER_PROFILE_MESSAGES.AVATAR_UPLOAD_LOADING);
+        const { uploadUrl, storageKey, bucket } = await authService.getAvatarUploadUrl(file.name);
+        
+        await fetch(uploadUrl, {
+          method: "PUT",
+          body: file,
+          headers: {
+            "Content-Type": file.type,
+          },
+        });
+        
+        setAvatarPreview(URL.createObjectURL(file));
+        setDetails((prev) => ({
+          ...prev,
+          avatar: { storageKey, bucket },
+        }));
+        
+        toast.dismiss(loadingToast);
+        toast.success(USER_PROFILE_MESSAGES.AVATAR_UPLOAD_SUCCESS);
+      } catch (err) {
+        toast.error(USER_PROFILE_MESSAGES.AVATAR_UPLOAD_ERROR);
+        console.error(err);
+      }
     }
   };
 
@@ -68,7 +85,7 @@ const UserProfilePage = () => {
       await dispatch(updateProfile(details)).unwrap();
       toast.success(USER_PROFILE_MESSAGES.UPDATE_SUCCESS);
     } catch (err) {
-      toast.error(err || USER_PROFILE_MESSAGES.UPDATE_FAILED);
+      toast.error(err);
     }
   };
 
@@ -94,7 +111,7 @@ const UserProfilePage = () => {
         confirmPassword: "",
       });
     } catch (err) {
-      toast.error(err || USER_PROFILE_MESSAGES.PASSWORD_FAILED);
+      toast.error(err);
     }
   };
 
@@ -113,8 +130,8 @@ const UserProfilePage = () => {
           <div className="glass-panel p-8 rounded-3xl border border-border-main flex flex-col items-center text-center">
             <div className="relative group cursor-pointer" onClick={() => fileInputRef.current.click()}>
               <div className="w-32 h-32 rounded-3xl overflow-hidden border-4 border-primary/20 bg-bg-panel flex items-center justify-center text-primary text-4xl font-bold shadow-premium group-hover:border-primary/50 transition-all">
-                {details.avatar ? (
-                  <img src={details.avatar} alt="Profile" className="w-full h-full object-cover" />
+                {avatarPreview ? (
+                  <img src={avatarPreview} alt="Profile" className="w-full h-full object-cover" />
                 ) : (
                   details.firstName?.charAt(0).toUpperCase()
                 )}
@@ -131,9 +148,9 @@ const UserProfilePage = () => {
               />
             </div>
             <h3 className="mt-4 text-xl font-bold text-text-main">
-              {details.firstName} {details.lastName}
+              {user.fullName}
             </h3>
-            <p className="text-sm text-text-dim">@{details.username}</p>
+            <p className="text-sm text-text-dim">@{user.username}</p>
             <div className="mt-6 w-full pt-6 border-t border-border-muted flex flex-col gap-3">
               <div className="flex items-center gap-3 text-sm text-text-muted px-2">
                 <CheckCircle size={16} className="text-primary" />
@@ -142,6 +159,14 @@ const UserProfilePage = () => {
               <div className="flex items-center gap-3 text-sm text-text-muted px-2">
                 <User size={16} className="text-secondary" />
                 <span>Standard Member</span>
+              </div>
+              <div className="flex items-center gap-3 text-sm text-text-muted px-2">
+                <Calendar size={16} className="text-secondary" />
+                <span>Since: <span className="text-primary">{format(new Date(user.createdAt), "MMM dd, yyyy")}</span></span>
+              </div>
+              <div className="flex items-center gap-3 text-sm text-text-muted px-2">
+                <Clock size={16} className="text-secondary" />
+                <span>Last Login: <span className="text-primary">{format(new Date(user.lastLogin), "MMM dd, yyyy")}</span></span>
               </div>
             </div>
           </div>
@@ -189,7 +214,7 @@ const UserProfilePage = () => {
                   <input
                     type="text"
                     name="username"
-                    value={details.username}
+                    value={user.username}
                     readOnly
                     className="w-full bg-bg-muted/50 border border-border-main rounded-2xl py-3 px-12 text-text-dim outline-none cursor-not-allowed"
                   />
@@ -203,7 +228,7 @@ const UserProfilePage = () => {
                   <input
                     type="email"
                     name="email"
-                    value={details.email}
+                    value={user.email}
                     onChange={handleDetailsChange}
                     readOnly
                     className="w-full bg-bg-muted/50 border border-border-main rounded-2xl py-3 px-12 text-text-dim outline-none cursor-not-allowed"
@@ -217,7 +242,7 @@ const UserProfilePage = () => {
                   disabled={loading}
                   className="cursor-pointer flex items-center gap-2 bg-primary hover:bg-primary-hover text-white font-medium py-3 px-8 rounded-2xl transition-all shadow-lg shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {loading ? <Loader2 className="animate-spin" size={20} /> : <Save size={20} />}
+                  {loading ? <Loader className="animate-spin" size={20} /> : <Save size={20} />}
                   Save Changes
                 </button>
               </div>
@@ -283,7 +308,7 @@ const UserProfilePage = () => {
                   disabled={loading}
                   className="cursor-pointer flex items-center gap-2 border border-border-main hover:bg-bg-hover text-text-main font-medium py-3 px-8 rounded-2xl transition-all disabled:opacity-50"
                 >
-                  {loading && <Loader2 className="animate-spin" size={20} />}
+                  {loading && <Loader className="animate-spin" size={20} />}
                   Update Password
                 </button>
               </div>

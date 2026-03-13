@@ -40,8 +40,8 @@ const Header = () => {
             <p className="text-[11px] text-text-dim font-medium mt-1">Member</p>
           </div>
           <div className="w-10 h-10 bg-indigo-600/10 border border-indigo-500/20 rounded-2xl flex items-center justify-center text-primary font-bold text-sm shadow-lg shadow-indigo-500/5 group-hover:scale-105 transition-transform overflow-hidden">
-            {user?.avatar ? (
-              <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover" />
+            {user?.avatarUrl ? (
+              <img src={user.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
             ) : (
               user?.firstName?.charAt(0).toUpperCase() || "U"
             )}

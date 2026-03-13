@@ -37,6 +37,12 @@ const authAPI = {
     const response = await api.put("/auth/updatepassword", passwordData);
     return response.data;
   },
+
+  // Get avatar upload URL
+  getAvatarUploadUrl: async (fileName) => {
+    const response = await api.get(`/auth/avatar-upload-url?fileName=${fileName}`);
+    return response.data;
+  },
 };
 
 export default authAPI;
