@@ -6,6 +6,7 @@ import {
   getMe,
   updateDetails,
   updatePassword,
+  getAvatarUploadUrl,
 } from "../controllers/auth.controller.js";
 import { protect } from "../middlewares/auth.middleware.js";
 
@@ -20,5 +21,6 @@ router.get("/me", protect, getMe);
 router.post("/logout", protect, logout);
 router.put("/updatedetails", protect, updateDetails);
 router.put("/updatepassword", protect, updatePassword);
+router.get("/avatar-upload-url", protect, getAvatarUploadUrl);
 
 export default router;

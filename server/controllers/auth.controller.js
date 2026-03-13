@@ -1,9 +1,12 @@
 import User from "../models/User.model.js";
 import { asyncHandler } from "../middlewares/error.middleware.js";
-import { isProduction } from "../utils/helper.util.js";
+import { isProduction, environment, shortId } from "../utils/helper.util.js";
+import s3Client from "../config/s3.js";
+import { PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 // Helper function to send token response
-const sendTokenResponse = (user, statusCode, res) => {
+const sendTokenResponse = async (user, statusCode, res) => {
   const token = user.generateAuthToken();
 
   const options = {
@@ -13,19 +16,35 @@ const sendTokenResponse = (user, statusCode, res) => {
     sameSite: "strict",
   };
 
+  // Generate signed URL for avatar if it exists
+  let avatarUrl = null;
+  if (user.avatar && user.avatar.storageKey) {
+    try {
+      const command = new GetObjectCommand({
+        Bucket: user.avatar.bucket,
+        Key: user.avatar.storageKey,
+      });
+      avatarUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
+    } catch (error) {
+      console.error("Error generating signed URL for avatar:", error);
+    }
+  }
+
   // Remove password from output
-  user.password = undefined;
+  const userObj = user.toObject();
+  delete userObj.password;
+  if (avatarUrl) {
+    userObj.avatarUrl = avatarUrl;
+  }
 
   res.status(statusCode).cookie("token", token, options).json({
     success: true,
     token,
-    user,
+    user: userObj,
   });
 };
 
-// @desc    Register user
 // @route   POST /api/auth/register
-// @access  Public
 export const register = asyncHandler(async (req, res, _next) => {
   const { firstName, lastName, email, password, username } = req.body;
 
@@ -64,12 +83,10 @@ export const register = asyncHandler(async (req, res, _next) => {
     username,
   });
 
-  sendTokenResponse(user, 201, res);
+  await sendTokenResponse(user, 201, res);
 });
 
-// @desc    Login user
 // @route   POST /api/auth/login
-// @access  Public
 export const login = asyncHandler(async (req, res, _next) => {
   const { identifier, password } = req.body;
 
@@ -113,22 +130,52 @@ export const login = asyncHandler(async (req, res, _next) => {
   user.lastLogin = Date.now();
   await user.save({ validateBeforeSave: false });
 
-  sendTokenResponse(user, 200, res);
+  await sendTokenResponse(user, 200, res);
 });
 
-// @desc    Get current logged in user
 // @route   GET /api/auth/me
-// @access  Private
 export const getMe = asyncHandler(async (req, res, _next) => {
+  const user = req.user;
+
+  // Generate signed URL for avatar if it exists
+  let avatarUrl = null;
+  if (user.avatar && user.avatar.storageKey) {
+    try {
+      const command = new GetObjectCommand({
+        Bucket: user.avatar.bucket,
+        Key: user.avatar.storageKey,
+      });
+      avatarUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
+    } catch (error) {
+      console.error("Error generating signed URL for avatar:", error);
+    }
+  }
+
+  const userObj = user.toObject();
+  if (avatarUrl) {
+    userObj.avatarUrl = avatarUrl;
+  }
+
   res.status(200).json({
     success: true,
-    user: req.user,
+    user: {
+      id: userObj._id,
+      fullName: `${userObj.firstName} ${userObj.lastName}`,
+      firstName: userObj.firstName,
+      lastName: userObj.lastName,
+      email: userObj.email,
+      username: userObj.username,
+      avatar: userObj.avatar,
+      avatarUrl: userObj.avatarUrl,
+      role: userObj.role,
+      createdAt: userObj.createdAt,
+      lastLogin: userObj.lastLogin,
+      updatedAt: userObj.updatedAt,
+    },
   });
 });
 
-// @desc    Logout user / clear cookie
 // @route   POST /api/auth/logout
-// @access  Private
 export const logout = asyncHandler(async (req, res, _next) => {
   res.cookie("token", "none", {
     expires: new Date(Date.now() + 10 * 1000),
@@ -143,16 +190,19 @@ export const logout = asyncHandler(async (req, res, _next) => {
   });
 });
 
-// @desc    Update user details
 // @route   PUT /api/auth/updatedetails
-// @access  Private
 export const updateDetails = asyncHandler(async (req, res, _next) => {
   const fieldsToUpdate = {
     firstName: req.body.firstName,
     lastName: req.body.lastName,
-    email: req.body.email,
-    username: req.body.username,
   };
+
+  if (req.body.avatar) {
+    fieldsToUpdate.avatar = {
+      storageKey: req.body.avatar.storageKey,
+      bucket: req.body.avatar.bucket,
+    };
+  }
 
   // Remove undefined fields
   Object.keys(fieldsToUpdate).forEach(
@@ -164,15 +214,52 @@ export const updateDetails = asyncHandler(async (req, res, _next) => {
     runValidators: true,
   });
 
+  sendTokenResponse(user, 200, res);
+});
+
+// @route   GET /api/auth/avatar-upload-url
+export const getAvatarUploadUrl = asyncHandler(async (req, res, _next) => {
+  const userId = req.user.id;
+  const bucket = process.env.AWS_S3_BUCKET;
+  const fileName = req.query.fileName;
+
+  if (!fileName) {
+    return res.status(400).json({ success: false, message: "Please provide a file name" });
+  }
+
+  const extension = fileName.split(".").pop();
+  const storageKey = `${environment}/${userId}/profile/${shortId(16)}.${extension}`;
+
+  // Delete old avatar if exists
+  const { bucket: oldBucket, storageKey: oldStorageKey } = req.user.avatar;
+  if (oldStorageKey) {
+    try {
+      const deleteCommand = new DeleteObjectCommand({
+        Bucket: oldBucket,
+        Key: oldStorageKey,
+      });
+      await s3Client.send(deleteCommand);
+    } catch (error) {
+      console.error("Error deleting old avatar:", error);
+    }
+  }
+
+  const command = new PutObjectCommand({
+    Bucket: bucket,
+    Key: storageKey,
+  });
+
+  const uploadUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
+
   res.status(200).json({
     success: true,
-    user,
+    uploadUrl,
+    storageKey,
+    bucket,
   });
 });
 
-// @desc    Update password
 // @route   PUT /api/auth/updatepassword
-// @access  Private
 export const updatePassword = asyncHandler(async (req, res, _next) => {
   const user = await User.findById(req.user.id).select("+password");
 

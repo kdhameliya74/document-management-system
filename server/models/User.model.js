@@ -45,8 +45,8 @@ const userSchema = new mongoose.Schema(
       match: [/^[a-zA-Z0-9_]+$/, USER_VALIDATION.USERNAME_INVALID],
     },
     avatar: {
-      type: String,
-      default: null,
+      storageKey: { type: String, default: null },
+      bucket: { type: String, default: null },
     },
     role: {
       type: String,

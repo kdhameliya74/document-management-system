@@ -10,6 +10,7 @@ import FolderView from "@/components/dashboard/FolderView";
 import RightSidebar from "@/components/dashboard/RightSidebar";
 import TrashPage from "@/pages/TrashPage";
 import SharePage from "@/pages/SharePage";
+import UserProfilePage from "@/pages/UserProfilePage";
 import PageNotFound from "@/pages/PageNotFound";
 import ROUTES from "@/utils/routes";
 import ModalManager from "@/components/modals/ModalManager";
@@ -45,10 +46,11 @@ const DashboardPage = () => {
         <div className="flex flex-1 overflow-hidden relative">
           <div className="flex-1 overflow-y-auto p-6 relative">
             <Routes>
-              <Route path="/" element={<Navigate to={ROUTES.APP.RELATIVE.FOLDERS} />} />
+              <Route path="/" element={<Navigate to={ROUTES.APP.FOLDERS} replace />} />
               <Route path={ROUTES.APP.RELATIVE.FOLDERS} element={<FolderView />} />
               <Route path={ROUTES.APP.RELATIVE.TRASH} element={<TrashPage />} />
               <Route path={ROUTES.APP.RELATIVE.SHARED} element={<SharePage />} />
+              <Route path={ROUTES.APP.RELATIVE.PROFILE} element={<UserProfilePage />} />
               <Route path="*" element={<PageNotFound />} />
             </Routes>
           </div>

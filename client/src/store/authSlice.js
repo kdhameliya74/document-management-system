@@ -1,5 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import authAPI from "@/services/authService";
+import authAPI from "@/services/auth.service";
+import { USER_PROFILE_MESSAGES } from "@/helpers/constants";
+import { logError } from "@/helpers/utils";
 
 const initialState = {
   isAuthenticated: false,
@@ -50,6 +52,42 @@ export const signup = createAsyncThunk("auth/signup", async (userData, { rejectW
     return rejectWithValue(err?.message || "Signup failed");
   }
 });
+
+/*
+|--------------------------------------------------------------------------
+| updateProfile
+|--------------------------------------------------------------------------
+*/
+export const updateProfile = createAsyncThunk(
+  "auth/updateProfile",
+  async (userData, { rejectWithValue }) => {
+    try {
+      const data = await authAPI.updateProfile(userData);
+      return data.user;
+    } catch (err) {
+      logError(err);
+      return rejectWithValue(USER_PROFILE_MESSAGES.UPDATE_FAILED);
+    }
+  },
+);
+
+/*
+|--------------------------------------------------------------------------
+| changePassword
+|--------------------------------------------------------------------------
+*/
+export const changePassword = createAsyncThunk(
+  "auth/changePassword",
+  async (passwordData, { rejectWithValue }) => {
+    try {
+      const data = await authAPI.changePassword(passwordData);
+      return data.user;
+    } catch (err) {
+      logError(err);
+      return rejectWithValue(USER_PROFILE_MESSAGES.PASSWORD_FAILED);
+    }
+  },
+);
 
 /*
 |--------------------------------------------------------------------------
@@ -154,6 +192,32 @@ const authSlice = createSlice({
         state.isAuthenticated = false;
         state.loading = false;
         state.error = null;
+      })
+      .addCase(updateProfile.fulfilled, (state, action) => {
+        state.user = action.payload;
+        state.loading = false;
+        state.error = null;
+      })
+      .addCase(updateProfile.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateProfile.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(changePassword.fulfilled, (state, action) => {
+        state.user = action.payload;
+        state.loading = false;
+        state.error = null;
+      })
+      .addCase(changePassword.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(changePassword.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   },
 });
