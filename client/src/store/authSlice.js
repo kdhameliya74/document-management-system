@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import authAPI from "@/services/auth.service";
 import { USER_PROFILE_MESSAGES } from "@/helpers/constants";
+import { logError } from "@/helpers/utils";
 
 const initialState = {
   isAuthenticated: false,
@@ -64,6 +65,7 @@ export const updateProfile = createAsyncThunk(
       const data = await authAPI.updateProfile(userData);
       return data.user;
     } catch (err) {
+      logError(err);
       return rejectWithValue(USER_PROFILE_MESSAGES.UPDATE_FAILED);
     }
   },
@@ -81,6 +83,7 @@ export const changePassword = createAsyncThunk(
       const data = await authAPI.changePassword(passwordData);
       return data.user;
     } catch (err) {
+      logError(err);
       return rejectWithValue(USER_PROFILE_MESSAGES.PASSWORD_FAILED);
     }
   },

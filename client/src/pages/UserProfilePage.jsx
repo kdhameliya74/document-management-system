@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Camera, User, Mail, Lock, CheckCircle, Save, Loader, Calendar, Clock } from "lucide-react";
 import { updateProfile, changePassword } from "@/store/authSlice";
@@ -15,10 +15,10 @@ const UserProfilePage = () => {
   const fileInputRef = useRef(null);
 
   const [details, setDetails] = useState({
-    firstName: "",
-    lastName: "",
+    firstName: user?.firstName || "",
+    lastName: user?.lastName || "",
   });
-  const [avatarPreview, setAvatarPreview] = useState(null);
+  const [avatarPreview, setAvatarPreview] = useState(user?.avatarUrl || null);
 
   const [passwords, setPasswords] = useState({
     currentPassword: "",
@@ -26,22 +26,12 @@ const UserProfilePage = () => {
     confirmPassword: "",
   });
 
-  useEffect(() => {
-    if (user) {
-      setDetails({
-        firstName: user.firstName || "",
-        lastName: user.lastName || "",
-      });
-      setAvatarPreview(user?.avatarUrl || null);
-    }
-  }, [user]);
-
   const handleDetailsChange = (e) => {
     setDetails({ ...details, [e.target.name]: e.target.value });
   };
 
   const handlePasswordChange = (e) => {
-    setErrors({[e.target.name]: ""});
+    setErrors({ [e.target.name]: "" });
     setPasswords({ ...passwords, [e.target.name]: e.target.value });
   };
 
@@ -55,7 +45,7 @@ const UserProfilePage = () => {
       try {
         const loadingToast = toast.loading(USER_PROFILE_MESSAGES.AVATAR_UPLOAD_LOADING);
         const { uploadUrl, storageKey, bucket } = await authService.getAvatarUploadUrl(file.name);
-        
+
         await fetch(uploadUrl, {
           method: "PUT",
           body: file,
@@ -63,13 +53,13 @@ const UserProfilePage = () => {
             "Content-Type": file.type,
           },
         });
-        
+
         setAvatarPreview(URL.createObjectURL(file));
         setDetails((prev) => ({
           ...prev,
           avatar: { storageKey, bucket },
         }));
-        
+
         toast.dismiss(loadingToast);
         toast.success(USER_PROFILE_MESSAGES.AVATAR_UPLOAD_SUCCESS);
       } catch (err) {
@@ -100,10 +90,12 @@ const UserProfilePage = () => {
       return;
     }
     try {
-      await dispatch(changePassword({
-        currentPassword: passwords.currentPassword,
-        newPassword: passwords.newPassword
-      })).unwrap();
+      await dispatch(
+        changePassword({
+          currentPassword: passwords.currentPassword,
+          newPassword: passwords.newPassword,
+        }),
+      ).unwrap();
       toast.success(USER_PROFILE_MESSAGES.PASSWORD_SUCCESS);
       setPasswords({
         currentPassword: "",
@@ -118,9 +110,9 @@ const UserProfilePage = () => {
   return (
     <div className="max-w-4xl mx-auto pb-12">
       <PageHeader>
-        <PageHeader.Left 
-          title="Account Settings" 
-          subtitle="Manage your profile information and security settings" 
+        <PageHeader.Left
+          title="Account Settings"
+          subtitle="Manage your profile information and security settings"
         />
       </PageHeader>
 
@@ -128,7 +120,10 @@ const UserProfilePage = () => {
         {/* Profile Sidebar */}
         <div className="lg:col-span-1 space-y-6">
           <div className="glass-panel p-8 rounded-3xl border border-border-main flex flex-col items-center text-center">
-            <div className="relative group cursor-pointer" onClick={() => fileInputRef.current.click()}>
+            <div
+              className="relative group cursor-pointer"
+              onClick={() => fileInputRef.current.click()}
+            >
               <div className="w-32 h-32 rounded-3xl overflow-hidden border-4 border-primary/20 bg-bg-panel flex items-center justify-center text-primary text-4xl font-bold shadow-premium group-hover:border-primary/50 transition-all">
                 {avatarPreview ? (
                   <img src={avatarPreview} alt="Profile" className="w-full h-full object-cover" />
@@ -139,17 +134,15 @@ const UserProfilePage = () => {
               <div className="absolute inset-0 bg-black/40 rounded-3xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                 <Camera className="text-white" size={24} />
               </div>
-              <input 
-                type="file" 
-                ref={fileInputRef} 
-                className="hidden" 
-                accept="image/*" 
-                onChange={handleFileChange} 
+              <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                accept="image/*"
+                onChange={handleFileChange}
               />
             </div>
-            <h3 className="mt-4 text-xl font-bold text-text-main">
-              {user.fullName}
-            </h3>
+            <h3 className="mt-4 text-xl font-bold text-text-main">{user.fullName}</h3>
             <p className="text-sm text-text-dim">@{user.username}</p>
             <div className="mt-6 w-full pt-6 border-t border-border-muted flex flex-col gap-3">
               <div className="flex items-center gap-3 text-sm text-text-muted px-2">
@@ -162,11 +155,21 @@ const UserProfilePage = () => {
               </div>
               <div className="flex items-center gap-3 text-sm text-text-muted px-2">
                 <Calendar size={16} className="text-secondary" />
-                <span>Since: <span className="text-primary">{format(new Date(user.createdAt), "MMM dd, yyyy")}</span></span>
+                <span>
+                  Since:{" "}
+                  <span className="text-primary">
+                    {format(new Date(user.createdAt), "MMM dd, yyyy")}
+                  </span>
+                </span>
               </div>
               <div className="flex items-center gap-3 text-sm text-text-muted px-2">
                 <Clock size={16} className="text-secondary" />
-                <span>Last Login: <span className="text-primary">{format(new Date(user.lastLogin), "MMM dd, yyyy")}</span></span>
+                <span>
+                  Last Login:{" "}
+                  <span className="text-primary">
+                    {format(new Date(user.lastLogin), "MMM dd, yyyy")}
+                  </span>
+                </span>
               </div>
             </div>
           </div>
@@ -210,7 +213,10 @@ const UserProfilePage = () => {
               <div className="space-y-2">
                 <label className="text-sm font-medium text-text-muted ml-1">Username</label>
                 <div className="relative">
-                  <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-dim" />
+                  <User
+                    size={18}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-text-dim"
+                  />
                   <input
                     type="text"
                     name="username"
@@ -224,7 +230,10 @@ const UserProfilePage = () => {
               <div className="space-y-2">
                 <label className="text-sm font-medium text-text-muted ml-1">Email Address</label>
                 <div className="relative">
-                  <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-dim" />
+                  <Mail
+                    size={18}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-text-dim"
+                  />
                   <input
                     type="email"
                     name="email"
@@ -283,11 +292,15 @@ const UserProfilePage = () => {
                     placeholder="••••••••"
                   />
                   <div className="min-h-[15px] mt-0.5">
-                    {errors.newPassword && <p className="text-red-500 text-xs">{errors.newPassword}</p>}
+                    {errors.newPassword && (
+                      <p className="text-red-500 text-xs">{errors.newPassword}</p>
+                    )}
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-text-muted ml-1">Confirm New Password</label>
+                  <label className="text-sm font-medium text-text-muted ml-1">
+                    Confirm New Password
+                  </label>
                   <input
                     type="password"
                     name="confirmPassword"
@@ -297,7 +310,9 @@ const UserProfilePage = () => {
                     placeholder="••••••••"
                   />
                   <div className="min-h-[15px] mt-0.5">
-                    {errors.confirmPassword && <p className="text-red-500 text-xs">{errors.confirmPassword}</p>}
+                    {errors.confirmPassword && (
+                      <p className="text-red-500 text-xs">{errors.confirmPassword}</p>
+                    )}
                   </div>
                 </div>
               </div>

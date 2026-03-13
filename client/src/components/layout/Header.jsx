@@ -29,7 +29,7 @@ const Header = () => {
           </button>
         </div>
 
-        <div 
+        <div
           className="flex items-center gap-3 cursor-pointer group"
           onClick={() => navigate(ROUTES.APP.PROFILE)}
         >

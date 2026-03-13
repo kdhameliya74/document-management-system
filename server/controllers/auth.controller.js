@@ -86,7 +86,6 @@ export const register = asyncHandler(async (req, res, _next) => {
   await sendTokenResponse(user, 201, res);
 });
 
-
 // @route   POST /api/auth/login
 export const login = asyncHandler(async (req, res, _next) => {
   const { identifier, password } = req.body;
