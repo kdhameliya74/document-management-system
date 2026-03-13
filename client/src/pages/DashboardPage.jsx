@@ -10,6 +10,7 @@ import FolderView from "@/components/dashboard/FolderView";
 import RightSidebar from "@/components/dashboard/RightSidebar";
 import TrashPage from "@/pages/TrashPage";
 import SharePage from "@/pages/SharePage";
+import UserProfilePage from "@/pages/UserProfilePage";
 import PageNotFound from "@/pages/PageNotFound";
 import ROUTES from "@/utils/routes";
 import ModalManager from "@/components/modals/ModalManager";
@@ -49,6 +50,7 @@ const DashboardPage = () => {
               <Route path={ROUTES.APP.RELATIVE.FOLDERS} element={<FolderView />} />
               <Route path={ROUTES.APP.RELATIVE.TRASH} element={<TrashPage />} />
               <Route path={ROUTES.APP.RELATIVE.SHARED} element={<SharePage />} />
+              <Route path={ROUTES.APP.RELATIVE.PROFILE} element={<UserProfilePage />} />
               <Route path="*" element={<PageNotFound />} />
             </Routes>
           </div>

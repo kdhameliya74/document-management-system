@@ -1,8 +1,10 @@
-import React from "react";
-import { Search, Bell, Settings } from "lucide-react";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import ROUTES from "@/utils/routes";
+import { Search, Bell } from "lucide-react";
 
 const Header = () => {
+  const navigate = useNavigate();
   const { user } = useSelector((state) => state.auth);
 
   return (
@@ -25,20 +27,24 @@ const Header = () => {
             <Bell size={20} strokeWidth={1.5} />
             <div className="absolute top-2.5 right-2.5 w-2 h-2 bg-primary rounded-full border-2 border-bg-main" />
           </button>
-          <button className="text-text-muted p-2.5 rounded-xl transition-all hover:bg-bg-hover hover:text-text-main">
-            <Settings size={20} strokeWidth={1.5} />
-          </button>
         </div>
 
-        <div className="flex items-center gap-3 cursor-pointer group">
+        <div 
+          className="flex items-center gap-3 cursor-pointer group"
+          onClick={() => navigate(ROUTES.APP.PROFILE)}
+        >
           <div className="text-right hidden sm:block">
             <p className="text-sm font-bold text-text-main leading-none">
               {user?.fullName || "Guest User"}
             </p>
             <p className="text-[11px] text-text-dim font-medium mt-1">Member</p>
           </div>
-          <div className="w-10 h-10 bg-indigo-600/10 border border-indigo-500/20 rounded-2xl flex items-center justify-center text-primary font-bold text-sm shadow-lg shadow-indigo-500/5 group-hover:scale-105 transition-transform">
-            {user?.firstName?.charAt(0).toUpperCase() || "U"}
+          <div className="w-10 h-10 bg-indigo-600/10 border border-indigo-500/20 rounded-2xl flex items-center justify-center text-primary font-bold text-sm shadow-lg shadow-indigo-500/5 group-hover:scale-105 transition-transform overflow-hidden">
+            {user?.avatar ? (
+              <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover" />
+            ) : (
+              user?.firstName?.charAt(0).toUpperCase() || "U"
+            )}
           </div>
         </div>
       </div>

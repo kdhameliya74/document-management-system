@@ -9,6 +9,7 @@ const ROUTES = {
     RECENT: "/app/recent",
     SHARED: "/app/shared",
     TRASH: "/app/trash",
+    PROFILE: "/app/profile",
 
     FOLDER: "/app/folders/:folderId",
     TRASH_FOLDER: "/app/trash/:folderId",
@@ -23,6 +24,7 @@ const ROUTES = {
       TRASH: "trash/:folderId?",
       SHARED: "shared/:folderId?",
       RECENT: "recent",
+      PROFILE: "profile",
     },
   },
 };

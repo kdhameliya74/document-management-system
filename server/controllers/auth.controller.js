@@ -152,6 +152,7 @@ export const updateDetails = asyncHandler(async (req, res, _next) => {
     lastName: req.body.lastName,
     email: req.body.email,
     username: req.body.username,
+    avatar: req.body.avatar,
   };
 
   // Remove undefined fields

@@ -95,3 +95,13 @@ export const SHARE_MESSAGES = Object.freeze({
   SHARE_SUCCESS: "Document shared successfully!",
   SHARE_FAILED: "Failed to share document!",
 });
+
+export const USER_PROFILE_MESSAGES = Object.freeze({
+  AVATAR_SIZE_ERROR: "File size should be less than 2MB",
+  UPDATE_SUCCESS: "Profile updated successfully",
+  UPDATE_FAILED: "Failed to update profile",
+  PASSWORD_MISMATCH: "Passwords do not match",
+  PASSWORD_LENGTH: "New password must be at least 8 characters",
+  PASSWORD_SUCCESS: "Password updated successfully",
+  PASSWORD_FAILED: "Failed to update password",
+});

@@ -1,5 +1,5 @@
 import React from "react";
-import { HardDrive, Clock, Users, Trash2, Cloud, LogOut } from "lucide-react";
+import { HardDrive, Clock, Users, Trash2, Cloud, LogOut, Settings } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { logout } from "@/store/authSlice";
@@ -74,7 +74,11 @@ const Sidebar = () => {
       </div>
 
       {/* Footer / Logout */}
-      <div className="mt-auto pt-6 border-t border-border-muted -mx-2">
+      <div className="mt-auto pt-6 border-t border-border-muted -mx-2 flex flex-col gap-1.5">
+        <NavLink to={ROUTES.APP.PROFILE} className={navItemClass}>
+          <Settings size={18} className="group-hover:scale-110 transition-transform" />
+          <span>Settings</span>
+        </NavLink>
         <button
           onClick={handleLogout}
           className="
