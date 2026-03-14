@@ -705,3 +705,29 @@ export const downloadDocument = asyncHandler(async (req, res) => {
   await Promise.all(tasks);
   await archive.finalize();
 });
+
+export const searchDocuments = asyncHandler(async (req, res) => {
+  const { q, limit, page } = req.query;
+  const skip = (page - 1) * limit;
+  const dbQuery = {
+    owner: req.user.id,
+    isTrashed: false,
+    name: { $regex: q, $options: "i" },
+  };
+  const [documents, total] = await Promise.all([
+    Document.find(dbQuery)
+      .skip(skip)
+      .limit(limit)
+      .select("name path docType parentId color mimeType")
+      .lean(),
+    Document.countDocuments(dbQuery),
+  ]);
+  res
+    .status(200)
+    .json({
+      success: true,
+      documents: documents.map((doc) => ({ ...doc, id: doc._id })),
+      total,
+      hasMore: total > skip + limit,
+    });
+});

@@ -1,17 +1,21 @@
-import { File, Folder, ChevronRight, Search, Loader2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Folder, ChevronRight, Search, Loader2 } from "lucide-react";
+import { FOLDER_COLORS } from "@/helpers/constants.js";
+import FileIcon from "@/components/common/FileIcon";
+import ROUTES from "@/utils/routes";
 
-const GlobalSearchResults = ({ 
-  isSearchFocused, 
-  searchQuery, 
-  results, 
+const GlobalSearchResults = ({
+  isSearchFocused,
+  searchQuery,
+  results,
   totalResults,
   loading,
   loadingMore,
   hasMore,
-  loadMore
+  loadMore,
 }) => {
+  const navigate = useNavigate();
   if (!isSearchFocused || searchQuery.length === 0) return null;
-
   const handleScroll = (e) => {
     const { scrollTop, clientHeight, scrollHeight } = e.target;
     if (scrollHeight - scrollTop <= clientHeight * 1.5) {
@@ -21,6 +25,11 @@ const GlobalSearchResults = ({
     }
   };
 
+  const navigateTo = (result) => {
+    const id = result.docType === "folder" ? result.id : result.parentId;
+    navigate(ROUTES.APP.FOLDER_DYNAMIC(id));
+  };
+
   return (
     <div className="absolute top-full left-0 right-0 mt-2 bg-bg-panel border border-border-main rounded-2xl shadow-xl overflow-hidden z-20 flex flex-col max-h-[400px] animate-in fade-in slide-in-from-top-2 duration-200">
       <div className="px-4 py-3 border-b border-border-muted flex items-center justify-between bg-bg-main/50 sticky top-0 z-10 backdrop-blur-sm">
@@ -28,7 +37,7 @@ const GlobalSearchResults = ({
           Search Results
         </span>
         <span className="text-xs bg-primary/10 text-primary px-2.5 py-1 rounded-full font-medium">
-          {totalResults || 124} items found
+          {totalResults} items found
         </span>
       </div>
 
@@ -43,11 +52,21 @@ const GlobalSearchResults = ({
           <>
             {results.map((result) => (
               <div
-                key={result.id || result._id}
+                key={result.id}
+                onClick={() => navigateTo(result)}
                 className="px-4 py-3 hover:bg-bg-hover cursor-pointer transition-colors flex items-center gap-3 group/item relative"
               >
                 <div className="p-2.5 bg-bg-main border border-border-muted/30 rounded-xl text-primary/70 group-hover/item:text-primary group-hover/item:bg-primary/10 transition-colors shrink-0 shadow-sm">
-                  {result.type === "folder" ? <Folder size={18} strokeWidth={1.5} /> : <File size={18} strokeWidth={1.5} />}
+                  {result.docType === "folder" ? (
+                    <Folder
+                      size={18}
+                      strokeWidth={1.5}
+                      fill={result.color || FOLDER_COLORS.DEFAULT}
+                      color={result.color || FOLDER_COLORS.DEFAULT}
+                    />
+                  ) : (
+                    <FileIcon mimeType={result.mimeType} size={18} strokeWidth={1.5} />
+                  )}
                 </div>
                 <div className="flex-1 min-w-0 pr-6">
                   <p className="text-sm font-semibold text-text-main truncate mb-0.5 group-hover/item:text-primary transition-colors">
@@ -85,7 +104,8 @@ const GlobalSearchResults = ({
             </div>
             <p className="text-sm font-medium text-text-main mb-1.5">No results found</p>
             <p className="text-xs text-center max-w-[220px] leading-relaxed">
-              We couldn't find anything matching <span className="font-semibold text-text-main">"{searchQuery}"</span>
+              We couldn't find anything matching{" "}
+              <span className="font-semibold text-text-main">"{searchQuery}"</span>
             </p>
           </div>
         )}
