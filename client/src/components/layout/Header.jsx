@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { Search, Bell } from "lucide-react";
+import { Search, Bell, X } from "lucide-react";
 
 import ROUTES from "@/utils/routes";
 import { useGlobalSearch } from "@/hooks/useGloablSearch";
@@ -26,6 +26,10 @@ const Header = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const handleClearSearch = () => {
+    setSearchQuery("");
+  };
+
   return (
     <div className="h-20 flex items-center justify-between px-8 bg-bg-main border-b border-border-muted relative z-30">
       <div className="relative w-[450px] group" ref={searchRef}>
@@ -39,8 +43,16 @@ const Header = () => {
           onChange={(e) => setSearchQuery(e.target.value)}
           onFocus={() => setIsSearchFocused(true)}
           placeholder="Search for anything..."
-          className="w-full py-2.5 px-6 pl-12 border border-border-main rounded-2xl bg-bg-panel text-sm text-text-main transition-all outline-none focus:border-primary/50 focus:ring-4 focus:ring-primary/5 shadow-inner group-hover:border-border-muted relative z-10"
+          className="w-full py-2.5 px-6 pl-12 pr-10 border border-border-main rounded-2xl bg-bg-panel text-sm text-text-main transition-all outline-none focus:border-primary/50 focus:ring-4 focus:ring-primary/5 shadow-inner group-hover:border-border-muted relative z-10"
         />
+        {searchQuery.length > 0 && (
+          <button
+            onClick={handleClearSearch}
+            className="cursor-pointer absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-text-muted hover:text-text-main hover:bg-bg-hover rounded-full transition-colors z-20"
+          >
+            <X size={14} strokeWidth={2} />
+          </button>
+        )}
 
         <GlobalSearchResults
           isSearchFocused={isSearchFocused}

@@ -722,12 +722,10 @@ export const searchDocuments = asyncHandler(async (req, res) => {
       .lean(),
     Document.countDocuments(dbQuery),
   ]);
-  res
-    .status(200)
-    .json({
-      success: true,
-      documents: documents.map((doc) => ({ ...doc, id: doc._id })),
-      total,
-      hasMore: total > skip + limit,
-    });
+  res.status(200).json({
+    success: true,
+    documents: documents.map((doc) => ({ ...doc, id: doc._id })),
+    total,
+    hasMore: total > skip + limit,
+  });
 });
