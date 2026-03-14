@@ -68,6 +68,11 @@ const DocumentService = {
     const response = await api.get(`/documents/${docId}/download`, { responseType: "blob" });
     return response;
   },
+
+  globalSearch: async (query, page = 1, limit = 10) => {
+    const response = await api.get(`/documents/search`, { params: { q: query, page, limit } });
+    return response.data;
+  },
 };
 
 export default DocumentService;

@@ -96,3 +96,11 @@ export const isViewableFile = (mimeType) => {
   if (!mimeType) return false;
   return !!getViewerType(mimeType);
 };
+
+export const debounce = (func, delay) => {
+  let timeoutId;
+  return function (...args) {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => func(...args), delay);
+  };
+};
