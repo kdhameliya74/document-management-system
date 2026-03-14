@@ -16,9 +16,13 @@ import {
   shareDocument,
   getDocumentURL,
   downloadDocument,
+  searchDocuments,
 } from "../controllers/document.controller.js";
 
 const router = express.Router();
+
+//Search documents
+router.get("/search/", protect, searchDocuments);
 
 //List documents
 router.get("/", protect, validateId("parentId", "query"), listDocuments);
