@@ -6,20 +6,26 @@ import { Search, Bell, X } from "lucide-react";
 import ROUTES from "@/utils/routes";
 import { useGlobalSearch } from "@/hooks/useGloablSearch";
 import GlobalSearchResults from "./GlobalSearchResults";
+import NotificationDropdown from "./NotificationDropdown";
 
 const Header = () => {
   const navigate = useNavigate();
   const { user } = useSelector((state) => state.auth);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const { results, loading, loadingMore, hasMore, totalResults, loadMore } =
     useGlobalSearch(searchQuery);
   const searchRef = useRef(null);
+  const notificationRef = useRef(null);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
         setIsSearchFocused(false);
+      }
+      if (notificationRef.current && !notificationRef.current.contains(event.target)) {
+        setIsNotificationsOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -28,6 +34,11 @@ const Header = () => {
 
   const handleClearSearch = () => {
     setSearchQuery("");
+  };
+
+  const toggleNotifications = () => {
+    setIsNotificationsOpen((prev) => !prev);
+    setIsSearchFocused(false); // Close search when opening notifications
   };
 
   return (
@@ -41,7 +52,10 @@ const Header = () => {
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          onFocus={() => setIsSearchFocused(true)}
+          onFocus={() => {
+            setIsSearchFocused(true);
+            setIsNotificationsOpen(false); // Close notifications when focusing search
+          }}
           placeholder="Search for anything..."
           className="w-full py-2.5 px-6 pl-12 pr-10 border border-border-main rounded-2xl bg-bg-panel text-sm text-text-main transition-all outline-none focus:border-primary/50 focus:ring-4 focus:ring-primary/5 shadow-inner group-hover:border-border-muted relative z-10"
         />
@@ -67,11 +81,19 @@ const Header = () => {
       </div>
 
       <div className="flex items-center gap-6">
-        <div className="flex items-center gap-2 border-r border-border-muted pr-6">
-          <button className="text-text-muted p-2.5 rounded-xl transition-all hover:bg-bg-hover hover:text-text-main group relative border border-transparent hover:border-border-muted">
+        <div className="flex items-center gap-2 border-r border-border-muted pr-6 relative" ref={notificationRef}>
+          <button 
+            onClick={toggleNotifications}
+            className={`text-text-muted p-2.5 rounded-xl transition-all hover:bg-bg-hover hover:text-text-main group relative border ${isNotificationsOpen ? 'border-primary/50 bg-primary/5 text-primary' : 'border-transparent hover:border-border-muted'}`}
+          >
             <Bell size={20} strokeWidth={1.5} />
             <div className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-primary rounded-full border-2 border-bg-main" />
           </button>
+
+          <NotificationDropdown 
+            isOpen={isNotificationsOpen} 
+            onClose={() => setIsNotificationsOpen(false)} 
+          />
         </div>
 
         <div
