@@ -16,6 +16,7 @@ import { errorHandler, notFound } from "./middlewares/error.middleware.js";
 // Routes
 import authRoutes from "./routes/auth.route.js";
 import documentRoutes from "./routes/document.route.js";
+import notificationRoutes from "./routes/notification.route.js";
 
 // Load env
 dotenv.config();
@@ -70,6 +71,7 @@ const startServer = async () => {
     // Routes
     app.use("/api/auth", authRoutes);
     app.use("/api/documents", documentRoutes);
+    app.use("/api/notifications", notificationRoutes);
 
     // Error handlers
     app.use(notFound);
