@@ -1,5 +1,4 @@
 import axios from "axios";
-import Cookies from "js-cookie";
 import ROUTES from "@/utils/routes";
 
 // Create axios instance
@@ -11,23 +10,11 @@ const api = axios.create({
   withCredentials: true, // Important for cookies
 });
 
-// Request interceptor - Add JWT token to headers
 api.interceptors.request.use(
-  (config) => {
-    // Get token from localStorage (primary) or cookies (fallback)
-    const token = localStorage.getItem("token") || Cookies.get("token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  },
+  (config) => config,
+  (error) => Promise.reject(error),
 );
 
-// Response interceptor - Handle errors globally
 api.interceptors.response.use(
   (response) => response,
 

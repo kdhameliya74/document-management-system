@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import authAPI from "@/services/auth.service";
 import { USER_PROFILE_MESSAGES } from "@/helpers/constants";
 import { logError } from "@/helpers/utils";
+import { bootstrapNotifications } from "./notification.slice";
 
 const initialState = {
   isAuthenticated: false,
@@ -30,14 +31,18 @@ export const fetchUser = createAsyncThunk("auth/fetchUser", async (_, { rejectWi
 | login
 |--------------------------------------------------------------------------
 */
-export const login = createAsyncThunk("auth/login", async (credentials, { rejectWithValue }) => {
-  try {
-    const data = await authAPI.login(credentials);
-    return data.user;
-  } catch (err) {
-    return rejectWithValue(err?.message || "Login failed");
-  }
-});
+export const login = createAsyncThunk(
+  "auth/login",
+  async (credentials, { dispatch, rejectWithValue }) => {
+    try {
+      const data = await authAPI.login(credentials);
+      dispatch(bootstrapNotifications());
+      return data.user;
+    } catch (err) {
+      return rejectWithValue(err?.message || "Login failed");
+    }
+  },
+);
 
 /*
 |--------------------------------------------------------------------------
