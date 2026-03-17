@@ -1,4 +1,5 @@
 import express from "express";
+import http from "http";
 import cors from "cors";
 import dotenv from "dotenv";
 import helmet from "helmet";
@@ -6,6 +7,7 @@ import mongoSanitize from "express-mongo-sanitize";
 import cookieParser from "cookie-parser";
 import rateLimit from "express-rate-limit";
 import connectDB from "./config/database.js";
+import { initSocket } from "./config/socket.js";
 import { errorHandler, notFound } from "./middlewares/error.middleware.js";
 
 // Import routes
@@ -16,7 +18,7 @@ import documentRoutes from "./routes/document.route.js";
 dotenv.config();
 
 // Connect to database
-connectDB();
+connectDB()
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -68,20 +70,17 @@ app.use("/api/documents", documentRoutes);
 app.use(notFound);
 app.use(errorHandler);
 
+const httpServer = http.createServer(app);
+await initSocket(httpServer);
 // Start server
-const server = app.listen(PORT, () => {
+const server = httpServer.listen(PORT, () => {
   console.log(`
-╔════════════════════════════════════════════════════════════╗
-║                                                            ║
-║   🚀 Document Management System Server                     ║
-║                                                            ║
-║   📡 Server running on port ${PORT}                        ║
-║   🌍 Environment: ${process.env.NODE_ENV}                  ║
-║   🔒 Security: Enabled (Helmet, Rate Limiting, Sanitize)   ║ 
-║   📝 API Docs: http://localhost:${PORT}/api/health         ║
-║                                                            ║
-╚════════════════════════════════════════════════════════════╝
-  `);
+    🚀 Document Management System Server                     
+    Server running on port ${PORT}                        
+    Environment: ${process.env.NODE_ENV}                  
+    Security: Enabled (Helmet, Rate Limiting, Sanitize)   
+    API Docs: http://localhost:${PORT}/api/health
+    `);
 });
 
 // Handle unhandled promise rejections

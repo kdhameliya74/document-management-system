@@ -86,6 +86,16 @@ notificationSchema.methods.markRead = function () {
     return this.save();
 };
 
+notificationSchema.statics.getUnread = function (userId, limit = 50) {
+    return this.find({
+        recipientId: userId,
+        isRead: false,
+    })
+        .sort({ createdAt: -1 })
+        .limit(limit)
+        .lean();
+};
+
 notificationSchema.statics.markAllRead = function (recipientId) {
     return this.updateMany(
         { recipientId, isRead: false },
