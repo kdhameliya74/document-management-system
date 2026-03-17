@@ -1,41 +1,50 @@
 import { io } from "socket.io-client";
-import { login, logout } from "../store/authSlice";
+import { login, logout } from "@/store/authSlice";
+import { syncMissed, notificationReceived } from "@/store/notification.slice";
 
 let socket = null;
 
 const socketMiddleware = (store) => (next) => (action) => {
-    const result = next(action);
-    if (!login.fulfilled.match(action)) {
-        if (!socket) {
-            const socketUrl = import.meta.env.VITE_API_BASE_URL;
-            socket = io(socketUrl, {
-                withCredentials: true,
-                reconnectionAttempts: 10,
-                reconnectionDelay: 1000,
-                reconnectionDelayMax: 5000
-            });
+  const result = next(action);
+  if (login.fulfilled.match(action)) {
+    if (!socket) {
+      const socketUrl = import.meta.env.VITE_API_BASE_URL;
+      socket = io(socketUrl, {
+        withCredentials: true,
+        reconnectionAttempts: 10,
+        reconnectionDelay: 1000,
+        reconnectionDelayMax: 5000,
+      });
 
-            console.log("Socket URL:", socket);
-            socket.on("connect", () => {
-                console.log("Socket connected");
-                socket.emit('notifications:sync');
-            });
+      socket.on("connect", () => {
+        socket.emit("notification:sync");
+      });
 
-            socket.on("disconnect", () => {
-                console.log("Socket disconnected");
-            });
+      socket.on("notification:new", (notif) => {
+        store.dispatch(notificationReceived(notif));
+        socket.emit("notification:ack", { id: notif.id });
+      });
 
+      socket.on("notification:synced", (data) => {
+        if (data.length > 0) {
+          store.dispatch(syncMissed(data));
         }
-    }
+      });
 
-    //disconnect socket on logout
-    if (logout.fulfilled.match(action)) {
-        if (socket) {
-            socket.disconnect();
-            socket = null;
-        }
+      socket.on("disconnect", () => {
+        console.log("Socket disconnected");
+      });
     }
-    return result;
+  }
+
+  //disconnect socket on logout
+  if (logout.fulfilled.match(action)) {
+    if (socket) {
+      socket.disconnect();
+      socket = null;
+    }
+  }
+  return result;
 };
 
 export default socketMiddleware;

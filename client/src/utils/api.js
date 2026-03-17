@@ -10,7 +10,6 @@ const api = axios.create({
   withCredentials: true, // Important for cookies
 });
 
-
 api.interceptors.request.use(
   (config) => config,
   (error) => Promise.reject(error),

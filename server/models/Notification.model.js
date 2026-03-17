@@ -1,30 +1,10 @@
 import mongoose from "mongoose";
-
-const NOTIFICATION_TYPES = {
-  DOC_SHARED: "doc_shared",
-  DOC_UPDATED: "doc_updated",
-  PERMISSION_CHANGED: "permission_changed",
-  PERMISSION_REVOKED: "permission_revoked",
-  COMMENT_ADDED: "comment_added", // TODO: Add more notification types
-  REMOVED_ACCESS: "removed_access",
-};
-
-const NOTIFICATION_MESSAGES_TEMPLATES = {
-  [NOTIFICATION_TYPES.DOC_SHARED]: "{sender} shared a document with you: {document}",
-  [NOTIFICATION_TYPES.DOC_UPDATED]: "{sender} updated a document: {document}",
-  [NOTIFICATION_TYPES.PERMISSION_CHANGED]:
-    "{sender} changed the permission of a document: {document}",
-  [NOTIFICATION_TYPES.PERMISSION_REVOKED]:
-    "{sender} revoked the permission of a document: {document}",
-  [NOTIFICATION_TYPES.COMMENT_ADDED]: "{sender} added a comment to a document: {document}",
-  [NOTIFICATION_TYPES.REMOVED_ACCESS]: "{sender} removed your access to a document: {document}",
-};
-
-const NOTIFICATION_PRIORITIES = {
-  HIGH: "high",
-  MEDIUM: "medium",
-  LOW: "low",
-};
+import {
+  NOTIFICATION_TYPES,
+  DELIVERY_STATUS,
+  NOTIFICATION_MESSAGES_TEMPLATES,
+  NOTIFICATION_PRIORITIES,
+} from "../constants/Notification.js";
 
 const notificationSchema = new mongoose.Schema(
   {
@@ -64,6 +44,12 @@ const notificationSchema = new mongoose.Schema(
       enum: Object.values(NOTIFICATION_PRIORITIES),
       default: NOTIFICATION_PRIORITIES.MEDIUM,
     },
+    deliveryStatus: {
+      type: String,
+      enum: Object.values(DELIVERY_STATUS),
+      default: DELIVERY_STATUS.PENDING,
+    },
+    deliveredAt: { type: Date },
     expiresAt: {
       type: Date,
       default: () => new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
@@ -98,11 +84,7 @@ notificationSchema.statics.getUnread = function (userId, limit = 10) {
 
 notificationSchema.statics.getNotifications = function (userId, page = 1, limit = 10) {
   const skip = (page - 1) * limit;
-  return this.find({ recipientId: userId })
-    .sort({ createdAt: -1 })
-    .skip(skip)
-    .limit(limit)
-    .lean();
+  return this.find({ recipientId: userId }).sort({ createdAt: -1 }).skip(skip).limit(limit).lean();
 };
 
 notificationSchema.statics.markAllRead = function (recipientId) {

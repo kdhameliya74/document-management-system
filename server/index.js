@@ -84,7 +84,8 @@ const startServer = async () => {
 
     const PORT = process.env.PORT || 5000;
     const server = httpServer.listen(PORT, () => {
-      const line = (key, value) => chalk.cyan(key.padEnd(13)) + chalk.white(": ") + chalk.green(value);
+      const line = (key, value) =>
+        chalk.cyan(key.padEnd(13)) + chalk.white(": ") + chalk.green(value);
       console.log(`
 ${chalk.blue("==================================================")}
 ${chalk.bold.green("   SERVER STARTED ✅")}

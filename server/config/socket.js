@@ -3,6 +3,7 @@ import { createAdapter } from "@socket.io/redis-adapter";
 import jwt from "jsonwebtoken";
 import { setOnline, setOffline, getRedisPub, getRedisSub } from "./redis.js";
 import Notification from "../models/Notification.model.js";
+import { DELIVERY_STATUS } from "../constants/Notification.js";
 
 export const initSocket = async (httpServer) => {
   const pubClient = getRedisPub();
@@ -28,7 +29,9 @@ export const initSocket = async (httpServer) => {
   io.adapter(createAdapter(pubClient, subClient));
 
   io.use((socket, next) => {
-    const token = socket.handshake.auth.token;
+    const rawCookie = socket.handshake.headers.cookie;
+    if (!rawCookie) return next(new Error("No cookie found"));
+    const token = rawCookie.split("token=")[1];
     if (!token) return next(new Error("Authentication error"));
 
     jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
@@ -51,13 +54,13 @@ export const initSocket = async (httpServer) => {
 
     socket.on("notification:ack", ({ id }) => {
       Notification.findByIdAndUpdate(id, {
-        isRead: true,
-        readAt: new Date(),
+        deliveryStatus: DELIVERY_STATUS.SENT,
+        deliveredAt: new Date(),
       }).exec();
     });
 
     socket.on("disconnect", async () => {
-      console.log("[Socket] User disconnected", socket.id);
+      // console.log("[Socket] User disconnected", socket.id);
       await setOffline(socket.user.id);
     });
   });

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import {
   Bell,
   Check,
@@ -64,7 +64,7 @@ const NotificationIcon = ({ type, className }) => {
   }
 };
 
-const NotificationDropdown = ({ isOpen, onClose }) => {
+const NotificationDropdown = ({ isOpen }) => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(0);
@@ -97,11 +97,11 @@ const NotificationDropdown = ({ isOpen, onClose }) => {
     setLoading(false);
   };
 
-  useEffect(() => {
-    if (isOpen) {
-      fetchNotifications(true);
-    }
-  }, [isOpen]);
+  // useEffect(() => {
+  //   if (isOpen) {
+  //     fetchNotifications(true);
+  //   }
+  // }, [isOpen]);
 
   const handleScroll = (e) => {
     const { scrollTop, clientHeight, scrollHeight } = e.target;

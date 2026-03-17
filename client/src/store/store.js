@@ -10,6 +10,5 @@ export const store = configureStore({
     documentSystem: documentSystemReducer,
     notifications: notificationReducer,
   },
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(socketMiddleware),
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(socketMiddleware),
 });
