@@ -81,18 +81,21 @@ const Header = () => {
       </div>
 
       <div className="flex items-center gap-6">
-        <div className="flex items-center gap-2 border-r border-border-muted pr-6 relative" ref={notificationRef}>
-          <button 
+        <div
+          className="flex items-center gap-2 border-r border-border-muted pr-6 relative"
+          ref={notificationRef}
+        >
+          <button
             onClick={toggleNotifications}
-            className={`text-text-muted p-2.5 rounded-xl transition-all hover:bg-bg-hover hover:text-text-main group relative border ${isNotificationsOpen ? 'border-primary/50 bg-primary/5 text-primary' : 'border-transparent hover:border-border-muted'}`}
+            className={`text-text-muted p-2.5 rounded-xl transition-all hover:bg-bg-hover hover:text-text-main group relative border ${isNotificationsOpen ? "border-primary/50 bg-primary/5 text-primary" : "border-transparent hover:border-border-muted"}`}
           >
             <Bell size={20} strokeWidth={1.5} />
             <div className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-primary rounded-full border-2 border-bg-main" />
           </button>
 
-          <NotificationDropdown 
-            isOpen={isNotificationsOpen} 
-            onClose={() => setIsNotificationsOpen(false)} 
+          <NotificationDropdown
+            isOpen={isNotificationsOpen}
+            onClose={() => setIsNotificationsOpen(false)}
           />
         </div>
 
