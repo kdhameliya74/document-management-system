@@ -1,6 +1,6 @@
 import { io } from "socket.io-client";
 import { login, logout } from "@/store/authSlice";
-import { syncMissed, notificationReceived } from "@/store/notification.slice";
+import { syncMissed, notificationReceived, notifyByRipple } from "@/store/notification.slice";
 
 let socket = null;
 
@@ -22,7 +22,11 @@ const socketMiddleware = (store) => (next) => (action) => {
 
       socket.on("notification:new", (notif) => {
         store.dispatch(notificationReceived(notif));
+        store.dispatch(notifyByRipple(true));
         socket.emit("notification:ack", { id: notif.id });
+        setTimeout(() => {
+          store.dispatch(notifyByRipple(false));
+        }, 3000);
       });
 
       socket.on("notification:synced", (data) => {

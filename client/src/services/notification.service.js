@@ -1,9 +1,6 @@
 import api from "@/utils/api";
 
 const NotificationService = {
-  async bootstrapForUser() {
-    return api.get("/notifications/bootstrap");
-  },
   async getNotifications(page, limit) {
     return api.get("/notifications", { params: { page, limit } });
   },

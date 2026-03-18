@@ -1,6 +1,5 @@
 import archiver from "archiver";
 import pLimit from "p-limit";
-import chalk from "chalk";
 import mongoose from "mongoose";
 
 import s3Client from "../config/s3.js";
@@ -341,6 +340,8 @@ export const getDocumentById = asyncHandler(async (req, res) => {
 // @route   PATCH /api/documents/:id
 export const updateDocument = asyncHandler(async (req, res) => {
   const doc = req.document;
+  const sharedWith = doc.sharedWith;
+  const sender = req.user;
 
   // Per-docType allowed field whitelist
   const commonAllowed = ["name", "isStarred", "description", "tags", "isPublic"];
@@ -365,7 +366,18 @@ export const updateDocument = asyncHandler(async (req, res) => {
   }
 
   await doc.save(); // triggers pre('validate') → path recompute if name changed
-
+  if (allowed.includes("name")) {
+    await Promise.all(
+      sharedWith.map((user) =>
+        notifyUser({
+          recipientId: user.user,
+          type: NOTIFICATION_TYPES.DOC_UPDATED,
+          sender: { id: sender.id, name: sender.firstName + " " + sender.lastName },
+          document: { id: doc._id, name: doc.name },
+        }),
+      ),
+    );
+  }
   return res.status(200).json({
     success: true,
     message: "Document updated successfully",
@@ -621,7 +633,6 @@ export const shareDocument = asyncHandler(async (req, res) => {
     },
   );
 
-  console.log(chalk.red("start notifying user"));
   await Promise.all(
     [...userMap.values()].map((recipientId) =>
       notifyUser({

@@ -1,7 +1,7 @@
 import { asyncHandler } from "../middlewares/error.middleware.js";
 import { getIO } from "../config/socket.js";
 import Notification from "../models/Notification.model.js";
-import { decrementUnreadCount, resetUnreadCount, incrementUnreadCount, getSocketId } from "../config/redis.js";
+import { decrementUnreadCount, resetUnreadCount, incrementUnreadCount, getSocketId, getUnreadCount } from "../config/redis.js";
 import { DELIVERY_STATUS, NOTIFICATION_PRIORITIES } from "../constants/Notification.js";
 
 export const notifyUser = async ({ recipientId, type, sender, document, priority }) => {
@@ -40,10 +40,24 @@ export const notifyUser = async ({ recipientId, type, sender, document, priority
 
 export const getNotifications = asyncHandler(async (req, res) => {
   try {
+    let unreadCount;
     const userId = req.user.id;
     const { page, limit } = req.query;
     const notifications = await Notification.getNotifications(userId, page, limit);
-    res.status(200).json({ success: true, notifications });
+    const hasMore = await Notification.countDocuments({ recipientId: userId }) > (page * limit);
+    const response = { success: true, notifications, hasMore };
+    if (+page === 1) {
+      const cached = await getUnreadCount(userId?.toString());
+      if (cached) {
+        unreadCount = cached;
+      } else {
+        unreadCount = await Notification.getUnreadCount(userId);
+        await resetUnreadCount(userId?.toString(), unreadCount);
+      }
+      response.unreadCount = unreadCount;
+    }
+
+    res.status(200).json(response);
   } catch (_) {
     res.status(500).json({ success: false, message: "Failed to fetch notifications" });
   }
@@ -74,19 +88,5 @@ export const markAllRead = asyncHandler(async (req, res) => {
     res.json({ success: true });
   } catch (_) {
     res.status(500).json({ success: false, message: "Failed to mark all notifications as read" });
-  }
-});
-
-export const bootstrapForUser = asyncHandler(async (req, res) => {
-  try {
-    const userId = req.user.id;
-    const [notifications, unreadCount] = await Promise.all([
-      Notification.getUnread(userId),
-      Notification.getUnreadCount(userId),
-    ]);
-    await resetUnreadCount(userId?.toString(), unreadCount);
-    res.json({ success: true, notifications, unreadCount });
-  } catch (_) {
-    res.status(500).json({ success: false, message: "Failed to bootstrap for user" });
   }
 });

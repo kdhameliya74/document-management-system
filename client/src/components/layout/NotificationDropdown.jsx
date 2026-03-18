@@ -1,13 +1,12 @@
 import { useState, useRef } from "react";
-import { useSelector } from "react-redux";
-import { selectNotifications, selectHasMore, fetchNotifications } from "@/store/notification.slice";
+import { useSelector, useDispatch } from "react-redux";
+import { fetchNotifications } from "@/store/notification.slice";
 import {
   Bell,
   Share,
   Info,
   AlertCircle,
   Loader2,
-  MoreHorizontal,
 } from "lucide-react";
 import { logError } from "@/helpers/utils";
 import { format } from "date-fns";
@@ -27,10 +26,10 @@ const NotificationIcon = ({ type, className }) => {
 
 const NotificationDropdown = ({ isOpen }) => {
   const [loading, setLoading] = useState(false);
-  const [page, setPage] = useState(0);
-  const notifications  = useSelector(selectNotifications);
-  const hasMore = useSelector(selectHasMore);
+  const dispatch = useDispatch();
+  const [page, setPage] = useState(1); // we already fetched page 1 on login
   const dropdownRef = useRef(null);
+  const { hasMore, items: notifications} = useSelector(state => state.notifications);
 
 
   const loadMoreNotifications = async () => {
@@ -116,13 +115,13 @@ const NotificationDropdown = ({ isOpen }) => {
               </div>
             )}
 
-            {!hasMore && notifications.length > 0 && (
+            {/* {!hasMore && notifications.length > 0 && (
               <div className="py-4 text-center">
                 <span className="text-[10px] text-text-dim uppercase tracking-wider font-medium">
                   End of notifications
                 </span>
               </div>
-            )}
+            )} */}
           </>
         )}
       </div>
