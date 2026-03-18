@@ -640,8 +640,8 @@ export const shareDocument = asyncHandler(async (req, res) => {
         type: NOTIFICATION_TYPES.DOC_SHARED,
         sender: { id: sender.id, name: sender.firstName + " " + sender.lastName },
         document: { id: document._id, name: document.name },
-      })
-    )
+      }),
+    ),
   );
 
   return res.status(200).json({

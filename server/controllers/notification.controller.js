@@ -1,7 +1,13 @@
 import { asyncHandler } from "../middlewares/error.middleware.js";
 import { getIO } from "../config/socket.js";
 import Notification from "../models/Notification.model.js";
-import { decrementUnreadCount, resetUnreadCount, incrementUnreadCount, getSocketId, getUnreadCount } from "../config/redis.js";
+import {
+  decrementUnreadCount,
+  resetUnreadCount,
+  incrementUnreadCount,
+  getSocketId,
+  getUnreadCount,
+} from "../config/redis.js";
 import { DELIVERY_STATUS, NOTIFICATION_PRIORITIES } from "../constants/Notification.js";
 
 export const notifyUser = async ({ recipientId, type, sender, document, priority }) => {
@@ -23,7 +29,6 @@ export const notifyUser = async ({ recipientId, type, sender, document, priority
       createdAt: notification.createdAt,
     };
 
-
     await incrementUnreadCount(recipientId.toString());
     const userSocketId = await getSocketId(recipientId.toString());
     if (userSocketId) {
@@ -36,7 +41,7 @@ export const notifyUser = async ({ recipientId, type, sender, document, priority
   } catch (error) {
     console.error("Error notifying user:", error);
   }
-}
+};
 
 export const getNotifications = asyncHandler(async (req, res) => {
   try {
@@ -44,7 +49,7 @@ export const getNotifications = asyncHandler(async (req, res) => {
     const userId = req.user.id;
     const { page, limit } = req.query;
     const notifications = await Notification.getNotifications(userId, page, limit);
-    const hasMore = await Notification.countDocuments({ recipientId: userId }) > (page * limit);
+    const hasMore = (await Notification.countDocuments({ recipientId: userId })) > page * limit;
     const response = { success: true, notifications, hasMore };
     if (+page === 1) {
       const cached = await getUnreadCount(userId?.toString());

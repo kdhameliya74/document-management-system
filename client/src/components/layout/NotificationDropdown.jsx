@@ -1,13 +1,7 @@
 import { useState, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchNotifications } from "@/store/notification.slice";
-import {
-  Bell,
-  Share,
-  Info,
-  AlertCircle,
-  Loader2,
-} from "lucide-react";
+import { Bell, Share, Info, AlertCircle, Loader2 } from "lucide-react";
 import { logError } from "@/helpers/utils";
 import { format } from "date-fns";
 
@@ -29,8 +23,7 @@ const NotificationDropdown = ({ isOpen }) => {
   const dispatch = useDispatch();
   const [page, setPage] = useState(1); // we already fetched page 1 on login
   const dropdownRef = useRef(null);
-  const { hasMore, items: notifications} = useSelector(state => state.notifications);
-
+  const { hasMore, items: notifications } = useSelector((state) => state.notifications);
 
   const loadMoreNotifications = async () => {
     if (loading || !hasMore) return;

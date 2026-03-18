@@ -1,7 +1,7 @@
 import { Server } from "socket.io";
 import { createAdapter } from "@socket.io/redis-adapter";
 import jwt from "jsonwebtoken";
-import { setOnline, setOffline, getRedisPub, getRedisSub, getSocketId } from "./redis.js";
+import { setOnline, setOffline, getRedisPub, getRedisSub } from "./redis.js";
 import Notification from "../models/Notification.model.js";
 import { DELIVERY_STATUS } from "../constants/Notification.js";
 
@@ -74,4 +74,4 @@ export const getIO = () => {
     throw new Error("Socket not initialized");
   }
   return io;
-}
+};

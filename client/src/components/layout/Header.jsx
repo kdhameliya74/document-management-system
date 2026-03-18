@@ -7,7 +7,6 @@ import ROUTES from "@/utils/routes";
 import { useGlobalSearch } from "@/hooks/useGloablSearch";
 import GlobalSearchResults from "./GlobalSearchResults";
 import NotificationDropdown from "./NotificationDropdown";
-import { selectUnreadCount } from "@/store/notification.slice";
 
 const Header = () => {
   const navigate = useNavigate();
@@ -19,7 +18,7 @@ const Header = () => {
     useGlobalSearch(searchQuery);
   const searchRef = useRef(null);
   const notificationRef = useRef(null);
-  const {unreadCount, ripple} = useSelector(state => state.notifications);
+  const { unreadCount, ripple } = useSelector((state) => state.notifications);
 
   useEffect(() => {
     const handleClickOutside = (event) => {

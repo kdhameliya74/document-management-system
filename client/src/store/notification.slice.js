@@ -7,7 +7,11 @@ export const fetchNotifications = createAsyncThunk(
   async ({ page = 1, limit = 10 } = {}, { rejectWithValue }) => {
     try {
       const { data } = await NotificationService.getNotifications(page, limit);
-      return { notifications: data.notifications, hasMore: data.hasMore, unreadCount: data.unreadCount };
+      return {
+        notifications: data.notifications,
+        hasMore: data.hasMore,
+        unreadCount: data.unreadCount,
+      };
     } catch (err) {
       logError(err);
       return rejectWithValue(err);

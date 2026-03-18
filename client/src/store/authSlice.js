@@ -17,15 +17,18 @@ const initialState = {
 | fetchUser (runs on reload)
 |--------------------------------------------------------------------------
 */
-export const fetchUser = createAsyncThunk("auth/fetchUser", async (_, { dispatch, rejectWithValue }) => {
-  try {
-    const data = await authAPI.getCurrentUser();
-    dispatch(fetchNotifications());
-    return data.user;
-  } catch (err) {
-    return rejectWithValue(err?.message || "Auth failed");
-  }
-});
+export const fetchUser = createAsyncThunk(
+  "auth/fetchUser",
+  async (_, { dispatch, rejectWithValue }) => {
+    try {
+      const data = await authAPI.getCurrentUser();
+      dispatch(fetchNotifications());
+      return data.user;
+    } catch (err) {
+      return rejectWithValue(err?.message || "Auth failed");
+    }
+  },
+);
 
 /*
 |--------------------------------------------------------------------------
