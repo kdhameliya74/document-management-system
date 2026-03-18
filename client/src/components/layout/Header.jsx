@@ -7,6 +7,7 @@ import ROUTES from "@/utils/routes";
 import { useGlobalSearch } from "@/hooks/useGloablSearch";
 import GlobalSearchResults from "./GlobalSearchResults";
 import NotificationDropdown from "./NotificationDropdown";
+import { selectUnreadCount } from "@/store/notification.slice";
 
 const Header = () => {
   const navigate = useNavigate();
@@ -18,6 +19,8 @@ const Header = () => {
     useGlobalSearch(searchQuery);
   const searchRef = useRef(null);
   const notificationRef = useRef(null);
+  const unreadCount = useSelector(selectUnreadCount);
+  const count = unreadCount > 99 ? "99+" : unreadCount;
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -90,7 +93,11 @@ const Header = () => {
             className={`text-text-muted p-2.5 rounded-xl transition-all hover:bg-bg-hover hover:text-text-main group relative border ${isNotificationsOpen ? "border-primary/50 bg-primary/5 text-primary" : "border-transparent hover:border-border-muted"}`}
           >
             <Bell size={20} strokeWidth={1.5} />
-            <div className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-primary rounded-full border-2 border-bg-main" />
+            {unreadCount > 0 && (
+              <span className="absolute bg-red-500 font-semibold px-1.5 rounded-full text-white text-xs top-0">
+                {count}
+              </span>
+            )}
           </button>
 
           <NotificationDropdown

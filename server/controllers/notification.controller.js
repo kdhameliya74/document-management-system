@@ -1,6 +1,42 @@
 import { asyncHandler } from "../middlewares/error.middleware.js";
+import { getIO } from "../config/socket.js";
 import Notification from "../models/Notification.model.js";
-import { decrementUnreadCount, resetUnreadCount } from "../config/redis.js";
+import { decrementUnreadCount, resetUnreadCount, incrementUnreadCount, getSocketId } from "../config/redis.js";
+import { DELIVERY_STATUS, NOTIFICATION_PRIORITIES } from "../constants/Notification.js";
+
+export const notifyUser = async ({ recipientId, type, sender, document, priority }) => {
+  try {
+    const message = Notification.buildMessage(type, sender.name, document.name);
+    const notification = await Notification.create({
+      recipientId,
+      type,
+      senderId: sender.id,
+      message,
+      documentId: document.id,
+      priority: priority || NOTIFICATION_PRIORITIES.MEDIUM,
+    });
+    const cleanNotification = {
+      id: notification._id,
+      message: notification.message,
+      type: notification.type,
+      priority: notification.priority,
+      createdAt: notification.createdAt,
+    };
+
+
+    await incrementUnreadCount(recipientId.toString());
+    const userSocketId = await getSocketId(recipientId.toString());
+    if (userSocketId) {
+      getIO().to(userSocketId).emit("notification:new", cleanNotification);
+      Notification.findByIdAndUpdate(notification._id, {
+        deliveryStatus: DELIVERY_STATUS.SENT,
+        deliveredAt: new Date(),
+      }).exec();
+    }
+  } catch (error) {
+    console.error("Error notifying user:", error);
+  }
+}
 
 export const getNotifications = asyncHandler(async (req, res) => {
   try {

@@ -1,63 +1,24 @@
 import { useState, useRef } from "react";
+import { useSelector } from "react-redux";
+import { selectNotifications, selectHasMore, fetchNotifications } from "@/store/notification.slice";
 import {
   Bell,
-  Check,
+  Share,
   Info,
-  AlertTriangle,
   AlertCircle,
   Loader2,
   MoreHorizontal,
 } from "lucide-react";
-
-// Dummy data generator
-const generateDummyNotifications = (page, limit = 10) => {
-  const types = ["info", "success", "warning", "error"];
-  const titles = [
-    "File Shared",
-    "Deployment Successful",
-    "Security Alert",
-    "System Update",
-    "New Comment",
-    "File Deleted",
-    "Subscription Renewed",
-    "Access Granted",
-  ];
-  const messages = [
-    "John shared 'Budget_2024.pdf' with you.",
-    "The client application was successfully deployed to production.",
-    "A new login was detected from a new device in London.",
-    "System maintenance scheduled for tonight at 2 AM.",
-    "Sarah commented on your document 'Project Proposal'.",
-    "The folder 'Legacy Documents' has been moved to trash.",
-    "Your monthly subscription has been successfully renewed.",
-    "You now have editor access to 'Annual Report'.",
-  ];
-
-  return Array.from({ length: limit }, (_, i) => {
-    const id = page * limit + i + 1;
-    const type = types[Math.floor(Math.random() * types.length)];
-    const title = titles[Math.floor(Math.random() * titles.length)];
-    const message = messages[Math.floor(Math.random() * messages.length)];
-    const timestamp = new Date(Date.now() - Math.floor(Math.random() * 1000000000)).toISOString();
-
-    return {
-      id: `notification-${id}`,
-      title,
-      message,
-      type,
-      timestamp,
-      read: Math.random() > 0.5,
-    };
-  });
-};
+import { logError } from "@/helpers/utils";
+import { format } from "date-fns";
 
 const NotificationIcon = ({ type, className }) => {
   switch (type) {
-    case "success":
-      return <Check className={`text-green-500 ${className}`} size={16} />;
-    case "warning":
-      return <AlertTriangle className={`text-yellow-500 ${className}`} size={16} />;
-    case "error":
+    case "doc_shared":
+      return <Share className={`text-green-500 ${className}`} size={16} />;
+    // case "doc_comment":
+    //   return <Comment className={`text-yellow-500 ${className}`} size={16} />;
+    case "doc_deleted":
       return <AlertCircle className={`text-red-500 ${className}`} size={16} />;
     default:
       return <Info className={`text-blue-500 ${className}`} size={16} />;
@@ -65,48 +26,30 @@ const NotificationIcon = ({ type, className }) => {
 };
 
 const NotificationDropdown = ({ isOpen }) => {
-  const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(0);
-  const [hasMore, setHasMore] = useState(true);
+  const notifications  = useSelector(selectNotifications);
+  const hasMore = useSelector(selectHasMore);
   const dropdownRef = useRef(null);
 
-  const fetchNotifications = async (reset = false) => {
-    if (loading || (!hasMore && !reset)) return;
 
-    setLoading(true);
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 800));
-
-    const nextPage = reset ? 0 : page;
-    const newNotifications = generateDummyNotifications(nextPage);
-
-    if (reset) {
-      setNotifications(newNotifications);
-      setPage(1);
-    } else {
-      setNotifications((prev) => [...prev, ...newNotifications]);
+  const loadMoreNotifications = async () => {
+    if (loading || !hasMore) return;
+    try {
+      setLoading(true);
       setPage((prev) => prev + 1);
+      await dispatch(fetchNotifications({ page, limit: 10 }));
+    } catch (error) {
+      logError(error);
+    } finally {
+      setLoading(false);
     }
-
-    // Stop after 5 pages (50 notifications)
-    if (nextPage >= 4) {
-      setHasMore(false);
-    }
-
-    setLoading(false);
   };
-
-  // useEffect(() => {
-  //   if (isOpen) {
-  //     fetchNotifications(true);
-  //   }
-  // }, [isOpen]);
 
   const handleScroll = (e) => {
     const { scrollTop, clientHeight, scrollHeight } = e.target;
     if (scrollHeight - scrollTop <= clientHeight + 50) {
-      fetchNotifications();
+      loadMoreNotifications();
     }
   };
 
@@ -140,47 +83,26 @@ const NotificationDropdown = ({ isOpen }) => {
           <>
             {notifications.map((notification) => (
               <div
-                key={notification.id}
+                key={notification.id || notification._id}
                 className={`px-4 py-3 hover:bg-bg-hover cursor-pointer transition-colors flex gap-3 relative group ${!notification.read ? "bg-primary/5" : ""}`}
               >
-                {!notification.read && (
+                {!notification.isRead && (
                   <div className="absolute left-1 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary rounded-r-full" />
                 )}
-                <div
-                  className={`p-2 rounded-xl shrink-0 h-fit ${
-                    notification.type === "success"
-                      ? "bg-green-500/10"
-                      : notification.type === "warning"
-                        ? "bg-yellow-500/10"
-                        : notification.type === "error"
-                          ? "bg-red-500/10"
-                          : "bg-blue-500/10"
-                  }`}
-                >
+                <div className={`p-2 rounded-xl shrink-0 h-fit`}>
                   <NotificationIcon type={notification.type} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2 mb-0.5">
                     <p
-                      className={`text-sm font-bold truncate ${notification.read ? "text-text-main" : "text-primary"}`}
+                      className={`text-sm font-medium ${notification.read ? "text-text-main" : "text-primary"}`}
                     >
-                      {notification.title}
+                      {notification.message}
                     </p>
                     <span className="text-[10px] text-text-dim whitespace-nowrap">
-                      {new Date(notification.timestamp).toLocaleDateString([], {
-                        month: "short",
-                        day: "numeric",
-                      })}
+                      {format(new Date(notification.createdAt), "MMM d")}
                     </span>
                   </div>
-                  <p className="text-xs text-text-muted line-clamp-2 leading-relaxed">
-                    {notification.message}
-                  </p>
-                </div>
-                <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute right-4 bottom-3">
-                  <button className="p-1 hover:bg-bg-panel rounded-lg border border-border-muted/50 transition-colors">
-                    <MoreHorizontal size={12} className="text-text-muted" />
-                  </button>
                 </div>
               </div>
             ))}

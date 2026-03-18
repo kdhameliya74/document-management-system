@@ -1,10 +1,11 @@
 import { Server } from "socket.io";
 import { createAdapter } from "@socket.io/redis-adapter";
 import jwt from "jsonwebtoken";
-import { setOnline, setOffline, getRedisPub, getRedisSub } from "./redis.js";
+import { setOnline, setOffline, getRedisPub, getRedisSub, getSocketId } from "./redis.js";
 import Notification from "../models/Notification.model.js";
 import { DELIVERY_STATUS } from "../constants/Notification.js";
 
+let io;
 export const initSocket = async (httpServer) => {
   const pubClient = getRedisPub();
   const subClient = getRedisSub();
@@ -17,7 +18,7 @@ export const initSocket = async (httpServer) => {
     console.error("[Redis] Sub Client Error", err);
   });
 
-  const io = new Server(httpServer, {
+  io = new Server(httpServer, {
     cors: {
       origin: process.env.CLIENT_URL,
       credentials: true,
@@ -54,7 +55,7 @@ export const initSocket = async (httpServer) => {
 
     socket.on("notification:ack", ({ id }) => {
       Notification.findByIdAndUpdate(id, {
-        deliveryStatus: DELIVERY_STATUS.SENT,
+        deliveryStatus: DELIVERY_STATUS.DELIVERED,
         deliveredAt: new Date(),
       }).exec();
     });
@@ -67,3 +68,10 @@ export const initSocket = async (httpServer) => {
 
   return io;
 };
+
+export const getIO = () => {
+  if (!io) {
+    throw new Error("Socket not initialized");
+  }
+  return io;
+}

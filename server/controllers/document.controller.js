@@ -1,5 +1,6 @@
 import archiver from "archiver";
 import pLimit from "p-limit";
+import chalk from "chalk";
 import mongoose from "mongoose";
 
 import s3Client from "../config/s3.js";
@@ -8,6 +9,7 @@ import User from "../models/User.model.js";
 
 import { DOC_TYPES, PERMISSION_LEVELS } from "../constants/Shared.js";
 import { FILE_UPLOAD_STATUS } from "../constants/File.js";
+import { NOTIFICATION_TYPES } from "../constants/Notification.js";
 import {
   shortId,
   environment,
@@ -19,6 +21,7 @@ import {
 import { PutObjectCommand, DeleteObjectsCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { asyncHandler } from "../middlewares/error.middleware.js";
+import { notifyUser } from "../controllers/notification.controller.js";
 
 const CONCURRENT_DOWNLOADS = 10;
 //Helpers
@@ -563,7 +566,8 @@ export const shareDocument = asyncHandler(async (req, res) => {
       message: "Document not found",
     });
   }
-
+  const sender = req.user;
+  const document = req.document;
   const emails = collaborators.map((c) => c.email.toLowerCase());
 
   const users = await User.find({
@@ -588,7 +592,6 @@ export const shareDocument = asyncHandler(async (req, res) => {
   }
 
   const userMap = new Map(users.map((u) => [u.email, u._id]));
-
   const sharedAt = new Date();
 
   const newCollaborators = collaborators
@@ -616,6 +619,18 @@ export const shareDocument = asyncHandler(async (req, res) => {
         },
       },
     },
+  );
+
+  console.log(chalk.red("start notifying user"));
+  await Promise.all(
+    [...userMap.values()].map((recipientId) =>
+      notifyUser({
+        recipientId,
+        type: NOTIFICATION_TYPES.DOC_SHARED,
+        sender: { id: sender.id, name: sender.firstName + " " + sender.lastName },
+        document: { id: document._id, name: document.name },
+      })
+    )
   );
 
   return res.status(200).json({
