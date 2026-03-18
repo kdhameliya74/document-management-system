@@ -2,25 +2,16 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import NotificationService from "@/services/notification.service";
 import { logError } from "@/helpers/utils";
 
-export const bootstrapNotifications = createAsyncThunk(
-  "notifications/bootstrap",
-  async (_, { rejectWithValue }) => {
-    try {
-      const { data } = await NotificationService.bootstrapForUser();
-      return data;
-    } catch (err) {
-      logError(err);
-      return rejectWithValue(err);
-    }
-  },
-);
-
 export const fetchNotifications = createAsyncThunk(
   "notifications/fetchPage",
-  async ({ page = 1, limit = 20 } = {}, { rejectWithValue }) => {
+  async ({ page = 1, limit = 10 } = {}, { rejectWithValue }) => {
     try {
       const { data } = await NotificationService.getNotifications(page, limit);
-      return data;
+      return {
+        notifications: data.notifications,
+        hasMore: data.hasMore,
+        unreadCount: data.unreadCount,
+      };
     } catch (err) {
       logError(err);
       return rejectWithValue(err);
@@ -77,6 +68,7 @@ const notificationSlice = createSlice({
     hasMore: true,
     loading: false,
     error: null,
+    ripple: false,
   },
 
   reducers: {
@@ -101,38 +93,28 @@ const notificationSlice = createSlice({
       });
       state.items.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     },
+
+    setUnreadCount: (state, action) => {
+      state.unreadCount = action.payload;
+    },
+
+    notifyByRipple: (state, action) => {
+      state.ripple = action.payload;
+    },
   },
 
   extraReducers: (builder) => {
-    // bootstrap — seed store on login
-    builder
-      .addCase(bootstrapNotifications.pending, (state) => {
-        state.loading = true;
-      })
-      .addCase(bootstrapNotifications.fulfilled, (state, action) => {
-        state.items = action.payload.notifications;
-        state.unreadCount = action.payload.unreadCount;
-        state.loading = false;
-      })
-      .addCase(bootstrapNotifications.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      });
-
     // fetchPage — infinite scroll
     builder.addCase(fetchNotifications.fulfilled, (state, action) => {
-      const { notifications, page } = action.payload;
-      if (page === 1) {
-        state.items = notifications;
-      } else {
-        // Append and deduplicate
-        const ids = new Set(state.items.map((n) => n.id));
-        notifications.forEach((n) => {
-          if (!ids.has(n.id)) state.items.push(n);
-        });
+      const { notifications, hasMore, unreadCount } = action.payload;
+      const ids = new Set(state.items.map((n) => n.id));
+      notifications.forEach((n) => {
+        if (!ids.has(n.id)) state.items.push(n);
+      });
+      state.hasMore = hasMore;
+      if (unreadCount !== undefined) {
+        state.unreadCount = unreadCount;
       }
-      state.page = page;
-      state.hasMore = notifications.length === 20;
     });
 
     // markOneRead — optimistic already done by thunk, confirm on success
@@ -160,12 +142,13 @@ const notificationSlice = createSlice({
   },
 });
 
-export const { notificationReceived, syncMissed } = notificationSlice.actions;
+export const { notificationReceived, syncMissed, notifyByRipple } = notificationSlice.actions;
 
 // ── Selectors ─────────────────────────────────────────────────────────────────
 export const selectNotifications = (state) => state.notifications.items;
 export const selectUnreadCount = (state) => state.notifications.unreadCount;
 export const selectHasMore = (state) => state.notifications.hasMore;
 export const selectNotifsLoading = (state) => state.notifications.loading;
+export const selectRipple = (state) => state.notifications.ripple;
 
 export default notificationSlice.reducer;

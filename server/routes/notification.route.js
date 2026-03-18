@@ -3,7 +3,7 @@ import { protect } from "../middlewares/auth.middleware.js";
 import {
   getNotifications,
   markOneRead,
-  bootstrapForUser,
+  markAllRead,
 } from "../controllers/notification.controller.js";
 
 const router = express.Router();
@@ -12,6 +12,6 @@ router.get("/", protect, getNotifications);
 
 router.patch("/:id/read", protect, markOneRead);
 
-router.get("/bootstrap", protect, bootstrapForUser);
+router.patch("/mark-all-read", protect, markAllRead);
 
 export default router;

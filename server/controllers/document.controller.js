@@ -8,6 +8,7 @@ import User from "../models/User.model.js";
 
 import { DOC_TYPES, PERMISSION_LEVELS } from "../constants/Shared.js";
 import { FILE_UPLOAD_STATUS } from "../constants/File.js";
+import { NOTIFICATION_TYPES } from "../constants/Notification.js";
 import {
   shortId,
   environment,
@@ -19,6 +20,7 @@ import {
 import { PutObjectCommand, DeleteObjectsCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { asyncHandler } from "../middlewares/error.middleware.js";
+import { notifyUser } from "../controllers/notification.controller.js";
 
 const CONCURRENT_DOWNLOADS = 10;
 //Helpers
@@ -338,6 +340,8 @@ export const getDocumentById = asyncHandler(async (req, res) => {
 // @route   PATCH /api/documents/:id
 export const updateDocument = asyncHandler(async (req, res) => {
   const doc = req.document;
+  const sharedWith = doc.sharedWith;
+  const sender = req.user;
 
   // Per-docType allowed field whitelist
   const commonAllowed = ["name", "isStarred", "description", "tags", "isPublic"];
@@ -362,7 +366,18 @@ export const updateDocument = asyncHandler(async (req, res) => {
   }
 
   await doc.save(); // triggers pre('validate') → path recompute if name changed
-
+  if (allowed.includes("name")) {
+    await Promise.all(
+      sharedWith.map((user) =>
+        notifyUser({
+          recipientId: user.user,
+          type: NOTIFICATION_TYPES.DOC_UPDATED,
+          sender: { id: sender.id, name: sender.firstName + " " + sender.lastName },
+          document: { id: doc._id, name: doc.name },
+        }),
+      ),
+    );
+  }
   return res.status(200).json({
     success: true,
     message: "Document updated successfully",
@@ -563,7 +578,8 @@ export const shareDocument = asyncHandler(async (req, res) => {
       message: "Document not found",
     });
   }
-
+  const sender = req.user;
+  const document = req.document;
   const emails = collaborators.map((c) => c.email.toLowerCase());
 
   const users = await User.find({
@@ -588,7 +604,6 @@ export const shareDocument = asyncHandler(async (req, res) => {
   }
 
   const userMap = new Map(users.map((u) => [u.email, u._id]));
-
   const sharedAt = new Date();
 
   const newCollaborators = collaborators
@@ -616,6 +631,17 @@ export const shareDocument = asyncHandler(async (req, res) => {
         },
       },
     },
+  );
+
+  await Promise.all(
+    [...userMap.values()].map((recipientId) =>
+      notifyUser({
+        recipientId,
+        type: NOTIFICATION_TYPES.DOC_SHARED,
+        sender: { id: sender.id, name: sender.firstName + " " + sender.lastName },
+        document: { id: document._id, name: document.name },
+      }),
+    ),
   );
 
   return res.status(200).json({

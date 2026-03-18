@@ -18,6 +18,7 @@ const Header = () => {
     useGlobalSearch(searchQuery);
   const searchRef = useRef(null);
   const notificationRef = useRef(null);
+  const { unreadCount, ripple } = useSelector((state) => state.notifications);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -87,10 +88,20 @@ const Header = () => {
         >
           <button
             onClick={toggleNotifications}
-            className={`text-text-muted p-2.5 rounded-xl transition-all hover:bg-bg-hover hover:text-text-main group relative border ${isNotificationsOpen ? "border-primary/50 bg-primary/5 text-primary" : "border-transparent hover:border-border-muted"}`}
+            className={`cursor-pointer text-text-muted p-2.5 rounded-xl transition-all hover:bg-bg-hover hover:text-text-main group relative border ${isNotificationsOpen ? "border-yellow-500/50 bg-yellow-500/5 text-yellow-500" : "border-transparent hover:border-border-muted"}`}
           >
-            <Bell size={20} strokeWidth={1.5} />
-            <div className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-primary rounded-full border-2 border-bg-main" />
+            {unreadCount > 0 && ripple && (
+              <span className="absolute inset-0 rounded-xl bg-yellow-300/40 animate-ping"></span>
+            )}
+            <div className="relative flex items-center justify-center">
+              <Bell size={22} strokeWidth={1.5} className="text-yellow-500" />
+
+              {unreadCount > 0 && (
+                <span className="absolute -top-2 -right-1 bg-red-500 font-semibold size-4 rounded-full flex items-center justify-center text-white text-[10px]">
+                  {unreadCount > 99 ? "99+" : unreadCount}
+                </span>
+              )}
+            </div>
           </button>
 
           <NotificationDropdown

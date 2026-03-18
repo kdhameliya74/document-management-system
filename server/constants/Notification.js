@@ -11,6 +11,7 @@ export const DELIVERY_STATUS = {
   PENDING: "pending",
   SENT: "sent",
   FAILED: "failed",
+  DELIVERED: "delivered",
 };
 
 export const NOTIFICATION_MESSAGES_TEMPLATES = {
