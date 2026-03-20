@@ -108,3 +108,8 @@ export const USER_PROFILE_MESSAGES = Object.freeze({
   PASSWORD_SUCCESS: "Password updated successfully",
   PASSWORD_FAILED: "Failed to update password",
 });
+
+export const NOTIFICATION_MESSAGES = Object.freeze({
+  MARK_ONE_READ_FAILED: "Failed to mark notification as read",
+  MARK_ALL_READ_FAILED: "Failed to mark all notifications as read",
+});
