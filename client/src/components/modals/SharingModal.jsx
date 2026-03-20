@@ -57,15 +57,18 @@ const SharingModal = ({ item, onClose }) => {
     setNewCollaborators((prev) => prev.filter((_, i) => i !== index));
   }, []);
 
-  const handleRemoveExistingCollaborator = useCallback(async (userId) => {
-    try {
-      await dispatch(removeCollaborator({ userId, docId: item.id })).unwrap();
-      setCollaborators((prev) => prev.filter((c) => c.user !== userId));
-      toast.success(SHARE_MESSAGES.REMOVE_SUCCESS);
-    } catch (err) {
-      toast.error(err);
-    }
-  }, []);
+  const handleRemoveExistingCollaborator = useCallback(
+    async (userId) => {
+      try {
+        await dispatch(removeCollaborator({ userId, docId: item.id })).unwrap();
+        setCollaborators((prev) => prev.filter((c) => c.user !== userId));
+        toast.success(SHARE_MESSAGES.REMOVE_SUCCESS);
+      } catch (err) {
+        toast.error(err);
+      }
+    },
+    [dispatch, item.id],
+  );
 
   return (
     <div className="flex flex-col gap-6">

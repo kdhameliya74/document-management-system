@@ -679,7 +679,7 @@ export const removeCollaborator = asyncHandler(async (req, res) => {
   }
 
   const result = await Document.updateOne(
-    { _id: document._id, 'sharedWith.user': userId, },
+    { _id: document._id, "sharedWith.user": userId },
     {
       $pull: {
         sharedWith: { user: userId },
