@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import NotificationService from "@/services/notification.service";
 import { logError } from "@/helpers/utils";
+import { NOTIFICATION_MESSAGES } from "@/helpers/constants";
 
 export const fetchNotifications = createAsyncThunk(
   "notifications/fetchPage",
@@ -27,7 +28,7 @@ export const markOneRead = createAsyncThunk(
       return id;
     } catch (err) {
       logError(err);
-      return rejectWithValue(err);
+      return rejectWithValue(NOTIFICATION_MESSAGES.MARK_ONE_READ_FAILED);
     }
   },
 );
@@ -37,9 +38,10 @@ export const markAllRead = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       await NotificationService.markAllRead();
+      return true;
     } catch (err) {
       logError(err);
-      return rejectWithValue(err);
+      return rejectWithValue(NOTIFICATION_MESSAGES.MARK_ALL_READ_FAILED);
     }
   },
 );
@@ -122,7 +124,6 @@ const notificationSlice = createSlice({
       const notif = state.items.find((n) => n.id === action.payload);
       if (notif && !notif.isRead) {
         notif.isRead = true;
-        notif.readAt = new Date().toISOString();
         state.unreadCount = Math.max(0, state.unreadCount - 1);
       }
     });
@@ -131,13 +132,6 @@ const notificationSlice = createSlice({
     builder.addCase(markAllRead.fulfilled, (state) => {
       state.items = state.items.map((n) => ({ ...n, isRead: true }));
       state.unreadCount = 0;
-    });
-
-    // delete
-    builder.addCase(deleteNotification.fulfilled, (state, action) => {
-      const notif = state.items.find((n) => n.id === action.payload);
-      if (notif && !notif.isRead) state.unreadCount = Math.max(0, state.unreadCount - 1);
-      state.items = state.items.filter((n) => n.id !== action.payload);
     });
   },
 });

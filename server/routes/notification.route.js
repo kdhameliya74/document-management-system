@@ -12,6 +12,6 @@ router.get("/", protect, getNotifications);
 
 router.patch("/:id/read", protect, markOneRead);
 
-router.patch("/mark-all-read", protect, markAllRead);
+router.patch("/read-all", protect, markAllRead);
 
 export default router;

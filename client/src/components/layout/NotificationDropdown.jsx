@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { fetchNotifications } from "@/store/notification.slice";
-import { Bell, Share, Info, AlertCircle, Loader2 } from "lucide-react";
+import { fetchNotifications, markAllRead, markOneRead } from "@/store/notification.slice";
+import { Bell, Share, Info, AlertCircle, Loader2, CheckCheck } from "lucide-react";
 import { logError } from "@/helpers/utils";
 import { format } from "date-fns";
 
@@ -54,7 +54,10 @@ const NotificationDropdown = ({ isOpen }) => {
     >
       <div className="px-4 py-3 border-b border-border-muted flex items-center justify-between bg-bg-main/50 sticky top-0 z-10 backdrop-blur-sm">
         <span className="text-sm font-bold text-text-main">Notifications</span>
-        <button className="text-[11px] font-semibold text-primary hover:text-primary-dark transition-colors px-2 py-1 rounded-lg hover:bg-primary/5">
+        <button
+          onClick={() => dispatch(markAllRead())}
+          className="cursor-pointer text-[11px] font-semibold text-primary hover:text-primary-dark transition-colors px-2 py-1 rounded-lg hover:bg-primary/5"
+        >
           Mark all as read
         </button>
       </div>
@@ -87,10 +90,22 @@ const NotificationDropdown = ({ isOpen }) => {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2 mb-0.5">
                     <p
-                      className={`text-sm font-medium ${notification.read ? "text-text-main" : "text-primary"}`}
+                      className={`text-sm font-medium ${notification.isRead ? "text-text-main" : "text-primary"}`}
                     >
                       {notification.message}
                     </p>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        dispatch(markOneRead(notification.id));
+                      }}
+                      className={`opacity-0 cursor-pointer group-hover:opacity-100 transition-opacity shrink-0 p-1 rounded-full hover:bg-primary/10 ${
+                        notification.isRead ? "invisible" : ""
+                      }`}
+                      title="Mark as read"
+                    >
+                      <CheckCheck className="w-3.5 h-3.5 text-primary" />
+                    </button>
                     <span className="text-[10px] text-text-dim whitespace-nowrap">
                       {format(new Date(notification.createdAt), "MMM d")}
                     </span>
@@ -119,11 +134,11 @@ const NotificationDropdown = ({ isOpen }) => {
         )}
       </div>
 
-      <div className="p-2 border-t border-border-muted bg-bg-main/50">
+      {/* <div className="p-2 border-t border-border-muted bg-bg-main/50">
         <button className="w-full py-2 text-xs font-semibold text-text-main hover:text-primary transition-colors text-center">
           View all notifications
         </button>
-      </div>
+      </div> */}
     </div>
   );
 };

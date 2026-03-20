@@ -50,7 +50,11 @@ export const getNotifications = asyncHandler(async (req, res) => {
     const { page, limit } = req.query;
     const notifications = await Notification.getNotifications(userId, page, limit);
     const hasMore = (await Notification.countDocuments({ recipientId: userId })) > page * limit;
-    const response = { success: true, notifications, hasMore };
+    const response = {
+      success: true,
+      notifications: notifications.map((n) => ({ ...n, id: n._id })),
+      hasMore,
+    };
     if (+page === 1) {
       const cached = await getUnreadCount(userId?.toString());
       if (cached) {
@@ -80,7 +84,8 @@ export const markOneRead = asyncHandler(async (req, res) => {
     await notification.save();
     await decrementUnreadCount(req.user.id);
     res.status(200).json({ success: true });
-  } catch (_) {
+  } catch (error) {
+    console.log(error);
     res.status(500).json({ success: false, message: "Failed to mark notification as read" });
   }
 });
@@ -90,7 +95,7 @@ export const markAllRead = asyncHandler(async (req, res) => {
     const userId = req.user.id;
     await Notification.markAllRead(userId);
     await resetUnreadCount(userId?.toString());
-    res.json({ success: true });
+    res.json({ success: true, message: "All notifications marked as read" });
   } catch (_) {
     res.status(500).json({ success: false, message: "Failed to mark all notifications as read" });
   }
