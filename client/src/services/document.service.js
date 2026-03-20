@@ -59,6 +59,11 @@ const DocumentService = {
     return response.data;
   },
 
+  removeCollaborator: async (docId, userId) => {
+    const response = await api.delete(`/documents/${docId}/share/${userId}`);
+    return response.data;
+  },
+
   getURL: async (docId) => {
     const response = await api.get(`/documents/${docId}/url`);
     return response.data;

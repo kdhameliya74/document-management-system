@@ -1,11 +1,11 @@
 import React, { useState, useCallback } from "react";
-import { Mail, Loader, Share2, ChevronDown, Plus } from "lucide-react";
+import { Mail, Loader, ChevronDown, Plus } from "lucide-react";
 import { DEFAULT_MESSAGES, PERMISSION_LEVELS, SHARE_MESSAGES } from "@/helpers/constants.js";
 import toast from "react-hot-toast";
 import UserTag from "@/components/common/UserTag";
 import { isValidEmail } from "@/helpers/utils";
 import { useDispatch } from "react-redux";
-import { shareDocument } from "@/store/documents.slice";
+import { shareDocument, removeCollaborator } from "@/store/documents.slice";
 
 const SharingModal = ({ item, onClose }) => {
   const dispatch = useDispatch();
@@ -16,7 +16,7 @@ const SharingModal = ({ item, onClose }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  const collaborators = item?.sharedWith || [];
+  const [collaborators, setCollaborators] = useState(item?.sharedWith || []);
 
   const handleShare = async () => {
     if (newCollaborators.length === 0) {
@@ -53,9 +53,22 @@ const SharingModal = ({ item, onClose }) => {
     setErrors({});
   };
 
-  const handleRemoveCollaborator = useCallback((index) => {
+  const handleRemoveNewCollaborator = useCallback((index) => {
     setNewCollaborators((prev) => prev.filter((_, i) => i !== index));
   }, []);
+
+  const handleRemoveExistingCollaborator = useCallback(
+    async (userId) => {
+      try {
+        await dispatch(removeCollaborator({ userId, docId: item.id })).unwrap();
+        setCollaborators((prev) => prev.filter((c) => c.user !== userId));
+        toast.success(SHARE_MESSAGES.REMOVE_SUCCESS);
+      } catch (err) {
+        toast.error(err);
+      }
+    },
+    [dispatch, item.id],
+  );
 
   return (
     <div className="flex flex-col gap-6">
@@ -125,9 +138,8 @@ const SharingModal = ({ item, onClose }) => {
             {newCollaborators.map((collaborator, index) => (
               <UserTag
                 key={`new-${index}`}
-                label={collaborator.email}
-                subLabel={collaborator.permission}
-                onClose={() => handleRemoveCollaborator(index)}
+                collaborator={collaborator}
+                onRemove={() => handleRemoveNewCollaborator(index)}
               />
             ))}
           </div>
@@ -152,11 +164,11 @@ const SharingModal = ({ item, onClose }) => {
         </label>
         <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto pr-1">
           {collaborators.length > 0 ? (
-            collaborators.map((collab, index) => (
+            collaborators.map((collab) => (
               <UserTag
-                key={`existing-${index}`}
-                label={collab.email}
-                subLabel={collab.permission}
+                key={collab.user}
+                collaborator={collab}
+                onRemove={(collaborator) => handleRemoveExistingCollaborator(collaborator.user)}
               />
             ))
           ) : (

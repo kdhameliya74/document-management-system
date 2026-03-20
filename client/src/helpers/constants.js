@@ -94,6 +94,9 @@ export const PERMISSION_LEVELS = Object.freeze({
 export const SHARE_MESSAGES = Object.freeze({
   SHARE_SUCCESS: "Document shared successfully!",
   SHARE_FAILED: "Failed to share document!",
+
+  REMOVE_SUCCESS: "Collaborator removed successfully!",
+  REMOVE_FAILED: "Failed to remove collaborator!",
 });
 
 export const USER_PROFILE_MESSAGES = Object.freeze({

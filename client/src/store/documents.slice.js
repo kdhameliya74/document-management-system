@@ -221,10 +221,10 @@ export const shareDocument = createAsyncThunk(
   "documents/share",
   async ({ id, collaborators }, { rejectWithValue }) => {
     try {
-      await DocumentService.shareDocument(id, collaborators);
+      const data = await DocumentService.shareDocument(id, collaborators);
       return {
         id,
-        collaborators,
+        collaborators: data.sharedWith,
       };
     } catch (err) {
       logError(err);
@@ -246,6 +246,27 @@ export const getURL = createAsyncThunk("documents/get-url", async (docId, { reje
     return rejectWithValue(ERROR_CODES_WITH_MESSAGES[err?.code] || FILE_MESSAGES.DOWNLOAD_FAILED);
   }
 });
+
+/*
+|--------------------------------------------------------------------------
+| removeCollaborator
+|--------------------------------------------------------------------------
+*/
+export const removeCollaborator = createAsyncThunk(
+  "documents/remove-collaborator",
+  async ({ userId, docId }, { rejectWithValue }) => {
+    try {
+      await DocumentService.removeCollaborator(docId, userId);
+      return {
+        userId,
+        docId,
+      };
+    } catch (err) {
+      logError(err);
+      return rejectWithValue(ERROR_CODES_WITH_MESSAGES[err?.code] || SHARE_MESSAGES.REMOVE_FAILED);
+    }
+  },
+);
 
 const ensureDocument = (state, id, data, rootId) => {
   const docState = state.documents;
@@ -449,6 +470,14 @@ const documentsSlice = createSlice({
         const { collaborators, id } = action.payload;
         if (state.documents[id]) {
           state.documents[id].sharedWith.push(...collaborators);
+        }
+      })
+      .addCase(removeCollaborator.fulfilled, (state, action) => {
+        const { userId, docId } = action.payload;
+        if (state.documents[docId]) {
+          state.documents[docId].sharedWith = state.documents[docId].sharedWith.filter(
+            (collaborator) => collaborator.user !== userId,
+          );
         }
       });
   },

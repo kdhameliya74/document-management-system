@@ -17,6 +17,7 @@ import {
   getDocumentURL,
   downloadDocument,
   searchDocuments,
+  removeCollaborator,
 } from "../controllers/document.controller.js";
 
 const router = express.Router();
@@ -55,6 +56,13 @@ router.patch("/:id/restore", protect, validateId("id"), checkPermission("edit"),
 
 //Share document
 router.post("/:id/share", protect, validateId("id"), checkPermission("share"), shareDocument);
+router.delete(
+  "/:id/share/:userId",
+  protect,
+  validateId("id"),
+  checkPermission("share"),
+  removeCollaborator,
+);
 
 //Move document
 router.patch("/:id/move", protect, validateId("id"), checkPermission("move"), moveDocument);

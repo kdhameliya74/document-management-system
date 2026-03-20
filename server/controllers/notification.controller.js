@@ -52,7 +52,14 @@ export const getNotifications = asyncHandler(async (req, res) => {
     const hasMore = (await Notification.countDocuments({ recipientId: userId })) > page * limit;
     const response = {
       success: true,
-      notifications: notifications.map((n) => ({ ...n, id: n._id })),
+      notifications: notifications.map((n) => ({
+        id: n._id,
+        message: n.message,
+        type: n.type,
+        priority: n.priority,
+        createdAt: n.createdAt,
+        isRead: n.isRead,
+      })),
       hasMore,
     };
     if (+page === 1) {

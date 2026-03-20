@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchNotifications, markAllRead, markOneRead } from "@/store/notification.slice";
-import { Bell, Share, Info, AlertCircle, Loader2, CheckCheck } from "lucide-react";
+import { Bell, Share, Info, AlertCircle, Loader2, CheckCheck, X } from "lucide-react";
 import { logError } from "@/helpers/utils";
 import { format } from "date-fns";
 
@@ -9,8 +9,8 @@ const NotificationIcon = ({ type, className }) => {
   switch (type) {
     case "doc_shared":
       return <Share className={`text-green-500 ${className}`} size={16} />;
-    // case "doc_comment":
-    //   return <Comment className={`text-yellow-500 ${className}`} size={16} />;
+    case "doc_shared_removed":
+      return <X className={`text-red-500 ${className}`} size={16} />;
     case "doc_deleted":
       return <AlertCircle className={`text-red-500 ${className}`} size={16} />;
     default:
@@ -50,7 +50,7 @@ const NotificationDropdown = ({ isOpen }) => {
   return (
     <div
       ref={dropdownRef}
-      className="absolute top-full right-0 mt-2 w-80 bg-bg-panel border border-border-main rounded-2xl shadow-xl overflow-hidden z-50 flex flex-col max-h-[500px] animate-in fade-in slide-in-from-top-2 duration-200"
+      className="absolute top-full right-0 mt-2 w-80 border border-border-main rounded-2xl shadow-xl overflow-hidden z-50 flex flex-col max-h-[500px] animate-in fade-in slide-in-from-top-2 duration-200"
     >
       <div className="px-4 py-3 border-b border-border-muted flex items-center justify-between bg-bg-main/50 sticky top-0 z-10 backdrop-blur-sm">
         <span className="text-sm font-bold text-text-main">Notifications</span>
@@ -63,7 +63,7 @@ const NotificationDropdown = ({ isOpen }) => {
       </div>
 
       <div
-        className="flex-1 overflow-y-auto py-2 divide-y divide-border-muted/30"
+        className="flex-1 overflow-y-auto divide-y divide-border-muted/70"
         onScroll={handleScroll}
       >
         {notifications.length === 0 && !loading ? (
@@ -78,7 +78,7 @@ const NotificationDropdown = ({ isOpen }) => {
           <>
             {notifications.map((notification) => (
               <div
-                key={notification.id || notification._id}
+                key={notification.id + notification.createdAt}
                 className={`px-4 py-3 hover:bg-bg-hover cursor-pointer transition-colors flex gap-3 relative group ${!notification.read ? "bg-primary/5" : ""}`}
               >
                 {!notification.isRead && (

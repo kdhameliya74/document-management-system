@@ -388,6 +388,8 @@ export const updateDocument = asyncHandler(async (req, res) => {
 // @route   DELETE /api/documents/:id
 export const trashDocument = asyncHandler(async (req, res) => {
   const doc = req.document;
+  const sharedWith = doc.sharedWith;
+  const sender = req.user;
 
   const trashedAt = new Date();
   const pathRegex = new RegExp(`^${doc.path.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(/|$)`);
@@ -397,6 +399,19 @@ export const trashDocument = asyncHandler(async (req, res) => {
     { path: { $regex: pathRegex }, isTrashed: false },
     { $set: { isTrashed: true, trashedAt } },
   );
+
+  if (sharedWith.length > 0) {
+    await Promise.all(
+      sharedWith.map((user) =>
+        notifyUser({
+          recipientId: user.user,
+          type: NOTIFICATION_TYPES.DOC_DELETED,
+          sender: { id: sender.id, name: sender.firstName + " " + sender.lastName },
+          document: { id: doc._id, name: doc.name },
+        }),
+      ),
+    );
+  }
 
   return res.status(200).json({ success: true, message: "Document moved to trash successfully" });
 });
@@ -646,7 +661,44 @@ export const shareDocument = asyncHandler(async (req, res) => {
 
   return res.status(200).json({
     success: true,
+    sharedWith: newCollaborators,
     message: "Document shared successfully",
+  });
+});
+
+export const removeCollaborator = asyncHandler(async (req, res) => {
+  const { userId } = req.params;
+  const document = req.document;
+  const sender = req.user;
+
+  if (!document) {
+    return res.status(404).json({
+      success: false,
+      message: "Document not found",
+    });
+  }
+
+  const result = await Document.updateOne(
+    { _id: document._id, "sharedWith.user": userId },
+    {
+      $pull: {
+        sharedWith: { user: userId },
+      },
+    },
+  );
+
+  if (result.matchedCount === 1) {
+    await notifyUser({
+      recipientId: userId,
+      type: NOTIFICATION_TYPES.DOC_SHARED_REMOVED,
+      sender: { id: sender.id, name: sender.firstName + " " + sender.lastName },
+      document: { id: document._id, name: document.name },
+    });
+  }
+
+  return res.status(200).json({
+    success: true,
+    message: "Collaborator removed successfully",
   });
 });
 
