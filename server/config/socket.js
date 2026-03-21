@@ -61,7 +61,7 @@ export const initSocket = async (httpServer) => {
     });
 
     socket.on("disconnect", async () => {
-      // console.log("[Socket] User disconnected", socket.id);
+      console.log("[Socket] User disconnected", socket.id);
       await setOffline(socket.user.id);
     });
   });
