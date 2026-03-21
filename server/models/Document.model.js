@@ -100,7 +100,7 @@ const documentSchema = new mongoose.Schema(
   },
 );
 
-// ─── Indexes (compound, scalable) ──────────────────────────────────────────
+
 // Primary browse: list children of a folder, scoped to owner, not trashed
 documentSchema.index({ owner: 1, parentId: 1, isTrashed: 1 });
 

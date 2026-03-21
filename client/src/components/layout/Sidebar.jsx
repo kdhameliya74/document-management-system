@@ -59,11 +59,6 @@ const Sidebar = () => {
           <span>Shared with me</span>
         </NavLink>
 
-        <NavLink to={ROUTES.APP.RECENT} className={navItemClass}>
-          <Clock size={18} className="group-hover:scale-110 transition-transform" />
-          <span>Recent</span>
-        </NavLink>
-
         <NavLink
           to={ROUTES.APP.TRASH}
           className={({ isActive }) => navItemClass({ isActive: isActive || isTrashActive })}
