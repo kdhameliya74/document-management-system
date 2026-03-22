@@ -8,6 +8,7 @@ import FileIcon from "@/components/common/FileIcon";
 import { truncateName } from "@/helpers/utils";
 import { FOLDER_COLORS } from "@/helpers/constants";
 import { useDownloadDocument } from "@/hooks/useDownloadDocument";
+import UserTag from "@/components/common/UserTag";
 
 const RightSidebar = () => {
   const dispatch = useDispatch();
@@ -26,6 +27,8 @@ const RightSidebar = () => {
   const type = isFolder ? "folder" : "file";
 
   const isOwner = selectedItem?.owner === user?.id || selectedItem?.owner?.id === user?.id;
+  const sharedWithMe = selectedItem?.sharedWith || [];
+
   const permissions =
     selectedItem?.permissions ||
     (isOwner
@@ -98,7 +101,7 @@ const RightSidebar = () => {
 
   return (
     <>
-      <div className="w-[320px] absolute right-0 bg-bg-panel/60 backdrop-blur-xl border-l border-border-main flex flex-col h-full overflow-hidden text-text-main animate-in slide-in-from-right duration-500 z-50">
+      <div className="w-[370px] absolute right-0 bg-bg-panel/60 backdrop-blur-xl border-l border-border-main flex flex-col h-full overflow-hidden text-text-main animate-in slide-in-from-right duration-500 z-50">
         <div className="p-5 border-b border-border-muted flex items-center justify-between">
           <h3 className="text-xl font-black tracking-tight">{truncateName(selectedItem, 20)}</h3>
           <button
@@ -109,7 +112,7 @@ const RightSidebar = () => {
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-5">
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-3">
           <div className="flex flex-col items-center mb-5 text-center">
             <div className="w-[140px] h-[140px] bg-bg-hover rounded-[2.5rem] flex items-center justify-center mb-6 border border-border-main shadow-inner relative group">
               <div className="absolute inset-0 bg-primary/5 blur-3xl rounded-full opacity-50" />
@@ -151,7 +154,20 @@ const RightSidebar = () => {
             ))}
           </div>
 
-          <div className="flex flex-col gap-4 p-5 rounded-3xl bg-bg-panel/50 border border-border-muted/50">
+          {sharedWithMe.length > 0 && (
+            <div className="w-full mb-2 p-3 rounded-3xl bg-bg-panel/50 border border-border-muted/50">
+              <div className="text-xs font-black uppercase tracking-[0.15em] text-text-dim mb-1.5">
+                Shared With
+              </div>
+              <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto pr-1">
+                {sharedWithMe.map((collaborator, index) => (
+                  <UserTag key={`new-${index}`} collaborator={collaborator} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="flex flex-col gap-4 p-3 rounded-3xl bg-bg-panel/50 border border-border-muted/50">
             <div className="flex gap-4 items-start">
               <div className="w-8 h-8 rounded-lg bg-bg-hover flex items-center justify-center text-primary/70">
                 <Info size={16} />
