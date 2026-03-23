@@ -7,6 +7,25 @@ import { USER_PROFILE_MESSAGES } from "@/helpers/constants";
 import toast from "react-hot-toast";
 import authService from "@/services/auth.service";
 import { format } from "date-fns";
+import userAvatar from "@/assets/avatar.png";
+
+const createThumbnail = (file, width = 150, height = 150) => {
+  return new Promise((resolve) => {
+    const img = new Image()
+    const canvas = document.createElement('canvas')
+    const ctx = canvas.getContext('2d')
+
+    img.onload = () => {
+      canvas.width = width
+      canvas.height = height
+      ctx.drawImage(img, 0, 0, width, height)
+      canvas.toBlob((blob) => {
+        resolve(blob)
+      }, 'image/webp', 0.8)
+    }
+    img.src = URL.createObjectURL(file)
+  })
+}
 
 const UserProfilePage = () => {
   const dispatch = useDispatch();
@@ -18,7 +37,7 @@ const UserProfilePage = () => {
     firstName: user?.firstName || "",
     lastName: user?.lastName || "",
   });
-  const [avatarPreview, setAvatarPreview] = useState(user?.avatarUrl || null);
+  const [avatarPreview, setAvatarPreview] = useState(user?.avatarUrl);
 
   const [passwords, setPasswords] = useState({
     currentPassword: "",
@@ -44,17 +63,18 @@ const UserProfilePage = () => {
       }
       try {
         const loadingToast = toast.loading(USER_PROFILE_MESSAGES.AVATAR_UPLOAD_LOADING);
+        const thumbnailBlob = await createThumbnail(file, 150, 150)
         const { uploadUrl, storageKey, bucket } = await authService.getAvatarUploadUrl(file.name);
 
         await fetch(uploadUrl, {
           method: "PUT",
-          body: file,
+          body: thumbnailBlob,
           headers: {
-            "Content-Type": file.type,
+            "Content-Type": "image/webp",
           },
         });
 
-        setAvatarPreview(URL.createObjectURL(file));
+        setAvatarPreview(URL.createObjectURL(thumbnailBlob));
         setDetails((prev) => ({
           ...prev,
           avatar: { storageKey, bucket },
@@ -126,7 +146,7 @@ const UserProfilePage = () => {
             >
               <div className="w-32 h-32 rounded-3xl overflow-hidden border-4 border-primary/20 bg-bg-panel flex items-center justify-center text-primary text-4xl font-bold shadow-premium group-hover:border-primary/50 transition-all">
                 {avatarPreview ? (
-                  <img src={avatarPreview} alt="Profile" className="w-full h-full object-cover" />
+                  <img src={avatarPreview || userAvatar} alt="Profile" className="w-full h-full object-cover" onError={(e) => { e.target.src = userAvatar; }} />
                 ) : (
                   details.firstName?.charAt(0).toUpperCase()
                 )}

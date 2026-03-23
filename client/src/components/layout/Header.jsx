@@ -7,6 +7,7 @@ import ROUTES from "@/utils/routes";
 import { useGlobalSearch } from "@/hooks/useGloablSearch";
 import GlobalSearchResults from "./GlobalSearchResults";
 import NotificationDropdown from "./NotificationDropdown";
+import userAvatar from "@/assets/avatar.png";
 
 const Header = () => {
   const navigate = useNavigate();
@@ -124,7 +125,7 @@ const Header = () => {
           </div>
           <div className="w-10 h-10 bg-indigo-600/10 border border-indigo-500/20 rounded-2xl flex items-center justify-center text-primary font-bold text-sm shadow-lg shadow-indigo-500/5 group-hover:scale-105 transition-all overflow-hidden group-hover:shadow-primary/20">
             {user?.avatarUrl ? (
-              <img src={user.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+              <img src={user.avatarUrl || userAvatar} alt="Avatar" onError={(e) => { e.target.src = userAvatar; }} className="w-full h-full object-cover" />
             ) : (
               user?.firstName?.charAt(0).toUpperCase() || "U"
             )}
