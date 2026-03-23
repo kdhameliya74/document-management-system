@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import mongooseLeanVirtuals from "mongoose-lean-virtuals";
 import {
   NOTIFICATION_TYPES,
   DELIVERY_STATUS,
@@ -103,6 +104,8 @@ notificationSchema.statics.buildMessage = function (type, senderName, documentNa
 notificationSchema.statics.getUnreadCount = function (recipientId) {
   return this.countDocuments({ recipientId, isRead: false });
 };
+
+notificationSchema.plugin(mongooseLeanVirtuals);
 
 const Notification = mongoose.model("Notification", notificationSchema);
 

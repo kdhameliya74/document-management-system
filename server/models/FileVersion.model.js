@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import mongooseLeanVirtuals from "mongoose-lean-virtuals";
 
 const fileVersionSchema = new mongoose.Schema(
   {
@@ -67,6 +68,8 @@ fileVersionSchema.statics.createVersion = async function (fileId, versionData) {
     isCurrent: true,
   });
 };
+
+fileVersionSchema.plugin(mongooseLeanVirtuals);
 
 const FileVersion = mongoose.model("FileVersion", fileVersionSchema);
 
