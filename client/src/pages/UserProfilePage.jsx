@@ -9,23 +9,25 @@ import authService from "@/services/auth.service";
 import { format } from "date-fns";
 import userAvatar from "@/assets/avatar.png";
 
-const createThumbnail = (file, width = 150, height = 150) => {
-  return new Promise((resolve) => {
-    const img = new Image()
-    const canvas = document.createElement('canvas')
-    const ctx = canvas.getContext('2d')
+// TODO: Use in next PR
 
-    img.onload = () => {
-      canvas.width = width
-      canvas.height = height
-      ctx.drawImage(img, 0, 0, width, height)
-      canvas.toBlob((blob) => {
-        resolve(blob)
-      }, 'image/webp', 0.8)
-    }
-    img.src = URL.createObjectURL(file)
-  })
-}
+// const createThumbnail = (file, width = 150, height = 150) => {
+//   return new Promise((resolve) => {
+//     const img = new Image()
+//     const canvas = document.createElement('canvas')
+//     const ctx = canvas.getContext('2d')
+
+//     img.onload = () => {
+//       canvas.width = width
+//       canvas.height = height
+//       ctx.drawImage(img, 0, 0, width, height)
+//       canvas.toBlob((blob) => {
+//         resolve(blob)
+//       }, 'image/webp', 0.8)
+//     }
+//     img.src = URL.createObjectURL(file)
+//   })
+// }
 
 const UserProfilePage = () => {
   const dispatch = useDispatch();
@@ -63,18 +65,18 @@ const UserProfilePage = () => {
       }
       try {
         const loadingToast = toast.loading(USER_PROFILE_MESSAGES.AVATAR_UPLOAD_LOADING);
-        const thumbnailBlob = await createThumbnail(file, 150, 150)
+        // const thumbnailBlob = await createThumbnail(file, 150, 150)
         const { uploadUrl, storageKey, bucket } = await authService.getAvatarUploadUrl(file.name);
 
         await fetch(uploadUrl, {
           method: "PUT",
-          body: thumbnailBlob,
+          body: file,
           headers: {
-            "Content-Type": "image/webp",
+            "Content-Type": file.type,
           },
         });
 
-        setAvatarPreview(URL.createObjectURL(thumbnailBlob));
+        setAvatarPreview(URL.createObjectURL(file));
         setDetails((prev) => ({
           ...prev,
           avatar: { storageKey, bucket },
