@@ -148,7 +148,14 @@ const UserProfilePage = () => {
             >
               <div className="w-32 h-32 rounded-3xl overflow-hidden border-4 border-primary/20 bg-bg-panel flex items-center justify-center text-primary text-4xl font-bold shadow-premium group-hover:border-primary/50 transition-all">
                 {avatarPreview ? (
-                  <img src={avatarPreview || userAvatar} alt="Profile" className="w-full h-full object-cover" onError={(e) => { e.target.src = userAvatar; }} />
+                  <img
+                    src={avatarPreview || userAvatar}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.target.src = userAvatar;
+                    }}
+                  />
                 ) : (
                   details.firstName?.charAt(0).toUpperCase()
                 )}
