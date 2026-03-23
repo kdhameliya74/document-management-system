@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import mongooseLeanVirtuals from "mongoose-lean-virtuals";
 import { FILE_VALIDATION, FILE_UPLOAD_STATUS } from "../constants/File.js";
 
 import {
@@ -42,6 +43,7 @@ const documentSchema = new mongoose.Schema(
     isStarred: {
       type: Boolean,
       default: false,
+      select: false,
     },
     isTrashed: {
       type: Boolean,
@@ -50,15 +52,18 @@ const documentSchema = new mongoose.Schema(
     trashedAt: {
       type: Date,
       default: null,
+      select: false,
     },
     tags: [
       {
         type: String,
         trim: true,
+        select: false,
       },
     ],
     description: {
       type: String,
+      select: false,
       maxlength: [1000, FILE_VALIDATION.DESCRIPTION_MAXLENGTH],
     },
     sharedWith: [
@@ -85,11 +90,13 @@ const documentSchema = new mongoose.Schema(
     isPublic: {
       type: Boolean,
       default: false,
+      select: false,
     },
     publicLink: {
       type: String,
       unique: true,
       sparse: true,
+      select: false,
     },
   },
   {
@@ -200,6 +207,8 @@ documentSchema.post("save", async function (doc) {
   );
 });
 
+documentSchema.plugin(mongooseLeanVirtuals);
+
 const Document = mongoose.model("Document", documentSchema);
 const Folder = Document.discriminator(
   DOC_TYPES.FOLDER,
@@ -234,18 +243,22 @@ const File = Document.discriminator(
     downloadCount: {
       type: Number,
       default: 0,
+      select: false,
     },
     lastAccessedAt: {
       type: Date,
       default: null,
+      select: false,
     },
     storageKey: {
       type: String, // Actual object key on S3
+      select: false,
     },
     storageProvider: {
       type: String,
       enum: ["s3"],
       default: "s3",
+      select: false,
     },
     bucket: {
       type: String,

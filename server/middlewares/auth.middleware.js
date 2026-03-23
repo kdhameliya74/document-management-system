@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.model.js";
+import { USER_EXCLUDE } from "../config/selectFields.js";
 
 // Protect routes - verify JWT token
 export const protect = async (req, res, next) => {
@@ -28,7 +29,7 @@ export const protect = async (req, res, next) => {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
       // Get user from token
-      req.user = await User.findById(decoded.id).select("-password -refreshToken");
+      req.user = await User.findById(decoded.id).select(`${USER_EXCLUDE}`).lean({ virtuals: true });
 
       if (!req.user) {
         return res.status(401).json({

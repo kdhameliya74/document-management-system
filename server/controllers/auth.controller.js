@@ -151,27 +151,13 @@ export const getMe = asyncHandler(async (req, res, _next) => {
     }
   }
 
-  const userObj = user.toObject();
+  const userObj = user;
   if (avatarUrl) {
     userObj.avatarUrl = avatarUrl;
   }
-
   res.status(200).json({
     success: true,
-    user: {
-      id: userObj._id,
-      fullName: `${userObj.firstName} ${userObj.lastName}`,
-      firstName: userObj.firstName,
-      lastName: userObj.lastName,
-      email: userObj.email,
-      username: userObj.username,
-      avatar: userObj.avatar,
-      avatarUrl: userObj.avatarUrl,
-      role: userObj.role,
-      createdAt: userObj.createdAt,
-      lastLogin: userObj.lastLogin,
-      updatedAt: userObj.updatedAt,
-    },
+    user: userObj,
   });
 });
 

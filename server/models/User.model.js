@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import mongooseLeanVirtuals from "mongoose-lean-virtuals";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import {
@@ -117,6 +118,8 @@ userSchema.virtual("fullName").get(function () {
 // Ensure virtuals are included in JSON
 userSchema.set("toJSON", { virtuals: true });
 userSchema.set("toObject", { virtuals: true });
+
+userSchema.plugin(mongooseLeanVirtuals);
 
 const User = mongoose.model("User", userSchema);
 

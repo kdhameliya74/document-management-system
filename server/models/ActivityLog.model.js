@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import mongooseLeanVirtuals from "mongoose-lean-virtuals";
 
 const activityLogSchema = new mongoose.Schema(
   {
@@ -72,6 +73,8 @@ activityLogSchema.index({ action: 1, createdAt: -1 });
 
 // TTL index - automatically delete logs older than 90 days
 activityLogSchema.index({ createdAt: 1 }, { expireAfterSeconds: 7776000 }); // 90 days
+
+activityLogSchema.plugin(mongooseLeanVirtuals);
 
 const ActivityLog = mongoose.model("ActivityLog", activityLogSchema);
 

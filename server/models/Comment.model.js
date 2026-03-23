@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import mongooseLeanVirtuals from "mongoose-lean-virtuals";
 import { COMMENT_VALIDATION } from "../constants/Comment.js";
 
 const commentSchema = new mongoose.Schema(
@@ -67,6 +68,8 @@ commentSchema.virtual("replies", {
 
 commentSchema.set("toJSON", { virtuals: true });
 commentSchema.set("toObject", { virtuals: true });
+
+commentSchema.plugin(mongooseLeanVirtuals);
 
 const Comment = mongoose.model("Comment", commentSchema);
 
