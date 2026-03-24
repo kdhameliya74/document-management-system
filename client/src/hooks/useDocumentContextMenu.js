@@ -120,7 +120,7 @@ const useDocumentContextMenu = (menuFor = "dashboard", onMenuAction) => {
     deleteForever: {
       label: "Delete Forever",
       icon: Trash2,
-      onClick: () => onMenuActionHandler(TRASH_MENU_ACTIONS.DELETE),
+      onClick: () => openModal("deleteForever"),
     },
   };
 

@@ -1,8 +1,18 @@
 import React, { useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useLocation } from "react-router-dom";
-import { deleteDocument, setShowDetails, closeModal } from "@/store/documents.slice";
-import { DOCUMENT_MODES, FOLDER_MESSAGES, FILE_MESSAGES } from "@/helpers/constants";
+import {
+  deleteDocument,
+  setShowDetails,
+  closeModal,
+  permenantDeleteDocument,
+} from "@/store/documents.slice";
+import {
+  DOCUMENT_MODES,
+  FOLDER_MESSAGES,
+  FILE_MESSAGES,
+  TRASH_MESSAGES,
+} from "@/helpers/constants";
 import { Folder, Upload, Trash2, Move, Share2, Edit } from "lucide-react";
 
 import Modal from "@/components/common/Modal";
@@ -12,6 +22,7 @@ import DeleteModal from "@/components/modals/DeleteModal";
 import MoveModal from "@/components/modals/MoveModal";
 import SharingModal from "@/components/modals/SharingModal";
 import FileViewer from "@/components/modals/FileViewer";
+import toast from "react-hot-toast";
 
 const ModalManager = () => {
   const dispatch = useDispatch();
@@ -58,6 +69,26 @@ const ModalManager = () => {
           onSuccess: () => {
             if (showDetails) {
               dispatch(setShowDetails(false));
+            }
+          },
+        },
+      },
+      deleteForever: {
+        Component: DeleteModal,
+        title: `Delete ${modalProps.itemType === "folder" ? "Folder" : "File"} Forever?`,
+        icon: <Trash2 className="bg-red-500/10 text-red-500" />,
+        props: {
+          deleteText: "Delete forever",
+          item: modalProps.item,
+          itemType: modalProps.itemType,
+          note: "This action is irreversible. Are you sure you want to permanently delete this item?",
+          onDelete: async () => {
+            const toastId = toast.loading(TRASH_MESSAGES.DELETE_LOADING);
+            try {
+              await dispatch(permenantDeleteDocument(modalProps.item.id)).unwrap();
+              toast.success(TRASH_MESSAGES.DELETE_SUCCESS, { id: toastId });
+            } catch (err) {
+              toast.error(err, { id: toastId });
             }
           },
         },

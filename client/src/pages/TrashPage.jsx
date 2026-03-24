@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, useCallback } from "react";
+import React, { useEffect, useMemo, useCallback } from "react";
 import toast from "react-hot-toast";
 import { Trash2, ArrowLeft, ChevronRight } from "lucide-react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
@@ -7,7 +7,6 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   setSelectedId,
   restoreDocument,
-  permenantDeleteDocument,
   fetchDocuments,
   setModalProps,
   setActiveModal,
@@ -23,7 +22,6 @@ import ContextMenu from "@/components/common/ContextMenu";
 import FolderItem from "@/components/dashboard/FolderItem";
 import FileItem from "@/components/dashboard/FileItem";
 import Loading from "@/components/common/Loading";
-import DeleteModal from "@/components/modals/DeleteModal";
 import ResourceNotFound from "@/components/common/ResourceNotFound";
 import EmptyState from "@/components/common/EmptyState";
 import PageHeader from "@/components/common/PageHeader";
@@ -37,9 +35,6 @@ const TrashPage = () => {
   const { folderId = "trash" } = useParams();
 
   const { documents, selectedId, isLoading } = useSelector((state) => state.documentSystem);
-
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState(null);
 
   /* --------------------------- derived states ---------------------------- */
 
@@ -63,12 +58,9 @@ const TrashPage = () => {
     return currentFolder.path.split("/").filter(Boolean);
   }, [currentFolder]);
 
-  /* ------------------------------ actions -------------------------------- */
-
   const handleAsyncAction = useCallback(
     async ({ item, asyncAction, loadingMessage, successMessage }) => {
       const toastId = toast.loading(loadingMessage);
-
       try {
         await dispatch(asyncAction(item.id)).unwrap();
         toast.success(successMessage, { id: toastId });
@@ -89,11 +81,6 @@ const TrashPage = () => {
             loadingMessage: TRASH_MESSAGES.RESTORE_LOADING,
             successMessage: TRASH_MESSAGES.RESTORE_SUCCESS,
           }),
-
-        [TRASH_MENU_ACTIONS.DELETE]: () => {
-          setSelectedItem(item);
-          setIsDeleteModalOpen(true);
-        },
       };
 
       await actionsMap[action]?.();
@@ -284,38 +271,6 @@ const TrashPage = () => {
           />
         )}
       </div>
-
-      {/* Delete Modal */}
-
-      <DeleteModal
-        isOpen={isDeleteModalOpen}
-        deleteText="Delete forever"
-        title="Delete forever?"
-        item={selectedItem}
-        onClose={() => {
-          setIsDeleteModalOpen(false);
-          setSelectedItem(null);
-        }}
-        onDelete={() =>
-          handleAsyncAction({
-            item: selectedItem,
-            asyncAction: permenantDeleteDocument,
-            loadingMessage: TRASH_MESSAGES.DELETE_LOADING,
-            successMessage: TRASH_MESSAGES.DELETE_SUCCESS,
-          })
-        }
-      >
-        <DeleteModal.Body>
-          <div className="bg-red-500/5 border border-red-500/10 rounded-2xl p-6">
-            <p className="text-text-main text-base leading-relaxed">
-              {selectedItem?.name && (
-                <span className="font-medium text-red-400">"{selectedItem?.name}"</span>
-              )}{" "}
-              will be deleted forever. This action cannot be undone.
-            </p>
-          </div>
-        </DeleteModal.Body>
-      </DeleteModal>
     </>
   );
 };
