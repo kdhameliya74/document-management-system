@@ -9,25 +9,27 @@ import authService from "@/services/auth.service";
 import { format } from "date-fns";
 import userAvatar from "@/assets/avatar.png";
 
-// TODO: Use in next PR
+const createThumbnail = (file, width = 150, height = 150) => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
 
-// const createThumbnail = (file, width = 150, height = 150) => {
-//   return new Promise((resolve) => {
-//     const img = new Image()
-//     const canvas = document.createElement('canvas')
-//     const ctx = canvas.getContext('2d')
-
-//     img.onload = () => {
-//       canvas.width = width
-//       canvas.height = height
-//       ctx.drawImage(img, 0, 0, width, height)
-//       canvas.toBlob((blob) => {
-//         resolve(blob)
-//       }, 'image/webp', 0.8)
-//     }
-//     img.src = URL.createObjectURL(file)
-//   })
-// }
+    img.onload = () => {
+      canvas.width = width;
+      canvas.height = height;
+      ctx.drawImage(img, 0, 0, width, height);
+      canvas.toBlob(
+        (blob) => {
+          resolve(blob);
+        },
+        "image/webp",
+        0.8,
+      );
+    };
+    img.src = URL.createObjectURL(file);
+  });
+};
 
 const UserProfilePage = () => {
   const dispatch = useDispatch();
@@ -65,23 +67,19 @@ const UserProfilePage = () => {
       }
       try {
         const loadingToast = toast.loading(USER_PROFILE_MESSAGES.AVATAR_UPLOAD_LOADING);
-        // const thumbnailBlob = await createThumbnail(file, 150, 150)
+        const thumbnailBlob = await createThumbnail(file, 150, 150);
         const { uploadUrl, storageKey, bucket } = await authService.getAvatarUploadUrl(file.name);
 
         await fetch(uploadUrl, {
           method: "PUT",
-          body: file,
+          body: thumbnailBlob,
           headers: {
-            "Content-Type": file.type,
+            "Content-Type": "image/webp",
           },
         });
 
-        setAvatarPreview(URL.createObjectURL(file));
-        setDetails((prev) => ({
-          ...prev,
-          avatar: { storageKey, bucket },
-        }));
-
+        setAvatarPreview(URL.createObjectURL(thumbnailBlob));
+        await dispatch(updateProfile({ avatar: { storageKey, bucket } })).unwrap();
         toast.dismiss(loadingToast);
         toast.success(USER_PROFILE_MESSAGES.AVATAR_UPLOAD_SUCCESS);
       } catch (err) {
@@ -152,6 +150,7 @@ const UserProfilePage = () => {
                     src={avatarPreview || userAvatar}
                     alt="Profile"
                     className="w-full h-full object-cover"
+                    loading="lazy"
                     onError={(e) => {
                       e.target.src = userAvatar;
                     }}

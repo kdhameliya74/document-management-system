@@ -50,7 +50,7 @@ const NotificationDropdown = ({ isOpen }) => {
   return (
     <div
       ref={dropdownRef}
-      className="absolute top-full right-0 mt-2 w-80 border border-border-main rounded-2xl shadow-xl overflow-hidden z-50 flex flex-col max-h-[500px] animate-in fade-in slide-in-from-top-2 duration-200"
+      className="absolute bg-bg-main top-full right-0 mt-2 w-80 border border-border-main rounded-2xl shadow-xl overflow-hidden z-50 flex flex-col max-h-[500px] animate-in fade-in slide-in-from-top-2 duration-200"
     >
       <div className="px-4 py-3 border-b border-border-muted flex items-center justify-between bg-bg-main/50 sticky top-0 z-10 backdrop-blur-sm">
         <span className="text-sm font-bold text-text-main">Notifications</span>
