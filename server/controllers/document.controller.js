@@ -331,9 +331,17 @@ export const createFolder = asyncHandler(async (req, res) => {
   });
 
   const folderObj = folder.toObject();
-  folderObj.permissions = { canView: true, canEdit: true, canDelete: true, canShare: true, canDownload: true };
+  folderObj.permissions = {
+    canView: true,
+    canEdit: true,
+    canDelete: true,
+    canShare: true,
+    canDownload: true,
+  };
 
-  return res.status(201).json({ success: true, message: "Folder created successfully", folder: folderObj });
+  return res
+    .status(201)
+    .json({ success: true, message: "Folder created successfully", folder: folderObj });
 });
 
 // @route   GET /api/documents/:id
@@ -553,7 +561,13 @@ export const confirmUpload = asyncHandler(async (req, res) => {
   });
 
   const fileObj = file.toObject();
-  fileObj.permissions = { canView: true, canEdit: true, canDelete: true, canShare: true, canDownload: true };
+  fileObj.permissions = {
+    canView: true,
+    canEdit: true,
+    canDelete: true,
+    canShare: true,
+    canDownload: true,
+  };
 
   return res.status(201).json({ success: true, message: "File record created", file: fileObj });
 });
