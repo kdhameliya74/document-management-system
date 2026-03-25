@@ -329,7 +329,11 @@ export const createFolder = asyncHandler(async (req, res) => {
     color: color || null,
     owner,
   });
-  return res.status(201).json({ success: true, message: "Folder created successfully", folder });
+
+  const folderObj = folder.toObject();
+  folderObj.permissions = { canView: true, canEdit: true, canDelete: true, canShare: true, canDownload: true };
+
+  return res.status(201).json({ success: true, message: "Folder created successfully", folder: folderObj });
 });
 
 // @route   GET /api/documents/:id
@@ -548,7 +552,10 @@ export const confirmUpload = asyncHandler(async (req, res) => {
     owner,
   });
 
-  return res.status(201).json({ success: true, message: "File record created", file });
+  const fileObj = file.toObject();
+  fileObj.permissions = { canView: true, canEdit: true, canDelete: true, canShare: true, canDownload: true };
+
+  return res.status(201).json({ success: true, message: "File record created", file: fileObj });
 });
 
 // @route   PATCH /api/documents/:id/move
