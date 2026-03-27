@@ -51,6 +51,8 @@ const Sidebar = () => {
     () => ({
       drive: location.pathname.startsWith(ROUTES.APP.FOLDERS),
       trash: location.pathname.startsWith(ROUTES.APP.TRASH),
+      shared: location.pathname.startsWith(ROUTES.APP.SHARED),
+      profile: location.pathname.startsWith(ROUTES.APP.PROFILE),
     }),
     [location.pathname],
   );
@@ -66,6 +68,7 @@ const Sidebar = () => {
       to: ROUTES.APP.SHARED,
       icon: Users,
       label: "Shared with me",
+      isActive: activeStates.shared,
     },
     {
       to: ROUTES.APP.TRASH,
@@ -80,6 +83,7 @@ const Sidebar = () => {
       to: ROUTES.APP.PROFILE,
       icon: Settings,
       label: "Settings",
+      isActive: activeStates.profile,
     },
   ];
 
@@ -127,7 +131,12 @@ const Sidebar = () => {
 
       <div className="mt-auto pt-6 border-t border-border-muted flex flex-col gap-1.5">
         {footerItems.map((item) => (
-          <SidebarItem key={item.label} {...item} isCollapsed={isCollapsed} />
+          <SidebarItem
+            key={item.label}
+            {...item}
+            isCollapsed={isCollapsed}
+            isActive={item.isActive}
+          />
         ))}
 
         <button
