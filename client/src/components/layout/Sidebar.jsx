@@ -24,16 +24,19 @@ const navItemClass = (isActive, isCollapsed) =>
       : "text-text-muted hover:bg-bg-hover hover:text-text-main"
   }`;
 
-const SidebarItem = ({ to, icon: Icon, label, isCollapsed, isActive }) => (
-  <NavLink
-    to={to}
-    className={() => navItemClass(isActive, isCollapsed)}
-    title={isCollapsed ? label : ""}
-  >
-    <Icon size={18} className="group-hover:scale-110 transition-transform flex-shrink-0" />
-    {!isCollapsed && <span className="whitespace-nowrap">{label}</span>}
-  </NavLink>
-);
+const SidebarItem = ({ to, icon, label, isCollapsed, isActive }) => {
+  const Icon = icon;
+  return (
+    <NavLink
+      to={to}
+      className={() => navItemClass(isActive, isCollapsed)}
+      title={isCollapsed ? label : ""}
+    >
+      <Icon size={18} className="group-hover:scale-110 transition-transform flex-shrink-0" />
+      {!isCollapsed && <span className="whitespace-nowrap">{label}</span>}
+    </NavLink>
+  );
+};
 
 const Sidebar = () => {
   const dispatch = useDispatch();
