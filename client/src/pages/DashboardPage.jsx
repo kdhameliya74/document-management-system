@@ -44,7 +44,7 @@ const DashboardPage = () => {
       <div className="flex-1 flex flex-col h-full overflow-hidden">
         <Header />
         <div className="flex flex-1 overflow-hidden relative">
-          <div className="flex-1 overflow-y-auto p-6 relative">
+          <div className="flex-1 overflow-y-auto relative">
             <Routes>
               <Route path="/" element={<Navigate to={ROUTES.APP.FOLDERS} replace />} />
               <Route path={ROUTES.APP.RELATIVE.FOLDERS} element={<FolderView />} />
