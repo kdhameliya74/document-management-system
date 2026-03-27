@@ -131,7 +131,12 @@ const Sidebar = () => {
 
       <div className="mt-auto pt-6 border-t border-border-muted flex flex-col gap-1.5">
         {footerItems.map((item) => (
-          <SidebarItem key={item.label} {...item} isCollapsed={isCollapsed} isActive={item.isActive}/>
+          <SidebarItem
+            key={item.label}
+            {...item}
+            isCollapsed={isCollapsed}
+            isActive={item.isActive}
+          />
         ))}
 
         <button
