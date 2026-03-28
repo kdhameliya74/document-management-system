@@ -3,18 +3,22 @@ import { useDispatch, useSelector } from "react-redux";
 import { Upload, X, Loader2, Check, AlertCircle } from "lucide-react";
 import { uploadFileMeta } from "@/store/documents.slice";
 import DocumentService from "@/services/document.service";
-import { logError, uuidToBase64 } from "@/helpers/utils";
+import { logError, uuidToBase64, formatFileSize } from "@/helpers/utils";
 
 const CHUNK_SIZE = 3;
+const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+
 const STATUS = {
   PENDING: "pending",
   UPLOADING: "uploading",
   COMPLETED: "completed",
   ERROR: "error",
   DUPLICATE: "duplicate",
+  SIZE_EXCEEDED: "size_exceeded",
 };
 
-const REMOVABLE_STATUSES = [STATUS.PENDING, STATUS.DUPLICATE, STATUS.ERROR];
+const REMOVABLE_STATUSES = [STATUS.PENDING, STATUS.DUPLICATE, STATUS.ERROR, STATUS.SIZE_EXCEEDED];
+
 
 const UploadFileModal = ({ onClose, currentFolderId }) => {
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -24,12 +28,19 @@ const UploadFileModal = ({ onClose, currentFolderId }) => {
   const currentDocument = documents[currentFolderId];
   const dispatch = useDispatch();
 
+  const maxFileSize = formatFileSize(MAX_FILE_SIZE);
+
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
     const filesStatus = {};
     const newFiles = files.map((file) => {
       const uid = uuidToBase64(crypto.randomUUID());
       filesStatus[uid] = isDuplicateName(file.name) ? STATUS.DUPLICATE : STATUS.PENDING;
+      
+      if (file.size > MAX_FILE_SIZE) {
+        console.log("file.size", file.size);
+        filesStatus[uid] = STATUS.SIZE_EXCEEDED;
+      }
       return {
         file,
         uid,
@@ -38,6 +49,7 @@ const UploadFileModal = ({ onClose, currentFolderId }) => {
         mimeType: file.type,
       };
     });
+    console.log("newFiles", newFiles);
     setSelectedFiles((prev) => [...prev, ...newFiles]);
     setUploadStatus((prev) => ({ ...prev, ...filesStatus }));
   };
@@ -77,11 +89,14 @@ const UploadFileModal = ({ onClose, currentFolderId }) => {
 
   const handleUpload = async () => {
     if (selectedFiles.length === 0 || isUploading) return;
+    console.log("selectedFiles", selectedFiles);
     const pendingFiles = selectedFiles.filter(
-      (f) => uploadStatus[f.uid] === STATUS.PENDING || uploadStatus[f.uid] === STATUS.ERROR,
+      (f) => REMOVABLE_STATUSES.includes(uploadStatus[f.uid]),
     );
     if (pendingFiles.length === 0) return;
 
+    console.log("pendingFiles", pendingFiles);
+    return;
     try {
       setIsUploading(true);
       const filesToGetUrls = pendingFiles.map((f) => ({
@@ -172,7 +187,7 @@ const UploadFileModal = ({ onClose, currentFolderId }) => {
               </p>
             </div>
             <div className="px-4 py-1.5 bg-bg-hover rounded-full text-[10px] font-black text-text-dim border border-border-muted uppercase tracking-[0.2em]">
-              Max 50MB per file
+              Max {maxFileSize} per file
             </div>
           </div>
         </div>
@@ -202,7 +217,7 @@ const UploadFileModal = ({ onClose, currentFolderId }) => {
               <div
                 key={fileObj.uid}
                 className={`flex gap-4 items-center justify-between p-4 rounded-2xl border transition-all duration-200 ${
-                  uploadStatus[fileObj.uid] === STATUS.DUPLICATE
+                  uploadStatus[fileObj.uid] === STATUS.DUPLICATE || uploadStatus[fileObj.uid] === STATUS.SIZE_EXCEEDED
                     ? "border-red-500/20 bg-red-500/5"
                     : "border-border-muted bg-bg-panel/50 hover:bg-bg-panel"
                 }`}
@@ -222,9 +237,12 @@ const UploadFileModal = ({ onClose, currentFolderId }) => {
                       {fileObj.name}
                     </p>
                     <p className="text-text-dim text-[11px] font-medium uppercase tracking-tight">
-                      {(fileObj.size / 1024).toFixed(1)} KB • {uploadStatus[fileObj.uid]}
+                      {formatFileSize(fileObj.size)} • {uploadStatus[fileObj.uid]}
                       {uploadStatus[fileObj.uid] === STATUS.DUPLICATE && (
                         <span className="text-red-400 ml-1"> (Already exists)</span>
+                      )}
+                      {uploadStatus[fileObj.uid] === STATUS.SIZE_EXCEEDED && (
+                        <span className="text-red-400 ml-1"> (Max file size is {maxFileSize})</span>
                       )}
                     </p>
                   </div>
