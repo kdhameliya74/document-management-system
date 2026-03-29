@@ -13,7 +13,6 @@ const Filters = ({ onChange }) => {
   const sortRef = useRef(null);
   const hasFilters = search || selectedColor || sortBy !== "date_desc";
 
-  // Close dropdowns on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (colorRef.current && !colorRef.current.contains(event.target)) {
@@ -27,7 +26,6 @@ const Filters = ({ onChange }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Update parent when any filter changes
   useEffect(() => {
     const handler = setTimeout(() => {
       onChange({ search, color: selectedColor, sortBy });
@@ -55,9 +53,8 @@ const Filters = ({ onChange }) => {
   };
 
   return (
-    <div className="flex items-center gap-3 bg-bg-panel/50 backdrop-blur-sm p-1.5 pl-3 rounded-2xl border border-border-main shadow-lg">
-      {/* Search Input */}
-      <div className="flex items-center gap-2.5 px-3 py-1.5 bg-white/5 rounded-full border border-border-main focus-within:border-primary/50 focus-within:bg-white/10 transition-all w-60 group">
+    <div className="filter-container z-1">
+      <div className="filter-input-group group">
         <Search size={16} className="text-text-dim group-focus-within:text-primary transition-colors" />
         <input
           type="text"
@@ -78,14 +75,9 @@ const Filters = ({ onChange }) => {
 
       <div className="h-5 w-[1px] bg-border-main/50 mx-1" />
 
-      {/* Color Filter */}
       <div className="relative" ref={colorRef}>
         <button
-          className={`group cursor-pointer flex items-center gap-2 px-3 py-2 rounded-full border transition-all text-[13px] font-medium ${
-            selectedColor
-              ? "bg-primary/10 border-primary/30 text-primary"
-              : "bg-white/5 border-border-main text-text-main hover:bg-white/10"
-          }`}
+          className={`filter-button group ${selectedColor ? "filter-button-active" : ""}`}
           onClick={() => setShowColorDropdown(!showColorDropdown)}
         >
           <Filter size={14} className={selectedColor ? "text-primary" : "text-text-dim group-hover:text-text-main"} />
@@ -105,7 +97,7 @@ const Filters = ({ onChange }) => {
         </button>
 
         {showColorDropdown && (
-          <div className="absolute top-full left-0 mt-3 w-44 bg-bg-panel rounded-2xl shadow-2xl border border-border-main p-2 z-50 animate-in fade-in zoom-in duration-200">
+          <div className="filter-dropdown left-0 w-44 animate-in fade-in zoom-in duration-200">
             <div className="grid grid-cols-4 gap-2 p-1">
               {Object.entries(FOLDER_COLORS).map(([name, code]) => (
                 <button
@@ -137,10 +129,9 @@ const Filters = ({ onChange }) => {
         )}
       </div>
 
-      {/* Sort Dropdown */}
       <div className="relative" ref={sortRef}>
         <button
-          className="group cursor-pointer flex items-center gap-2 px-3 py-2 bg-white/5 border border-border-main rounded-full hover:bg-white/10 hover:border-border-main/80 transition-all text-[13px] font-medium text-text-main"
+          className="filter-button group"
           onClick={() => setShowSortDropdown(!showSortDropdown)}
         >
           <SortAsc size={14} className="text-text-dim group-hover:text-text-main" />
@@ -154,7 +145,7 @@ const Filters = ({ onChange }) => {
         </button>
 
         {showSortDropdown && (
-          <div className="absolute top-full right-0 mt-3 w-48 bg-bg-panel rounded-2xl shadow-2xl border border-border-main p-1.5 z-50 animate-in fade-in zoom-in duration-200">
+          <div className="filter-dropdown right-0 w-48 p-1.5 animate-in fade-in zoom-in duration-200">
             {sortOptions.map((option) => (
               <button
                 key={option.value}
@@ -176,7 +167,7 @@ const Filters = ({ onChange }) => {
 
       {hasFilters && (
         <button
-          className="flex cursor-pointer items-center gap-2 px-3 py-2 bg-white/5 border border-border-main rounded-full hover:bg-white/10 hover:border-border-main/80 transition-all text-[13px] text-text-main"
+          className="filter-button"
           onClick={clearAllFilters}
         >
           <X size={14} />
