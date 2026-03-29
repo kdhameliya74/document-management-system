@@ -16,11 +16,16 @@ const Left = ({ title, subtitle, children, className = "" }) => {
   );
 };
 
+const Middle = ({ children, className = "" }) => {
+  return <div className={className}>{children}</div>;
+};
+
 const Right = ({ children, className = "" }) => {
   return <div className={`flex items-center gap-3 ${className}`}>{children}</div>;
 };
 
 PageHeader.Left = Left;
 PageHeader.Right = Right;
+PageHeader.Middle = Middle;
 
 export default PageHeader;
