@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Search, ChevronDown, X, SortAsc, Filter } from "lucide-react";
+import { ChevronDown, X, SortAsc, Filter } from "lucide-react";
 import { FOLDER_COLORS } from "@/helpers/constants";
 
 const Filters = ({ onChange }) => {
-  const [search, setSearch] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
   const [sortBy, setSortBy] = useState("date_desc");
   const [showColorDropdown, setShowColorDropdown] = useState(false);
@@ -11,7 +10,7 @@ const Filters = ({ onChange }) => {
 
   const colorRef = useRef(null);
   const sortRef = useRef(null);
-  const hasFilters = search || selectedColor || sortBy !== "date_desc";
+  const hasFilters = selectedColor || sortBy !== "date_desc";
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -28,11 +27,11 @@ const Filters = ({ onChange }) => {
 
   useEffect(() => {
     const handler = setTimeout(() => {
-      onChange({ search, color: selectedColor, sortBy });
+      onChange({ color: selectedColor, sortBy });
     }, 300);
 
     return () => clearTimeout(handler);
-  }, [search, selectedColor, sortBy, onChange]);
+  }, [selectedColor, sortBy, onChange]);
 
   const sortOptions = [
     { label: "Date (Newest)", value: "date_desc" },
@@ -44,37 +43,19 @@ const Filters = ({ onChange }) => {
   const handleClearColor = (e) => {
     e.stopPropagation();
     setSelectedColor("");
+    setShowColorDropdown(false);
   };
 
   const clearAllFilters = () => {
-    setSearch("");
     setSelectedColor("");
     setSortBy("date_desc");
+    setShowColorDropdown(false);
+    setShowSortDropdown(false);
   };
 
   return (
+    <>
     <div className="filter-container z-1">
-      <div className="filter-input-group group">
-        <Search size={16} className="text-text-dim group-focus-within:text-primary transition-colors" />
-        <input
-          type="text"
-          placeholder="Search Drive..."
-          className="bg-transparent border-none outline-none text-[13px] w-full placeholder:text-text-dim/40"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        {search && (
-          <button
-            onClick={() => setSearch("")}
-            className="text-text-dim hover:text-white p-0.5 hover:bg-white/10 rounded-md transition-colors"
-          >
-            <X size={14} />
-          </button>
-        )}
-      </div>
-
-      <div className="h-5 w-[1px] bg-border-main/50 mx-1" />
-
       <div className="relative" ref={colorRef}>
         <button
           className={`filter-button group ${selectedColor ? "filter-button-active" : ""}`}
@@ -164,7 +145,6 @@ const Filters = ({ onChange }) => {
           </div>
         )}
       </div>
-
       {hasFilters && (
         <button
           className="filter-button"
@@ -175,6 +155,8 @@ const Filters = ({ onChange }) => {
         </button>
       )}
     </div>
+    
+    </>
   );
 };
 
