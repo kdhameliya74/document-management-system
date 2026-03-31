@@ -40,6 +40,10 @@ const initialState = {
   activeModal: null, // 'createFolder' | 'upload' | 'edit' | 'delete' | 'move' | 'share' | 'Download'
   modalProps: {},
   contextMenu: null, // { x: number, y: number, item: object, type: string }
+  filters: {
+    color: "",
+    sortBy: "date_desc",
+  },
 };
 
 /*
@@ -338,6 +342,9 @@ const documentsSlice = createSlice({
       state.selectedId = null;
       state.contextMenu = null;
     },
+    setFilters: (state, action) => {
+      state.filters = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -494,5 +501,6 @@ export const {
   setContextMenu,
   clearContextMenu,
   addFileVersion,
+  setFilters,
 } = documentsSlice.actions;
 export default documentsSlice.reducer;

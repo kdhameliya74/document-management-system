@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import { ChevronDown, X, SortAsc, Filter } from "lucide-react";
-import { FOLDER_COLORS } from "@/helpers/constants";
+import { FOLDER_COLORS, SORT_OPTIONS } from "@/helpers/constants";
 
-const Filters = ({ onChange }) => {
-  const [selectedColor, setSelectedColor] = useState("");
-  const [sortBy, setSortBy] = useState("date_desc");
+const Filters = ({ filters, onChange }) => {
+  const { color: selectedColor, sortBy } = filters || {};
   const [showColorDropdown, setShowColorDropdown] = useState(false);
   const [showSortDropdown, setShowSortDropdown] = useState(false);
 
@@ -25,30 +24,18 @@ const Filters = ({ onChange }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      onChange({ color: selectedColor, sortBy });
-    }, 300);
-
-    return () => clearTimeout(handler);
-  }, [selectedColor, sortBy, onChange]);
-
-  const sortOptions = [
-    { label: "Date (Newest)", value: "date_desc" },
-    { label: "Date (Oldest)", value: "date_asc" },
-    { label: "Name (A-Z)", value: "name_asc" },
-    { label: "Name (Z-A)", value: "name_desc" },
-  ];
+  const handleUpdate = (updates) => {
+    onChange({ ...filters, ...updates });
+  };
 
   const handleClearColor = (e) => {
     e.stopPropagation();
-    setSelectedColor("");
+    handleUpdate({ color: "" });
     setShowColorDropdown(false);
   };
 
   const clearAllFilters = () => {
-    setSelectedColor("");
-    setSortBy("date_desc");
+    onChange({ color: "", sortBy: "date_desc" });
     setShowColorDropdown(false);
     setShowSortDropdown(false);
   };
@@ -94,7 +81,7 @@ const Filters = ({ onChange }) => {
                     style={{ backgroundColor: code }}
                     title={name}
                     onClick={() => {
-                      setSelectedColor(code);
+                      handleUpdate({ color: code });
                       setShowColorDropdown(false);
                     }}
                   >
@@ -124,7 +111,7 @@ const Filters = ({ onChange }) => {
           >
             <SortAsc size={14} className="text-text-dim group-hover:text-text-main" />
             <span className="min-w-[80px] text-left">
-              {sortOptions.find((opt) => opt.value === sortBy)?.label.split(" ")[0]}
+              {SORT_OPTIONS.find((opt) => opt.value === sortBy)?.label.split(" ")[0]}
             </span>
             <ChevronDown
               size={13}
@@ -134,7 +121,7 @@ const Filters = ({ onChange }) => {
 
           {showSortDropdown && (
             <div className="filter-dropdown right-0 w-48 p-1.5 animate-in fade-in zoom-in duration-200">
-              {sortOptions.map((option) => (
+              {SORT_OPTIONS.map((option) => (
                 <button
                   key={option.value}
                   className={`w-full text-left px-3 py-2.5 text-[13px] rounded-xl hover:bg-white/5 transition-all flex items-center justify-between group ${
@@ -143,7 +130,7 @@ const Filters = ({ onChange }) => {
                       : "text-text-main"
                   }`}
                   onClick={() => {
-                    setSortBy(option.value);
+                    handleUpdate({ sortBy: option.value });
                     setShowSortDropdown(false);
                   }}
                 >
