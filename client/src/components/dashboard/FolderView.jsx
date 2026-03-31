@@ -1,10 +1,12 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { Plus, Upload, FolderPlus, ChevronDown, Loader } from "lucide-react";
-import { DOCUMENT_MODES, APP_VIEWS_MAP } from "@/helpers/constants";
+import { Plus, Upload, FolderPlus, ChevronDown } from "lucide-react";
+import { APP_VIEWS_MAP } from "@/helpers/constants";
 import Loading from "@/components/common/Loading";
 import PageHeader from "@/components/common/PageHeader";
+import Filters from "@/components/common/Filters";
+import { useFilter } from "@/hooks/useFilter";
 
 import ROUTES from "@/utils/routes";
 import {
@@ -12,6 +14,7 @@ import {
   fetchDocuments,
   setActiveModal,
   setModalProps,
+  setFilters,
 } from "@/store/documents.slice";
 
 import FolderItem from "@/components/dashboard/FolderItem";
@@ -28,8 +31,11 @@ const FolderView = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const { documents, selectedId, isLoading } = useSelector((state) => state.documentSystem);
+  const { documents, selectedId, isLoading, filters } = useSelector(
+    (state) => state.documentSystem,
+  );
 
+  // TODO: convert to useCommon hook
   const normalizedFolderId = folderId || APP_VIEWS_MAP.FOLDERS;
   const currentFolder = documents[normalizedFolderId];
 
@@ -41,6 +47,8 @@ const FolderView = () => {
 
   const { contextMenu, handleContextMenu, closeContextMenu, getContextMenuItems } =
     useDocumentContextMenu();
+
+  const { childDocuments, isEmpty } = useFilter();
 
   /* -------------------- Dropdown Logic -------------------- */
   const handleOpenModal = (modalType) => {
@@ -92,13 +100,6 @@ const FolderView = () => {
 
   /* -------------------- Derived Data -------------------- */
 
-  const childDocuments = useMemo(
-    () => currentFolder?.childDocuments?.map((id) => documents[id]).filter(Boolean) || [],
-    [currentFolder?.childDocuments, documents],
-  );
-
-  const isEmpty = childDocuments.length === 0;
-
   const handleNavigate = (id) => {
     navigate(ROUTES.APP.FOLDER_DYNAMIC(id));
   };
@@ -106,6 +107,13 @@ const FolderView = () => {
   const handleSelect = (id) => {
     dispatch(setSelectedId(id));
   };
+
+  const handleFilterChange = useCallback(
+    (newFilters) => {
+      dispatch(setFilters(newFilters));
+    },
+    [dispatch],
+  );
 
   /* -------------------- Render Guards -------------------- */
 
@@ -132,9 +140,14 @@ const FolderView = () => {
       {/* Header */}
       <PageHeader>
         <PageHeader.Left
+          className="flex-1"
           title={folderName}
           subtitle="Manage your folders and documents with ease"
         />
+
+        <PageHeader.Middle className="flex justify-center px-4">
+          <Filters filters={filters} onChange={handleFilterChange} />
+        </PageHeader.Middle>
 
         <PageHeader.Right>
           <div className="relative" ref={dropdownRef}>

@@ -39,6 +39,13 @@ export const FOLDER_COLORS = Object.freeze({
   YELLOW: "#eab308",
 });
 
+export const SORT_OPTIONS = [
+  { label: "Date (Newest)", value: "date_desc" },
+  { label: "Date (Oldest)", value: "date_asc" },
+  { label: "Name (A-Z)", value: "name_asc" },
+  { label: "Name (Z-A)", value: "name_desc" },
+];
+
 export const DEFAULT_MESSAGES = Object.freeze({
   FAILED_TO_FETCH_DOCUMENTS: "Failed to fetch documents!",
   NO_FOLDERS_AVAILABLE: "No folders available",
