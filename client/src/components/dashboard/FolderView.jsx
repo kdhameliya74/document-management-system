@@ -31,7 +31,9 @@ const FolderView = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const { documents, selectedId, isLoading, filters } = useSelector((state) => state.documentSystem);
+  const { documents, selectedId, isLoading, filters } = useSelector(
+    (state) => state.documentSystem,
+  );
 
   // TODO: convert to useCommon hook
   const normalizedFolderId = folderId || APP_VIEWS_MAP.FOLDERS;
@@ -106,9 +108,12 @@ const FolderView = () => {
     dispatch(setSelectedId(id));
   };
 
-  const handleFilterChange = useCallback((newFilters) => {
-    dispatch(setFilters(newFilters));
-  }, [dispatch]);
+  const handleFilterChange = useCallback(
+    (newFilters) => {
+      dispatch(setFilters(newFilters));
+    },
+    [dispatch],
+  );
 
   /* -------------------- Render Guards -------------------- */
 
@@ -135,7 +140,7 @@ const FolderView = () => {
       {/* Header */}
       <PageHeader>
         <PageHeader.Left
-        className="flex-1"
+          className="flex-1"
           title={folderName}
           subtitle="Manage your folders and documents with ease"
         />
