@@ -1,20 +1,23 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Upload, X, Loader2, Check, AlertCircle } from "lucide-react";
+import { Upload, X, Check, AlertCircle } from "lucide-react";
 import { uploadFileMeta } from "@/store/documents.slice";
 import DocumentService from "@/services/document.service";
-import { logError, uuidToBase64 } from "@/helpers/utils";
+import { logError, uuidToBase64, formatFileSize } from "@/helpers/utils";
 
 const CHUNK_SIZE = 3;
+const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+
 const STATUS = {
   PENDING: "pending",
   UPLOADING: "uploading",
   COMPLETED: "completed",
   ERROR: "error",
   DUPLICATE: "duplicate",
+  SIZE_EXCEEDED: "size_exceeded",
 };
 
-const REMOVABLE_STATUSES = [STATUS.PENDING, STATUS.DUPLICATE, STATUS.ERROR];
+const REMOVABLE_STATUSES = [STATUS.PENDING, STATUS.DUPLICATE, STATUS.ERROR, STATUS.SIZE_EXCEEDED];
 
 const UploadFileModal = ({ onClose, currentFolderId }) => {
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -24,12 +27,21 @@ const UploadFileModal = ({ onClose, currentFolderId }) => {
   const currentDocument = documents[currentFolderId];
   const dispatch = useDispatch();
 
+  const maxFileSize = formatFileSize(MAX_FILE_SIZE);
+  const hasInvalidFiles = selectedFiles.some(
+    (f) => uploadStatus[f.uid] === STATUS.DUPLICATE || uploadStatus[f.uid] === STATUS.SIZE_EXCEEDED,
+  );
+
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
     const filesStatus = {};
     const newFiles = files.map((file) => {
       const uid = uuidToBase64(crypto.randomUUID());
       filesStatus[uid] = isDuplicateName(file.name) ? STATUS.DUPLICATE : STATUS.PENDING;
+
+      if (file.size > MAX_FILE_SIZE) {
+        filesStatus[uid] = STATUS.SIZE_EXCEEDED;
+      }
       return {
         file,
         uid,
@@ -76,12 +88,11 @@ const UploadFileModal = ({ onClose, currentFolderId }) => {
   };
 
   const handleUpload = async () => {
+    if (hasInvalidFiles) return;
     if (selectedFiles.length === 0 || isUploading) return;
-    const pendingFiles = selectedFiles.filter(
-      (f) => uploadStatus[f.uid] === STATUS.PENDING || uploadStatus[f.uid] === STATUS.ERROR,
-    );
-    if (pendingFiles.length === 0) return;
+    const pendingFiles = selectedFiles.filter((f) => uploadStatus[f.uid] === STATUS.PENDING);
 
+    if (pendingFiles.length === 0) return;
     try {
       setIsUploading(true);
       const filesToGetUrls = pendingFiles.map((f) => ({
@@ -145,11 +156,13 @@ const UploadFileModal = ({ onClose, currentFolderId }) => {
   const completedCount = selectedFiles.filter(
     (f) => uploadStatus[f.uid] === STATUS.COMPLETED,
   ).length;
+
   const totalCount = selectedFiles.length;
+  const isUploadDisabled =
+    selectedFiles.length === 0 || hasInvalidFiles || isUploading || completedCount === totalCount;
 
   return (
     <div className="flex flex-col gap-8">
-      {/* Dropzone Area */}
       <div className="group relative">
         <input
           type="file"
@@ -158,25 +171,31 @@ const UploadFileModal = ({ onClose, currentFolderId }) => {
           disabled={isUploading}
           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 disabled:cursor-not-allowed"
         />
-        <div className="border-2 border-dashed border-border-main rounded-[2rem] p-10 text-center transition-all duration-300 bg-bg-panel/30 group-hover:border-primary/50 group-hover:bg-primary/5 group-hover:shadow-2xl group-hover:shadow-primary/5">
-          <div className="flex flex-col items-center gap-4">
-            <div className="w-16 h-16 rounded-2xl bg-bg-hover flex items-center justify-center text-text-dim group-hover:text-primary group-hover:scale-110 transition-all duration-300 shadow-inner">
-              <Upload size={32} strokeWidth={1.5} />
+        <div className="border-2 border-dashed border-border-main rounded-[2rem] p-4 text-center transition-all duration-300 bg-bg-panel/30 group-hover:border-primary/50 group-hover:bg-primary/5 group-hover:shadow-2xl group-hover:shadow-primary/5">
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-bg-hover flex items-center justify-center text-text-dim group-hover:text-primary group-hover:scale-110 transition-all duration-300 shadow-inner">
+              <Upload size={24} strokeWidth={1.5} />
             </div>
             <div>
-              <p className="text-text-main font-bold text-lg tracking-tight">
+              <p className="text-text-main font-bold text-md tracking-tight">
                 Drop your files here
               </p>
-              <p className="text-text-dim text-sm mt-1 font-medium">
+              <p className="text-text-dim text-xs mt-1 font-medium">
                 or click to browse from your device
               </p>
             </div>
-            <div className="px-4 py-1.5 bg-bg-hover rounded-full text-[10px] font-black text-text-dim border border-border-muted uppercase tracking-[0.2em]">
-              Max 50MB per file
+            <div className="px-4 py-1 bg-bg-hover rounded-full text-[10px] font-black text-text-dim border border-border-muted uppercase tracking-[0.2em]">
+              Max {maxFileSize} per file
             </div>
           </div>
         </div>
       </div>
+
+      {hasInvalidFiles && (
+        <div className="text-red-500 text-sm font-medium text-center bg-red-500/10 p-2 rounded-lg">
+          Please remove invalid files before uploading.
+        </div>
+      )}
 
       {selectedFiles.length > 0 && (
         <div className="flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
@@ -202,7 +221,8 @@ const UploadFileModal = ({ onClose, currentFolderId }) => {
               <div
                 key={fileObj.uid}
                 className={`flex gap-4 items-center justify-between p-4 rounded-2xl border transition-all duration-200 ${
-                  uploadStatus[fileObj.uid] === STATUS.DUPLICATE
+                  uploadStatus[fileObj.uid] === STATUS.DUPLICATE ||
+                  uploadStatus[fileObj.uid] === STATUS.SIZE_EXCEEDED
                     ? "border-red-500/20 bg-red-500/5"
                     : "border-border-muted bg-bg-panel/50 hover:bg-bg-panel"
                 }`}
@@ -222,9 +242,12 @@ const UploadFileModal = ({ onClose, currentFolderId }) => {
                       {fileObj.name}
                     </p>
                     <p className="text-text-dim text-[11px] font-medium uppercase tracking-tight">
-                      {(fileObj.size / 1024).toFixed(1)} KB • {uploadStatus[fileObj.uid]}
+                      {formatFileSize(fileObj.size)} • {uploadStatus[fileObj.uid]}
                       {uploadStatus[fileObj.uid] === STATUS.DUPLICATE && (
                         <span className="text-red-400 ml-1"> (Already exists)</span>
+                      )}
+                      {uploadStatus[fileObj.uid] === STATUS.SIZE_EXCEEDED && (
+                        <span className="text-red-400 ml-1"> (Max file size is {maxFileSize})</span>
                       )}
                     </p>
                   </div>
@@ -258,7 +281,7 @@ const UploadFileModal = ({ onClose, currentFolderId }) => {
         </button>
         <button
           onClick={handleUpload}
-          disabled={selectedFiles.length === 0 || isUploading || completedCount === totalCount}
+          disabled={isUploadDisabled}
           className="flex-[1.5] flex items-center justify-center gap-2 py-3.5 px-6 rounded-2xl font-bold text-sm transition-all duration-300 bg-primary text-white hover:bg-primary-hover shadow-xl shadow-primary/20 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer hover:-translate-y-0.5"
         >
           {isUploading ? (

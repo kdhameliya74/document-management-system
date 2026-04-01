@@ -104,3 +104,19 @@ export const debounce = (func, delay) => {
     timeoutId = setTimeout(() => func(...args), delay);
   };
 };
+
+export const formatFileSize = (size, unit = "auto", precision = 2) => {
+  const units = ["B", "KB", "MB", "GB", "TB"];
+  if (size === 0) return "0 B";
+
+  if (unit !== "auto") {
+    const index = units.indexOf(unit.toUpperCase());
+    if (index === -1) return "Invalid unit";
+    const value = size / Math.pow(1024, index);
+    return `${value.toFixed(precision)} ${units[index]}`;
+  }
+  const i = Math.floor(Math.log(size) / Math.log(1024));
+  const value = size / Math.pow(1024, i);
+
+  return `${value.toFixed(precision)} ${units[i]}`;
+};
