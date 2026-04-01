@@ -19,7 +19,6 @@ const STATUS = {
 
 const REMOVABLE_STATUSES = [STATUS.PENDING, STATUS.DUPLICATE, STATUS.ERROR, STATUS.SIZE_EXCEEDED];
 
-
 const UploadFileModal = ({ onClose, currentFolderId }) => {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
@@ -29,7 +28,9 @@ const UploadFileModal = ({ onClose, currentFolderId }) => {
   const dispatch = useDispatch();
 
   const maxFileSize = formatFileSize(MAX_FILE_SIZE);
-  const hasInvalidFiles = selectedFiles.some((f) => uploadStatus[f.uid] === STATUS.DUPLICATE || uploadStatus[f.uid] === STATUS.SIZE_EXCEEDED);
+  const hasInvalidFiles = selectedFiles.some(
+    (f) => uploadStatus[f.uid] === STATUS.DUPLICATE || uploadStatus[f.uid] === STATUS.SIZE_EXCEEDED,
+  );
 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
@@ -37,7 +38,7 @@ const UploadFileModal = ({ onClose, currentFolderId }) => {
     const newFiles = files.map((file) => {
       const uid = uuidToBase64(crypto.randomUUID());
       filesStatus[uid] = isDuplicateName(file.name) ? STATUS.DUPLICATE : STATUS.PENDING;
-      
+
       if (file.size > MAX_FILE_SIZE) {
         filesStatus[uid] = STATUS.SIZE_EXCEEDED;
       }
@@ -89,9 +90,7 @@ const UploadFileModal = ({ onClose, currentFolderId }) => {
   const handleUpload = async () => {
     if (hasInvalidFiles) return;
     if (selectedFiles.length === 0 || isUploading) return;
-    const pendingFiles = selectedFiles.filter(
-      (f) => uploadStatus[f.uid] === STATUS.PENDING,
-    );
+    const pendingFiles = selectedFiles.filter((f) => uploadStatus[f.uid] === STATUS.PENDING);
 
     if (pendingFiles.length === 0) return;
     try {
@@ -157,12 +156,13 @@ const UploadFileModal = ({ onClose, currentFolderId }) => {
   const completedCount = selectedFiles.filter(
     (f) => uploadStatus[f.uid] === STATUS.COMPLETED,
   ).length;
+
   const totalCount = selectedFiles.length;
-  const isUploadDisabled = selectedFiles.length === 0 || isUploading || completedCount === totalCount;
+  const isUploadDisabled =
+    selectedFiles.length === 0 || hasInvalidFiles || isUploading || completedCount === totalCount;
 
   return (
     <div className="flex flex-col gap-8">
-      {/* Dropzone Area */}
       <div className="group relative">
         <input
           type="file"
@@ -221,7 +221,8 @@ const UploadFileModal = ({ onClose, currentFolderId }) => {
               <div
                 key={fileObj.uid}
                 className={`flex gap-4 items-center justify-between p-4 rounded-2xl border transition-all duration-200 ${
-                  uploadStatus[fileObj.uid] === STATUS.DUPLICATE || uploadStatus[fileObj.uid] === STATUS.SIZE_EXCEEDED
+                  uploadStatus[fileObj.uid] === STATUS.DUPLICATE ||
+                  uploadStatus[fileObj.uid] === STATUS.SIZE_EXCEEDED
                     ? "border-red-500/20 bg-red-500/5"
                     : "border-border-muted bg-bg-panel/50 hover:bg-bg-panel"
                 }`}
