@@ -21,6 +21,7 @@ import { PutObjectCommand, DeleteObjectsCommand, GetObjectCommand } from "@aws-s
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { asyncHandler } from "../middlewares/error.middleware.js";
 import { notifyUser } from "../controllers/notification.controller.js";
+import { createActivityLog } from "../controllers/activityLog.controller.js";
 
 const CONCURRENT_DOWNLOADS = 10;
 //Helpers
