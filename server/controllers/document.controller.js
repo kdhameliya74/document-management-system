@@ -339,6 +339,20 @@ export const createFolder = asyncHandler(async (req, res) => {
     canDownload: true,
   };
 
+  await createActivityLog({
+    user: owner,
+    action: "folder_create",
+    targetType: DOC_TYPES.FOLDER,
+    target: folder._id,
+    targetName: folder.name,
+    metadata: {
+      parentId: parentId || null,
+      color: color || null,
+    },
+    ipAddress: req.ip,
+    userAgent: req.headers["user-agent"],
+  });
+
   return res
     .status(201)
     .json({ success: true, message: "Folder created successfully", folder: folderObj });

@@ -38,7 +38,7 @@ const activityLogSchema = new mongoose.Schema(
     targetType: {
       type: String,
       required: true,
-      enum: ["File", "Folder", "Comment", "FileVersion"],
+      enum: [DOC_TYPES.FILE, DOC_TYPES.FOLDER, "Comment", "FileVersion"],
     },
     target: {
       type: mongoose.Schema.Types.ObjectId,
