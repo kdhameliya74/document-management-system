@@ -6,7 +6,7 @@ import s3Client from "../config/s3.js";
 import Document from "../models/Document.model.js";
 import User from "../models/User.model.js";
 
-import { DOC_TYPES, PERMISSION_LEVELS } from "../constants/Shared.js";
+import { DOC_TYPES, PERMISSION_LEVELS, ACTIVITY_ACTIONS } from "../constants/Shared.js";
 import { FILE_UPLOAD_STATUS } from "../constants/File.js";
 import { NOTIFICATION_TYPES } from "../constants/Notification.js";
 import {
@@ -21,6 +21,7 @@ import { PutObjectCommand, DeleteObjectsCommand, GetObjectCommand } from "@aws-s
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { asyncHandler } from "../middlewares/error.middleware.js";
 import { notifyUser } from "../controllers/notification.controller.js";
+import { logActivity } from "../controllers/activityLog.controller.js";
 
 const CONCURRENT_DOWNLOADS = 10;
 //Helpers
@@ -339,6 +340,20 @@ export const createFolder = asyncHandler(async (req, res) => {
     canDownload: true,
   };
 
+  logActivity({
+    user: owner,
+    action: ACTIVITY_ACTIONS.FOLDER_CREATE,
+    targetType: DOC_TYPES.FOLDER,
+    target: folder._id,
+    targetName: folder.name,
+    metadata: {
+      parentId: parentId || null,
+      color: color || null,
+    },
+    ipAddress: req.ip,
+    userAgent: req.headers["user-agent"],
+  });
+
   return res
     .status(201)
     .json({ success: true, message: "Folder created successfully", folder: folderObj });
@@ -354,6 +369,8 @@ export const updateDocument = asyncHandler(async (req, res) => {
   const doc = req.document;
   const sharedWith = doc.sharedWith;
   const sender = req.user;
+  const oldName = doc.name || "";
+  const oldColor = doc.color || "";
 
   // Per-docType allowed field whitelist
   const commonAllowed = ["name", "isStarred", "description", "tags", "isPublic"];
@@ -377,7 +394,33 @@ export const updateDocument = asyncHandler(async (req, res) => {
     return res.status(400).json({ success: false, message: "No valid fields provided to update" });
   }
 
+  // Determine action and metadata for activity log
+  const changes = {
+    color: allowed.includes("color") && oldColor !== req.body.color,
+    name: allowed.includes("name") && oldName !== req.body.name,
+  };
+
+  const metadata = {
+    ...(changes.color && {
+      oldColor,
+      newColor: req.body.color,
+    }),
+    ...(changes.name && {
+      oldName,
+      newName: req.body.name,
+    }),
+  };
+
+  const activity = {
+    action:
+      doc.docType === DOC_TYPES.FOLDER
+        ? ACTIVITY_ACTIONS.FOLDER_UPDATE
+        : ACTIVITY_ACTIONS.FILE_UPDATE,
+    metadata,
+  };
+
   await doc.save(); // triggers pre('validate') → path recompute if name changed
+
   if (allowed.includes("name")) {
     await Promise.all(
       sharedWith.map((user) =>
@@ -390,6 +433,9 @@ export const updateDocument = asyncHandler(async (req, res) => {
       ),
     );
   }
+
+  logActivity(req, doc, activity);
+
   return res.status(200).json({
     success: true,
     message: "Document updated successfully",
@@ -425,6 +471,17 @@ export const trashDocument = asyncHandler(async (req, res) => {
     );
   }
 
+  const action =
+    doc.docType === DOC_TYPES.FOLDER
+      ? ACTIVITY_ACTIONS.FOLDER_DELETE
+      : ACTIVITY_ACTIONS.FILE_DELETE;
+  logActivity(req, doc, {
+    action,
+    metadata: {
+      parentId: doc.parentId || null,
+    },
+  });
+
   return res.status(200).json({ success: true, message: "Document moved to trash successfully" });
 });
 
@@ -438,6 +495,17 @@ export const restoreDocument = asyncHandler(async (req, res) => {
     { path: { $regex: pathRegex }, isTrashed: true },
     { $set: { isTrashed: false, trashedAt: null } },
   );
+
+  const action =
+    doc.docType === DOC_TYPES.FOLDER
+      ? ACTIVITY_ACTIONS.FOLDER_RESTORE
+      : ACTIVITY_ACTIONS.FILE_RESTORE;
+  logActivity(req, doc, {
+    action,
+    metadata: {
+      parentId: doc.parentId || null,
+    },
+  });
 
   return res.status(200).json({ success: true, message: "Document restored successfully" });
 });
@@ -485,6 +553,20 @@ export const permanentDelete = asyncHandler(async (req, res) => {
 
   const docIds = docsToDelete.map((doc) => doc._id);
   await Document.deleteMany({ _id: { $in: docIds } });
+
+  const action =
+    targetDoc.docType === DOC_TYPES.FOLDER
+      ? ACTIVITY_ACTIONS.FOLDER_PERMANENT_DELETE
+      : ACTIVITY_ACTIONS.FILE_PERMANENT_DELETE;
+
+  // Real usecase is when any user complains about any file or folder
+  logActivity(req, targetDoc, {
+    action,
+    metadata: {
+      parentId: targetDoc.parentId || null,
+      totalDeleted: docsToDelete.length,
+    },
+  });
 
   return res.status(200).json({
     success: true,
@@ -569,6 +651,14 @@ export const confirmUpload = asyncHandler(async (req, res) => {
     canDownload: true,
   };
 
+  logActivity(req, fileObj, {
+    action: ACTIVITY_ACTIONS.FILE_UPLOAD,
+    metadata: {
+      parentId: parentId || null,
+      // TODO: add total size of uploaded files
+    },
+  });
+
   return res.status(201).json({ success: true, message: "File record created", file: fileObj });
 });
 
@@ -600,6 +690,17 @@ export const moveDocument = asyncHandler(async (req, res) => {
   }
   document.parentId = targetParent;
   await document.save();
+
+  logActivity(req, document, {
+    action:
+      document.docType === DOC_TYPES.FOLDER
+        ? ACTIVITY_ACTIONS.FOLDER_MOVE
+        : ACTIVITY_ACTIONS.FILE_MOVE,
+    metadata: {
+      previousParentId: currentParent,
+      newParentId: targetParent,
+    },
+  });
 
   return res.status(200).json({ success: true, message: "Document moved successfully" });
 });
@@ -680,6 +781,16 @@ export const shareDocument = asyncHandler(async (req, res) => {
     ),
   );
 
+  logActivity(req, document, {
+    action:
+      document.docType === DOC_TYPES.FOLDER
+        ? ACTIVITY_ACTIONS.FOLDER_SHARE
+        : ACTIVITY_ACTIONS.FILE_SHARE,
+    metadata: {
+      sharedWith: newCollaborators.map((c) => ({ email: c.email, permission: c.permission })),
+    },
+  });
+
   return res.status(200).json({
     success: true,
     sharedWith: newCollaborators,
@@ -699,6 +810,8 @@ export const removeCollaborator = asyncHandler(async (req, res) => {
     });
   }
 
+  const unsharedUser = req.document.sharedWith.find((c) => c.user.toString() === userId.toString());
+
   const result = await Document.updateOne(
     { _id: document._id, "sharedWith.user": userId },
     {
@@ -716,6 +829,16 @@ export const removeCollaborator = asyncHandler(async (req, res) => {
       document: { id: document._id, name: document.name },
     });
   }
+
+  logActivity(req, document, {
+    action:
+      document.docType === DOC_TYPES.FOLDER
+        ? ACTIVITY_ACTIONS.FOLDER_UNSHARE
+        : ACTIVITY_ACTIONS.FILE_UNSHARE,
+    metadata: {
+      unsharedWith: unsharedUser.email,
+    },
+  });
 
   return res.status(200).json({
     success: true,
