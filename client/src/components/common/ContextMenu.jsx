@@ -1,18 +1,23 @@
 import React, { useEffect, useRef } from "react";
+import { useDispatch } from "react-redux";
+import { clearUISelection } from "@/store/documents.slice";
 
 const ContextMenu = ({ x, y, items, onClose }) => {
   const menuRef = useRef(null);
+  const dispatch = useDispatch();
+  
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
         onClose();
+        dispatch(clearUISelection())
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [onClose]);
+  }, [onClose, dispatch]);
 
   return (
     <div
