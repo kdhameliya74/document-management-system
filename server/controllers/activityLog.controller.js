@@ -27,11 +27,21 @@ export const logActivity = (req, doc, activity = {}) => {
 };
 
 export const getActivityLogs = asyncHandler(async (req, res) => {
-    const { docId } = req.params;
-    const activityLogs = await ActivityLog.find({ target: docId })
-        .sort({ createdAt: -1 })
-        .lean();
-    console.log(activityLogs);
-    res.status(200).json({ success: true, activityLogs });
+    const { id } = req.query;
+    const { page = 1, limit = 20 } = req.query;
+    const skip = (page - 1) * limit;
+    const query = { target: id };
+    const [activities, total] = await Promise.all([
+        ActivityLog.find(query)
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
+            .lean(),
+        ActivityLog.countDocuments(query)
+    ]);
+
+    const hasNextPage = skip + limit < total;
+
+    res.status(200).json({ success: true, activities, total, hasNextPage });
 });
 
