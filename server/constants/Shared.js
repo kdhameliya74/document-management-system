@@ -61,4 +61,4 @@ export const ACTIVITY_ACTIONS = {
   COMMENT_DELETE: "comment_delete",
   VERSION_CREATE: "version_create",
   VERSION_RESTORE: "version_restore",
-}
+};

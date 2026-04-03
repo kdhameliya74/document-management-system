@@ -352,7 +352,7 @@ export const createFolder = asyncHandler(async (req, res) => {
     },
     ipAddress: req.ip,
     userAgent: req.headers["user-agent"],
-  })
+  });
 
   return res
     .status(201)
@@ -412,7 +412,10 @@ export const updateDocument = asyncHandler(async (req, res) => {
   };
 
   const activity = {
-    action: doc.docType === DOC_TYPES.FOLDER ? ACTIVITY_ACTIONS.FOLDER_UPDATE : ACTIVITY_ACTIONS.FILE_UPDATE,
+    action:
+      doc.docType === DOC_TYPES.FOLDER
+        ? ACTIVITY_ACTIONS.FOLDER_UPDATE
+        : ACTIVITY_ACTIONS.FILE_UPDATE,
     metadata,
   };
 
@@ -468,7 +471,10 @@ export const trashDocument = asyncHandler(async (req, res) => {
     );
   }
 
-  const action = doc.docType === DOC_TYPES.FOLDER ? ACTIVITY_ACTIONS.FOLDER_DELETE : ACTIVITY_ACTIONS.FILE_DELETE;
+  const action =
+    doc.docType === DOC_TYPES.FOLDER
+      ? ACTIVITY_ACTIONS.FOLDER_DELETE
+      : ACTIVITY_ACTIONS.FILE_DELETE;
   logActivity(req, doc, {
     action,
     metadata: {
@@ -490,7 +496,10 @@ export const restoreDocument = asyncHandler(async (req, res) => {
     { $set: { isTrashed: false, trashedAt: null } },
   );
 
-  const action = doc.docType === DOC_TYPES.FOLDER ? ACTIVITY_ACTIONS.FOLDER_RESTORE : ACTIVITY_ACTIONS.FILE_RESTORE;
+  const action =
+    doc.docType === DOC_TYPES.FOLDER
+      ? ACTIVITY_ACTIONS.FOLDER_RESTORE
+      : ACTIVITY_ACTIONS.FILE_RESTORE;
   logActivity(req, doc, {
     action,
     metadata: {
@@ -545,7 +554,10 @@ export const permanentDelete = asyncHandler(async (req, res) => {
   const docIds = docsToDelete.map((doc) => doc._id);
   await Document.deleteMany({ _id: { $in: docIds } });
 
-  const action = targetDoc.docType === DOC_TYPES.FOLDER ? ACTIVITY_ACTIONS.FOLDER_PERMANENT_DELETE : ACTIVITY_ACTIONS.FILE_PERMANENT_DELETE;
+  const action =
+    targetDoc.docType === DOC_TYPES.FOLDER
+      ? ACTIVITY_ACTIONS.FOLDER_PERMANENT_DELETE
+      : ACTIVITY_ACTIONS.FILE_PERMANENT_DELETE;
 
   // Real usecase is when any user complains about any file or folder
   logActivity(req, targetDoc, {
@@ -680,7 +692,10 @@ export const moveDocument = asyncHandler(async (req, res) => {
   await document.save();
 
   logActivity(req, document, {
-    action: document.docType === DOC_TYPES.FOLDER ? ACTIVITY_ACTIONS.FOLDER_MOVE : ACTIVITY_ACTIONS.FILE_MOVE,
+    action:
+      document.docType === DOC_TYPES.FOLDER
+        ? ACTIVITY_ACTIONS.FOLDER_MOVE
+        : ACTIVITY_ACTIONS.FILE_MOVE,
     metadata: {
       previousParentId: currentParent,
       newParentId: targetParent,
@@ -767,7 +782,10 @@ export const shareDocument = asyncHandler(async (req, res) => {
   );
 
   logActivity(req, document, {
-    action: document.docType === DOC_TYPES.FOLDER ? ACTIVITY_ACTIONS.FOLDER_SHARE : ACTIVITY_ACTIONS.FILE_SHARE,
+    action:
+      document.docType === DOC_TYPES.FOLDER
+        ? ACTIVITY_ACTIONS.FOLDER_SHARE
+        : ACTIVITY_ACTIONS.FILE_SHARE,
     metadata: {
       sharedWith: newCollaborators.map((c) => ({ email: c.email, permission: c.permission })),
     },
@@ -813,7 +831,10 @@ export const removeCollaborator = asyncHandler(async (req, res) => {
   }
 
   logActivity(req, document, {
-    action: document.docType === DOC_TYPES.FOLDER ? ACTIVITY_ACTIONS.FOLDER_UNSHARE : ACTIVITY_ACTIONS.FILE_UNSHARE,
+    action:
+      document.docType === DOC_TYPES.FOLDER
+        ? ACTIVITY_ACTIONS.FOLDER_UNSHARE
+        : ACTIVITY_ACTIONS.FILE_UNSHARE,
     metadata: {
       unsharedWith: unsharedUser.email,
     },
