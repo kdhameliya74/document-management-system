@@ -36,3 +36,27 @@ export const PERMISSION_CAPABILITIES = {
     "share",
   ],
 };
+
+export const ACTIVITY_ACTIONS = {
+  FILE_UPLOAD: "file_upload",
+  FILE_DOWNLOAD: "file_download",
+  FILE_UPDATE: "file_update",
+  FILE_DELETE: "file_delete",
+  FILE_RESTORE: "file_restore",
+  FILE_SHARE: "file_share",
+  FILE_UNSHARE: "file_unshare",
+  FILE_RENAME: "file_rename",
+  FILE_MOVE: "file_move",
+  FOLDER_CREATE: "folder_create",
+  FOLDER_DELETE: "folder_delete",
+  FOLDER_RESTORE: "folder_restore",
+  FOLDER_UPDATE: "folder_update",
+  FOLDER_MOVE: "folder_move",
+  FOLDER_SHARE: "folder_share",
+  FOLDER_UNSHARE: "folder_unshare",
+  COMMENT_ADD: "comment_add",
+  COMMENT_EDIT: "comment_edit",
+  COMMENT_DELETE: "comment_delete",
+  VERSION_CREATE: "version_create",
+  VERSION_RESTORE: "version_restore",
+}

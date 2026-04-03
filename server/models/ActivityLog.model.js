@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { DOC_TYPES, ACTIVITY_ACTIONS } from "../constants/Shared.js";
 
 const activityLogSchema = new mongoose.Schema(
   {
@@ -11,34 +12,12 @@ const activityLogSchema = new mongoose.Schema(
     action: {
       type: String,
       required: true,
-      enum: [
-        "file_upload",
-        "file_download",
-        "file_update",
-        "file_delete",
-        "file_restore",
-        "file_share",
-        "file_unshare",
-        "file_rename",
-        "file_move",
-        "folder_create",
-        "folder_delete",
-        "folder_restore",
-        "folder_rename",
-        "folder_move",
-        "folder_share",
-        "folder_unshare",
-        "comment_add",
-        "comment_edit",
-        "comment_delete",
-        "version_create",
-        "version_restore",
-      ],
+      enum: Object.values(ACTIVITY_ACTIONS),
     },
     targetType: {
       type: String,
       required: true,
-      enum: [DOC_TYPES.FILE, DOC_TYPES.FOLDER, "Comment", "FileVersion"],
+      enum: [DOC_TYPES.FILE, DOC_TYPES.FOLDER, "Comment"],
     },
     target: {
       type: mongoose.Schema.Types.ObjectId,

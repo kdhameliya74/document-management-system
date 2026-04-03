@@ -29,7 +29,7 @@ const FolderModal = ({ documentItem, onClose, currentFolderId, mode = DOCUMENT_M
     const currentFolder = documents[currentFolderId];
 
     return currentFolder?.childDocuments?.some(
-      (docId) => documents[docId]?.name.toLowerCase() === sanitized,
+      (docId) => documents[docId]?.name.toLowerCase() === sanitized && documents[docId]?.id !== documentItem?.id,
     );
   };
 

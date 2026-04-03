@@ -6,7 +6,7 @@ import s3Client from "../config/s3.js";
 import Document from "../models/Document.model.js";
 import User from "../models/User.model.js";
 
-import { DOC_TYPES, PERMISSION_LEVELS } from "../constants/Shared.js";
+import { DOC_TYPES, PERMISSION_LEVELS, ACTIVITY_ACTIONS } from "../constants/Shared.js";
 import { FILE_UPLOAD_STATUS } from "../constants/File.js";
 import { NOTIFICATION_TYPES } from "../constants/Notification.js";
 import {
@@ -21,7 +21,7 @@ import { PutObjectCommand, DeleteObjectsCommand, GetObjectCommand } from "@aws-s
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { asyncHandler } from "../middlewares/error.middleware.js";
 import { notifyUser } from "../controllers/notification.controller.js";
-import { createActivityLog } from "../controllers/activityLog.controller.js";
+import { logActivity } from "../controllers/activityLog.controller.js";
 
 const CONCURRENT_DOWNLOADS = 10;
 //Helpers
@@ -340,9 +340,9 @@ export const createFolder = asyncHandler(async (req, res) => {
     canDownload: true,
   };
 
-  await createActivityLog({
+  logActivity({
     user: owner,
-    action: "folder_create",
+    action: ACTIVITY_ACTIONS.FOLDER_CREATE,
     targetType: DOC_TYPES.FOLDER,
     target: folder._id,
     targetName: folder.name,
@@ -352,7 +352,7 @@ export const createFolder = asyncHandler(async (req, res) => {
     },
     ipAddress: req.ip,
     userAgent: req.headers["user-agent"],
-  });
+  })
 
   return res
     .status(201)
@@ -369,6 +369,8 @@ export const updateDocument = asyncHandler(async (req, res) => {
   const doc = req.document;
   const sharedWith = doc.sharedWith;
   const sender = req.user;
+  const oldName = doc.name || "";
+  const oldColor = doc.color || "";
 
   // Per-docType allowed field whitelist
   const commonAllowed = ["name", "isStarred", "description", "tags", "isPublic"];
@@ -392,7 +394,36 @@ export const updateDocument = asyncHandler(async (req, res) => {
     return res.status(400).json({ success: false, message: "No valid fields provided to update" });
   }
 
+  // Determine action and metadata for activity log
+  const changes = {
+    color: allowed.includes("color") && oldColor !== req.body.color,
+    name: allowed.includes("name") && oldName !== req.body.name,
+  };
+
+  const metadata = {
+    ...(changes.color && {
+      oldColor,
+      newColor: req.body.color,
+    }),
+    ...(changes.name && {
+      oldName,
+      newName: req.body.name,
+    }),
+  };
+
+  const activity = {
+    user: sender.id,
+    action: doc.docType === DOC_TYPES.FOLDER ? ACTIVITY_ACTIONS.FOLDER_UPDATE : ACTIVITY_ACTIONS.FILE_UPDATE,
+    targetType: doc.docType,
+    target: doc._id,
+    targetName: doc.name,
+    metadata,
+    ipAddress: req.ip,
+    userAgent: req.headers["user-agent"],
+  };
+
   await doc.save(); // triggers pre('validate') → path recompute if name changed
+
   if (allowed.includes("name")) {
     await Promise.all(
       sharedWith.map((user) =>
@@ -405,6 +436,9 @@ export const updateDocument = asyncHandler(async (req, res) => {
       ),
     );
   }
+
+  logActivity(activity);
+
   return res.status(200).json({
     success: true,
     message: "Document updated successfully",

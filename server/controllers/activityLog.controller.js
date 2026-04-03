@@ -1,8 +1,17 @@
 import ActivityLog from "../models/ActivityLog.model.js";
 
 const createActivityLog = async (activity) => {
-    const activityLog = await ActivityLog.create(activity);
-    return activityLog;
+    try { await ActivityLog.create(activity); }
+    catch (error) { console.error("Activity Log Error:", error); }
+};
+
+export const logActivity = (activity) => {
+    console.log("Activity Log:", activity);
+    setImmediate(() => {
+        createActivityLog(activity).catch(err => {
+            console.error("Unhandled Activity Log Error:", err);
+        });
+    });
 };
 
 export { createActivityLog };
