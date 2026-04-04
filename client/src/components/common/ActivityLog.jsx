@@ -7,37 +7,54 @@ import { useGetActivityLogsQuery } from "@/store/api/activity.api";
 export const ACTIVITY_MESSAGES = {
   file_upload: (a) => `Uploaded file "${a.targetName}"`,
   file_download: (a) => `Downloaded file "${a.targetName}"`,
-  file_update: (a) => `Renamed file from "${a.metadata.oldName}" to "${a.metadata.newName}"`,
+  file_update: (a) => {
+    if (a.details?.newName)
+      return `Renamed file from "${a.details.oldName}" to "${a.details.newName}"`;
+    return `Updated file "${a.targetName}"`;
+  },
   file_delete: (a) => `Deleted file "${a.targetName}"`,
   file_permanent_delete: (a) => `Permanently deleted file "${a.targetName}"`,
-  file_restore: (a) => `Restored file "${a.targetName}"`,
-  file_share: (a) => `Shared file "${a.targetName}"`,
-  file_unshare: (a) => `Unshared file "${a.targetName}"`,
-  file_move: (a) => `Moved file "${a.targetName}"`,
+  file_restore: (a) =>
+    `Restored file "${a.targetName}" into "${a.details?.parentFolder || "My Drive"}"`,
+  file_share: (a) => {
+    const list = a.details?.sharedWith?.map((c) => c.name || c.email).join(", ");
+    return `Shared file "${a.targetName}" with ${list || "someone"}`;
+  },
+  file_unshare: (a) =>
+    `Unshared file "${a.targetName}" from ${a.details?.removedUser?.email || "someone"}`,
+  file_move: (a) =>
+    `Moved file "${a.targetName}" from "${a.details?.from || "My Drive"}" to "${a.details?.to || "My Drive"}"`,
 
-  folder_create: (a) => `Created folder "${a.targetName}"`,
+  folder_create: (a) =>
+    `Created folder "${a.targetName}" in "${a.details?.parentFolder || "My Drive"}"`,
   folder_delete: (a) => `Deleted folder "${a.targetName}"`,
   folder_permanent_delete: (a) => `Permanently deleted folder "${a.targetName}"`,
-  folder_restore: (a) => `Restored folder "${a.targetName}"`,
+  folder_restore: (a) =>
+    `Restored folder "${a.targetName}" into "${a.details?.parentFolder || "My Drive"}"`,
   folder_update: (a) => {
     const parts = [];
-    if (a.metadata?.newName) {
-      parts.push(`Renamed folder from "${a.metadata.oldName}" to "${a.metadata.newName}"`);
+    if (a.details?.newName) {
+      parts.push(`Renamed folder from "${a.details.oldName}" to "${a.details.newName}"`);
     }
-    if (a.metadata?.newColor) {
-      parts.push(`Changed color of folder from "${a.metadata.oldColor}" to "${a.metadata.newColor}"`);
+    if (a.details?.newColor) {
+      parts.push(`Changed color from "${a.details.oldColor}" to "${a.details.newColor}"`);
     }
-    return parts.join(" and ");
+    return parts.length > 0 ? parts.join(" and ") : `Updated folder "${a.targetName}"`;
   },
-  folder_move: (a) => `Moved folder "${a.targetName}"`,
-  folder_share: (a) => `Shared folder "${a.targetName}"`,
-  folder_unshare: (a) => `Unshared folder "${a.targetName}"`,
-  comment_add: () => `Added a comment`,
-  comment_edit: () => `Edited a comment`,
-  comment_delete: () => `Deleted a comment`,
+  folder_move: (a) =>
+    `Moved folder "${a.targetName}" from "${a.details?.from || "My Drive"}" to "${a.details?.to || "My Drive"}"`,
+  folder_share: (a) => {
+    const list = a.details?.sharedWith?.map((c) => c.name || c.email).join(", ");
+    return `Shared folder "${a.targetName}" with ${list || "someone"}`;
+  },
+  folder_unshare: (a) =>
+    `Removed access from folder "${a.targetName}" for ${a.details?.removedUser?.email || "someone"}`,
+  comment_add: (a) => `Added a comment on "${a.targetName}"`,
+  comment_edit: (a) => `Edited a comment on "${a.targetName}"`,
+  comment_delete: (a) => `Deleted a comment on "${a.targetName}"`,
 
-  version_create: () => `Created a new version`,
-  version_restore: () => `Restored a previous version`,
+  version_create: (a) => `Created a new version of "${a.targetName}"`,
+  version_restore: (a) => `Restored a previous version of "${a.targetName}"`,
 };
 
 const ActivityLog = ({ docId }) => {
@@ -48,19 +65,24 @@ const ActivityLog = ({ docId }) => {
   const hasMore = data?.hasMore || false;
 
   useEffect(() => {
-    if (data?.fetchedPages?.length > 0) {
-      const maxPage = Math.max(...data.fetchedPages);
-      if (maxPage > page) {
-        setPage(maxPage);
+    const setMaxPage = () => {
+      if (data?.fetchedPages?.length > 0) {
+        const maxPage = Math.max(...data.fetchedPages);
+        if (maxPage > page) {
+          setPage(maxPage);
+        }
       }
-    }
-  }, [data?.fetchedPages]);
+    };
+    setMaxPage();
+  }, [data?.fetchedPages, page]);
 
   if (isLoading && page === 1) {
     return (
       <div className="flex flex-col items-center justify-center py-12 opacity-50">
         <Activity size={24} className="animate-pulse text-primary/50 mb-2" />
-        <p className="text-[10px] font-black uppercase tracking-widest text-text-dim">Loading Activity...</p>
+        <p className="text-[10px] font-black uppercase tracking-widest text-text-dim">
+          Loading Activity...
+        </p>
       </div>
     );
   }
@@ -73,7 +95,9 @@ const ActivityLog = ({ docId }) => {
         Recent Activity
       </div>
 
-      <div className={`space-y-4 px-2 transition-opacity duration-300 ${isFetching ? "opacity-50" : "opacity-100"}`}>
+      <div
+        className={`space-y-4 px-2 transition-opacity duration-300 ${isFetching ? "opacity-50" : "opacity-100"}`}
+      >
         {activityLogs.length === 0 && !isLoading && (
           <p className="text-sm text-white/50 italic py-2 text-center">No activity yet</p>
         )}
@@ -89,13 +113,13 @@ const ActivityLog = ({ docId }) => {
               <div className="flex-1">
                 <p className="text-xs text-text-main leading-relaxed">
                   <span className="font-black text-text-main opacity-90">
-                    {activity.user?.firstName} {activity.user?.lastName}
+                    {activity.performedBy}
                   </span>{" "}
                   <span className="text-text-muted font-medium">{getMessage(activity)}</span>
                 </p>
 
                 <p className="text-[9px] font-black text-text-dim uppercase tracking-tighter mt-1 opacity-60">
-                  {formatDistanceToNow(new Date(activity.createdAt), { addSuffix: true })}
+                  {formatDistanceToNow(new Date(activity.timestamp), { addSuffix: true })}
                 </p>
               </div>
             </div>
@@ -111,7 +135,9 @@ const ActivityLog = ({ docId }) => {
             disabled={isFetching}
           >
             <span>{isFetching ? "Loading..." : "More"}</span>
-            {!isFetching && <ChevronDown size={10} className="group-hover:translate-y-0.5 transition-transform" />}
+            {!isFetching && (
+              <ChevronDown size={10} className="group-hover:translate-y-0.5 transition-transform" />
+            )}
           </button>
         </div>
       )}

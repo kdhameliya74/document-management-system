@@ -36,9 +36,7 @@ const DashboardPage = () => {
   };
 
   return (
-    <div
-      className="flex h-screen w-screen bg-bg-main overflow-hidden text-text-main"
-    >
+    <div className="flex h-screen w-screen bg-bg-main overflow-hidden text-text-main">
       <Sidebar />
       <div className="flex-1 flex flex-col h-full overflow-hidden">
         <Header />

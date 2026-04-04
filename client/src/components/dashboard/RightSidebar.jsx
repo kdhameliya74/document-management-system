@@ -1,17 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { Folder, Download, Trash2, Share2, Clock, Info, X, Pencil, Eye } from "lucide-react";
 import {
-  Folder,
-  Download,
-  Trash2,
-  Share2,
-  Clock,
-  Info,
-  X,
-  Pencil,
-  Eye,
-} from "lucide-react";
-import { setShowDetails, setActiveModal, setModalProps, clearUISelection } from "@/store/documents.slice";
+  setShowDetails,
+  setActiveModal,
+  setModalProps,
+  clearUISelection,
+} from "@/store/documents.slice";
 import { format } from "date-fns";
 
 import FileIcon from "@/components/common/FileIcon";
@@ -34,13 +29,19 @@ const RightSidebar = () => {
   const currentFolder = documents[currentFolderId];
   const selectedItem = selectedId ? documents[selectedId] : currentFolder;
 
+  const handleClose = useCallback(() => {
+    dispatch(setShowDetails(false));
+    setActiveTab("info");
+    dispatch(clearUISelection());
+  }, [dispatch]);
+
   useEffect(() => {
     return () => {
-      if(showDetails){
-        handleClose()
+      if (showDetails) {
+        handleClose();
       }
-    }
-  }, [showDetails])
+    };
+  }, [showDetails, handleClose]);
 
   if (!showDetails || !selectedItem) return null;
 
@@ -124,14 +125,6 @@ const RightSidebar = () => {
     { id: "info", label: "Basic Info", icon: Info },
     { id: "activity", label: "Activity Logs", icon: Clock },
   ];
-
-  const handleClose = () => {
-    dispatch(setShowDetails(false))
-    setActiveTab("info")
-    dispatch(clearUISelection())
-  }
-
-  
 
   return (
     <>
@@ -248,7 +241,9 @@ const RightSidebar = () => {
                           Size
                         </span>
                         <span className="text-sm font-bold text-text-main font-mono">
-                          {selectedItem.size ? `${(selectedItem.size / 1024).toFixed(2)} KB` : "N/A"}
+                          {selectedItem.size
+                            ? `${(selectedItem.size / 1024).toFixed(2)} KB`
+                            : "N/A"}
                         </span>
                       </div>
                     </div>

@@ -340,18 +340,11 @@ export const createFolder = asyncHandler(async (req, res) => {
     canDownload: true,
   };
 
-  logActivity({
-    user: owner,
+  logActivity(req, folderObj, {
     action: ACTIVITY_ACTIONS.FOLDER_CREATE,
-    targetType: DOC_TYPES.FOLDER,
-    target: folder._id,
-    targetName: folder.name,
     metadata: {
       parentId: parentId || null,
-      color: color || null,
     },
-    ipAddress: req.ip,
-    userAgent: req.headers["user-agent"],
   });
 
   return res
@@ -697,8 +690,8 @@ export const moveDocument = asyncHandler(async (req, res) => {
         ? ACTIVITY_ACTIONS.FOLDER_MOVE
         : ACTIVITY_ACTIONS.FILE_MOVE,
     metadata: {
-      previousParentId: currentParent,
-      newParentId: targetParent,
+      moveFrom: currentParent,
+      moveTo: targetParent,
     },
   });
 
@@ -787,7 +780,11 @@ export const shareDocument = asyncHandler(async (req, res) => {
         ? ACTIVITY_ACTIONS.FOLDER_SHARE
         : ACTIVITY_ACTIONS.FILE_SHARE,
     metadata: {
-      sharedWith: newCollaborators.map((c) => ({ email: c.email, permission: c.permission })),
+      sharedWith: newCollaborators.map((c) => ({
+        user: c.user,
+        email: c.email,
+        permission: c.permission,
+      })),
     },
   });
 
@@ -836,7 +833,8 @@ export const removeCollaborator = asyncHandler(async (req, res) => {
         ? ACTIVITY_ACTIONS.FOLDER_UNSHARE
         : ACTIVITY_ACTIONS.FILE_UNSHARE,
     metadata: {
-      unsharedWith: unsharedUser.email,
+      removedUserId: userId,
+      unsharedWithEmail: unsharedUser?.email,
     },
   });
 
