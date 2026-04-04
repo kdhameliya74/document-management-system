@@ -1,5 +1,6 @@
 import { asyncHandler } from "../middlewares/error.middleware.js";
 import ActivityLog from "../models/ActivityLog.model.js";
+import { ACTIVITY_ACTIONS } from "../constants/Shared.js";
 
 const createActivityLog = async (activity) => {
   try {
@@ -10,6 +11,7 @@ const createActivityLog = async (activity) => {
 };
 
 export const logActivity = (req, doc, activity = {}) => {
+  console.log(doc);
   setImmediate(() => {
     const sender = req.user;
     const log = {
@@ -35,11 +37,77 @@ export const getActivityLogs = asyncHandler(async (req, res) => {
   const skip = (page - 1) * limit;
   const query = { target: id };
   const [activities, total] = await Promise.all([
-    ActivityLog.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+    ActivityLog.find(query)
+      .select("-__v -ipAddress -userAgent -target")
+      .populate("user", "firstName lastName email")
+      .populate("metadata.moveFrom", "name")
+      .populate("metadata.moveTo", "name")
+      .populate("metadata.parentId", "name")
+      .populate("metadata.sharedWith.user", "firstName lastName email")
+      .populate("metadata.removedUserId", "firstName lastName email")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean(),
     ActivityLog.countDocuments(query),
   ]);
 
-  const hasNextPage = skip + limit < total;
+  const hasMore = skip + limit < total;
 
-  res.status(200).json({ success: true, activities, total, hasNextPage });
+  const transformed = activities.map((a) => {
+    const details = {};
+    const m = a.metadata || {};
+
+    switch (a.action) {
+      case ACTIVITY_ACTIONS.FILE_MOVE:
+      case ACTIVITY_ACTIONS.FOLDER_MOVE:
+        details.from = m.moveFrom?.name || "My Drive";
+        details.to = m.moveTo?.name || "My Drive";
+        break;
+      case ACTIVITY_ACTIONS.FILE_UPDATE:
+      case ACTIVITY_ACTIONS.FOLDER_UPDATE:
+        if (m.oldName) details.oldName = m.oldName;
+        if (m.newName) details.newName = m.newName;
+        if (m.oldColor) details.oldColor = m.oldColor;
+        if (m.newColor) details.newColor = m.newColor;
+        break;
+      case ACTIVITY_ACTIONS.FILE_RESTORE:
+      case ACTIVITY_ACTIONS.FOLDER_RESTORE:
+      case ACTIVITY_ACTIONS.FOLDER_CREATE:
+        details.parentFolder = m.parentId?.name || "My Drive";
+        break;
+      case ACTIVITY_ACTIONS.FILE_SHARE:
+      case ACTIVITY_ACTIONS.FOLDER_SHARE:
+        details.sharedWith = (m.sharedWith || []).map((c) => ({
+          name: c.user ? `${c.user.firstName} ${c.user.lastName}` : null,
+          email: c.email,
+          permission: c.permission,
+        }));
+        break;
+      case ACTIVITY_ACTIONS.FILE_UNSHARE:
+      case ACTIVITY_ACTIONS.FOLDER_UNSHARE:
+        details.removedUser = {
+          name: m.removedUserId ? `${m.removedUserId.firstName} ${m.removedUserId.lastName}` : null,
+          email: m.unsharedWithEmail,
+        };
+        break;
+    }
+
+    return {
+      id: a._id,
+      action: a.action,
+      targetType: a.targetType,
+      targetName: a.targetName,
+      performedBy: a.user ? `${a.user.firstName} ${a.user.lastName}` : "System",
+      details,
+      timestamp: a.createdAt,
+    };
+  });
+
+  res.status(200).json({
+    success: true,
+    activities: transformed,
+    total,
+    hasMore,
+  });
 });
