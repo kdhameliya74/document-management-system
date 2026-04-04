@@ -148,7 +148,7 @@ const RightSidebar = () => {
               <tab.icon size={14} strokeWidth={activeTab === tab.id ? 3 : 2} />
               {tab.label}
               {activeTab === tab.id && (
-                <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-primary rounded-t-full shadow-[0_-4px_12px_rgba(var(--primary-rgb),0.3)] animate-in fade-in slide-in-from-bottom-[2px] duration-300" />
+                <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-primary rounded-t-full shadow-[0_-4px_12px_rgba(var(--primary-rgb),0.3)]" />
               )}
             </button>
           ))}
@@ -157,7 +157,7 @@ const RightSidebar = () => {
         <div className="flex-1 overflow-y-auto custom-scrollbar relative">
           <div className="p-4">
             {activeTab === "info" ? (
-              <div className="animate-in fade-in duration-500 fill-mode-both">
+              <div className="">
                 <div className="flex flex-col items-center mb-5 text-center mt-4">
                   <div className="w-[140px] h-[140px] bg-bg-hover rounded-[2.5rem] flex items-center justify-center mb-6 border border-border-main shadow-inner relative group">
                     <div className="absolute inset-0 bg-primary/5 blur-3xl rounded-full opacity-50" />
@@ -277,7 +277,7 @@ const RightSidebar = () => {
                 </div>
               </div>
             ) : (
-              <div className="animate-in fade-in duration-500 fill-mode-both py-2 px-1">
+              <div className="py-2 px-1">
                 <ActivityLog />
               </div>
             )}
