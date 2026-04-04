@@ -35,11 +35,25 @@ export const getActivityLogs = asyncHandler(async (req, res) => {
   const skip = (page - 1) * limit;
   const query = { target: id };
   const [activities, total] = await Promise.all([
-    ActivityLog.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+    ActivityLog.find(query).select("-__v -ipAddress -userAgent -target")
+      .populate("user", "firstName lastName -_id")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean(),
     ActivityLog.countDocuments(query),
   ]);
 
-  const hasNextPage = skip + limit < total;
+  const hasMore = skip + limit < total;
 
-  res.status(200).json({ success: true, activities, total, hasNextPage });
+  res.status(200).json({
+    success: true,
+    activities: activities.map((activity) => ({
+      ...activity,
+      id: activity._id ? activity._id.toString() : null,
+      _id: undefined,
+    })),
+    total,
+    hasMore,
+  });
 });

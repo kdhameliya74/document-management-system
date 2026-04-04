@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
   Folder,
@@ -33,6 +33,14 @@ const RightSidebar = () => {
 
   const currentFolder = documents[currentFolderId];
   const selectedItem = selectedId ? documents[selectedId] : currentFolder;
+
+  useEffect(() => {
+    return () => {
+      if(showDetails){
+        handleClose()
+      }
+    }
+  }, [showDetails])
 
   if (!showDetails || !selectedItem) return null;
 
@@ -119,8 +127,11 @@ const RightSidebar = () => {
 
   const handleClose = () => {
     dispatch(setShowDetails(false))
+    setActiveTab("info")
     dispatch(clearUISelection())
   }
+
+  
 
   return (
     <>
@@ -278,7 +289,7 @@ const RightSidebar = () => {
               </div>
             ) : (
               <div className="py-2 px-1">
-                <ActivityLog />
+                <ActivityLog docId={selectedItem._id || selectedItem.id} />
               </div>
             )}
           </div>
