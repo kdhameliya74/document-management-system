@@ -5,47 +5,57 @@ import { formatDistanceToNow } from "date-fns";
 import { ChevronDown, Activity } from "lucide-react";
 
 export const ACTIVITY_MESSAGES = {
-  file_upload:           (a) => `Uploaded file "${a.targetName}"`,
-  file_download:         (a) => `Downloaded file "${a.targetName}"`,
-  file_update:           (a) => a.details?.newName
-                                  ? `Renamed file from "${a.details.oldName}" to "${a.details.newName}"`
-                                  : `Updated file "${a.targetName}"`,
-  file_delete:           (a) => `Deleted file "${a.targetName}"`,
+  file_upload: (a) => `Uploaded file "${a.targetName}"`,
+  file_download: (a) => `Downloaded file "${a.targetName}"`,
+  file_update: (a) =>
+    a.details?.newName
+      ? `Renamed file from "${a.details.oldName}" to "${a.details.newName}"`
+      : `Updated file "${a.targetName}"`,
+  file_delete: (a) => `Deleted file "${a.targetName}"`,
   file_permanent_delete: (a) => `Permanently deleted file "${a.targetName}"`,
-  file_restore:          (a) => `Restored file "${a.targetName}" into "${a.details?.parentFolder || "My Drive"}"`,
+  file_restore: (a) =>
+    `Restored file "${a.targetName}" into "${a.details?.parentFolder || "My Drive"}"`,
   file_share: (a, user) => {
     const list = a.details?.sharedWith
       ?.map((c) => (c.email === user.email ? "You" : c.name || c.email))
       .join(", ");
     return `Shared file "${a.targetName}" with ${list || "someone"}`;
   },
-  file_unshare: (a) => `Unshared file "${a.targetName}" from ${a.details?.removedUser?.email || "someone"}`,
-  file_move:    (a) => `Moved file "${a.targetName}" from "${a.details?.from || "My Drive"}" to "${a.details?.to || "My Drive"}"`,
+  file_unshare: (a) =>
+    `Unshared file "${a.targetName}" from ${a.details?.removedUser?.email || "someone"}`,
+  file_move: (a) =>
+    `Moved file "${a.targetName}" from "${a.details?.from || "My Drive"}" to "${a.details?.to || "My Drive"}"`,
 
-  folder_create:           (a) => `Created folder "${a.targetName}" in "${a.details?.parentFolder || "My Drive"}"`,
-  folder_delete:           (a) => `Deleted folder "${a.targetName}"`,
+  folder_create: (a) =>
+    `Created folder "${a.targetName}" in "${a.details?.parentFolder || "My Drive"}"`,
+  folder_delete: (a) => `Deleted folder "${a.targetName}"`,
   folder_permanent_delete: (a) => `Permanently deleted folder "${a.targetName}"`,
-  folder_restore:          (a) => `Restored folder "${a.targetName}" into "${a.details?.parentFolder || "My Drive"}"`,
+  folder_restore: (a) =>
+    `Restored folder "${a.targetName}" into "${a.details?.parentFolder || "My Drive"}"`,
   folder_update: (a) => {
     const parts = [];
-    if (a.details?.newName)  parts.push(`Renamed folder from "${a.details.oldName}" to "${a.details.newName}"`);
-    if (a.details?.newColor) parts.push(`Changed color from "${a.details.oldColor}" to "${a.details.newColor}"`);
+    if (a.details?.newName)
+      parts.push(`Renamed folder from "${a.details.oldName}" to "${a.details.newName}"`);
+    if (a.details?.newColor)
+      parts.push(`Changed color from "${a.details.oldColor}" to "${a.details.newColor}"`);
     return parts.length > 0 ? parts.join(" and ") : `Updated folder "${a.targetName}"`;
   },
-  folder_move: (a) => `Moved folder "${a.targetName}" from "${a.details?.from || "My Drive"}" to "${a.details?.to || "My Drive"}"`,
+  folder_move: (a) =>
+    `Moved folder "${a.targetName}" from "${a.details?.from || "My Drive"}" to "${a.details?.to || "My Drive"}"`,
   folder_share: (a, user) => {
     const list = a.details?.sharedWith
       ?.map((c) => (c.email === user.email ? "You" : c.name || c.email))
       .join(", ");
     return `Shared folder "${a.targetName}" with ${list || "someone"}`;
   },
-  folder_unshare: (a) => `Removed access from folder "${a.targetName}" for ${a.details?.removedUser?.email || "someone"}`,
+  folder_unshare: (a) =>
+    `Removed access from folder "${a.targetName}" for ${a.details?.removedUser?.email || "someone"}`,
 
-  comment_add:    (a) => `Added a comment on "${a.targetName}"`,
-  comment_edit:   (a) => `Edited a comment on "${a.targetName}"`,
+  comment_add: (a) => `Added a comment on "${a.targetName}"`,
+  comment_edit: (a) => `Edited a comment on "${a.targetName}"`,
   comment_delete: (a) => `Deleted a comment on "${a.targetName}"`,
 
-  version_create:  (a) => `Created a new version of "${a.targetName}"`,
+  version_create: (a) => `Created a new version of "${a.targetName}"`,
   version_restore: (a) => `Restored a previous version of "${a.targetName}"`,
 };
 
@@ -53,7 +63,7 @@ export const ACTIVITY_MESSAGES = {
 const ActivityItem = memo(({ activity, user }) => {
   const getMessage = ACTIVITY_MESSAGES[activity.action] ?? (() => activity.action);
   const timeAgo = formatDistanceToNow(new Date(activity.timestamp), { addSuffix: true });
-  const {firstName, lastName, email} = activity.performedBy;
+  const { firstName, lastName, email } = activity.performedBy;
   const performedBy = email === user.email ? "You" : firstName + " " + lastName;
 
   return (
@@ -103,7 +113,9 @@ const ActivityLog = ({ docId }) => {
         Recent Activity
       </div>
 
-      <div className={`space-y-4 px-2 transition-opacity duration-300 ${isFetching ? "opacity-50" : "opacity-100"}`}>
+      <div
+        className={`space-y-4 px-2 transition-opacity duration-300 ${isFetching ? "opacity-50" : "opacity-100"}`}
+      >
         {!isLoading && activityLogs.length === 0 && (
           <p className="text-sm text-white/50 italic py-2 text-center">No activity yet</p>
         )}

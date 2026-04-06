@@ -91,7 +91,7 @@ export const markOneRead = asyncHandler(async (req, res) => {
     await notification.save();
     await decrementUnreadCount(req.user.id);
     res.status(200).json({ success: true });
-  } catch (error) {
+  } catch (_) {
     res.status(500).json({ success: false, message: "Failed to mark notification as read" });
   }
 });

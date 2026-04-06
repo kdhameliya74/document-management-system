@@ -922,7 +922,6 @@ export const downloadDocument = asyncHandler(async (req, res) => {
 
   await Promise.all(tasks);
   await archive.finalize();
-
 });
 
 export const searchDocuments = asyncHandler(async (req, res) => {
