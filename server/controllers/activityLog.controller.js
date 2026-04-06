@@ -11,7 +11,6 @@ const createActivityLog = async (activity) => {
 };
 
 export const logActivity = (req, doc, activity = {}) => {
-  console.log(doc);
   setImmediate(() => {
     const sender = req.user;
     const log = {
@@ -98,7 +97,7 @@ export const getActivityLogs = asyncHandler(async (req, res) => {
       action: a.action,
       targetType: a.targetType,
       targetName: a.targetName,
-      performedBy: a.user ? `${a.user.firstName} ${a.user.lastName}` : "System",
+      performedBy: a.user,
       details,
       timestamp: a.createdAt,
     };

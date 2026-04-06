@@ -910,9 +910,7 @@ export const downloadDocument = asyncHandler(async (req, res) => {
         });
 
         const s3Response = await s3Client.send(command);
-
         const relativePath = doc.path.replace(/^\/+/, "").replace(/\/+/g, "/"); // remove leading slash and replace multiple slashes with single slash
-
         archive.append(s3Response.Body, {
           name: relativePath,
         });
@@ -924,6 +922,7 @@ export const downloadDocument = asyncHandler(async (req, res) => {
 
   await Promise.all(tasks);
   await archive.finalize();
+
 });
 
 export const searchDocuments = asyncHandler(async (req, res) => {
