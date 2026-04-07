@@ -1,6 +1,10 @@
 import { useState, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { fetchNotifications, markAllRead, markOneRead } from "@/features/notifications/store/notification.slice";
+import {
+  fetchNotifications,
+  markAllRead,
+  markOneRead,
+} from "@/features/notifications/store/notification.slice";
 import { Bell, Share, Info, AlertCircle, Loader2, CheckCheck, X } from "lucide-react";
 import { logError } from "@/shared/utils/utils";
 import { format } from "date-fns";

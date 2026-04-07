@@ -1,12 +1,7 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import {
-  USER_ROLES,
-  USER_VALIDATION,
-  STORAGE_CONSTANTS,
-  AUTH_CONSTANTS,
-} from "../shared/User.js";
+import { USER_ROLES, USER_VALIDATION, STORAGE_CONSTANTS, AUTH_CONSTANTS } from "../shared/User.js";
 
 const userSchema = new mongoose.Schema(
   {
