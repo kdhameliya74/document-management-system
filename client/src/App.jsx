@@ -1,11 +1,11 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import LoginPage from "@/pages/LoginPage";
-import SignupPage from "@/pages/SignupPage";
-import DashboardPage from "@/pages/DashboardPage";
-import PageNotFound from "@/pages/PageNotFound";
-import ROUTES from "@/utils/routes";
+import LoginPage from "@/features/auth/components/LoginPage";
+import SignupPage from "@/features/auth/components/SignupPage";
+import DashboardPage from "@/features/dashboard/components/DashboardPage";
+import PageNotFound from "@/shared/components/PageNotFound";
+import ROUTES from "@/shared/utils/routes";
 import { Toaster } from "react-hot-toast";
 
 const PrivateRoute = ({ children }) => {

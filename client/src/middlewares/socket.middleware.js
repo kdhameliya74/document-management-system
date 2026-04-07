@@ -1,6 +1,6 @@
 import { io } from "socket.io-client";
-import { login, logout, fetchUser } from "@/store/authSlice";
-import { syncMissed, notificationReceived, notifyByRipple } from "@/store/notification.slice";
+import { login, logout, fetchUser } from "@/features/auth/store/auth.slice";
+import { syncMissed, notificationReceived, notifyByRipple } from "@/features/notifications/store/notification.slice";
 
 let socket = null;
 
