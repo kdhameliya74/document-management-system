@@ -55,7 +55,7 @@ A full-stack Document Management System (DMS) built with React.js, Node.js, and 
 
 ### AI Features
 <div align="center">
-  <img src="AI-Summary-Tags.png" alt="AI Summary Tags" width="45%" />
+  <img src="docs/AI-Summary-Tags.png" alt="AI Summary Tags" width="45%" />
 </div>
 
 ## Technologies Used
