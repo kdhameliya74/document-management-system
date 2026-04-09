@@ -19,6 +19,7 @@ import {
   searchDocuments,
   removeCollaborator,
   summarizeDocument,
+  suggestDocumentName,
 } from "./document.controller.js";
 
 const router = express.Router();
@@ -87,6 +88,15 @@ router.post(
   validateId("id"),
   checkPermission("edit"),
   summarizeDocument,
+);
+
+// AI Smart Rename
+router.post(
+  "/:id/suggest-name",
+  protect,
+  validateId("id"),
+  checkPermission("edit"),
+  suggestDocumentName,
 );
 
 export default router;
