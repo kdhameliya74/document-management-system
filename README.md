@@ -110,6 +110,7 @@ A full-stack Document Management System (DMS) built with React.js, Node.js, and 
    AWS_REGION=your_aws_region
    AWS_S3_BUCKET_NAME=your_bucket_name
    REDIS_URL=your_redis_url
+   GEMINI_API_KEY=your_gemini_api_key
    ```
 
    **Client:** Ensure your client `.env` file (`client/.env`) is correctly configured:
