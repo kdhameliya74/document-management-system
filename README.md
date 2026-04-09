@@ -1,6 +1,6 @@
 # Document Management System
 
-A full-stack Document Management System (DMS) built with React.js, Node.js, and MongoDB. This system provides a robust platform for managing files and folders, facilitating seamless collaboration through document sharing, and tracking document-related activities.
+A full-stack Document Management System (DMS) built with React.js, Node.js, and MongoDB. This system provides a robust platform for managing files and folders, facilitating seamless collaboration through document sharing, and tracking document-related activities. AI-powered document summarization and tagging.
 
 ## Features & Screenshots
 
@@ -51,6 +51,11 @@ A full-stack Document Management System (DMS) built with React.js, Node.js, and 
   <img src="docs/Document%20With%20Filter.png" alt="Document With Filter" width="45%" />
   <br />
   <img src="docs/Trashed%20Documents.png" alt="Trashed Documents" width="45%" />
+</div>
+
+### AI Features
+<div align="center">
+  <img src="AI-Summary-Tags.png" alt="AI Summary Tags" width="45%" />
 </div>
 
 ## Technologies Used
@@ -105,6 +110,7 @@ A full-stack Document Management System (DMS) built with React.js, Node.js, and 
    AWS_REGION=your_aws_region
    AWS_S3_BUCKET_NAME=your_bucket_name
    REDIS_URL=your_redis_url
+   GEMINI_API_KEY=your_gemini_api_key
    ```
 
    **Client:** Ensure your client `.env` file (`client/.env`) is correctly configured:

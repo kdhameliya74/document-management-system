@@ -22,6 +22,7 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { asyncHandler } from "../../middlewares/error.middleware.js";
 import { notifyUser } from "../notifications/notification.controller.js";
 import { logActivity } from "../activity-logs/activitylog.controller.js";
+import { generateTags, generateSummary } from "../../utils/ai.util.js";
 
 const CONCURRENT_DOWNLOADS = 10;
 //Helpers
@@ -648,9 +649,17 @@ export const confirmUpload = asyncHandler(async (req, res) => {
     action: ACTIVITY_ACTIONS.FILE_UPLOAD,
     metadata: {
       parentId: parentId || null,
-      // TODO: add total size of uploaded files
     },
   });
+
+  // Fire-and-forget AI auto-tagging — never delays the upload response
+  generateTags(name, mimeType, extension)
+    .then((tags) => {
+      if (tags?.length) {
+        Document.findByIdAndUpdate(file._id, { $set: { tags } }).catch(() => {});
+      }
+    })
+    .catch(() => {});
 
   return res.status(201).json({ success: true, message: "File record created", file: fileObj });
 });
@@ -945,5 +954,37 @@ export const searchDocuments = asyncHandler(async (req, res) => {
     documents: documents.map((doc) => ({ ...doc, id: doc._id })),
     total,
     hasMore: total > skip + limit,
+  });
+});
+
+// @desc    Generate and save an AI summary + tags for a document
+// @route   POST /api/documents/:id/summarize
+// @access  Private (edit permission required)
+export const summarizeDocument = asyncHandler(async (req, res) => {
+  const doc = req.document;
+
+  if (doc.docType === DOC_TYPES.FOLDER) {
+    return res.status(400).json({
+      success: false,
+      message: "Summarization is only available for files, not folders.",
+    });
+  }
+
+  const summary = await generateSummary(doc.name, doc.mimeType, doc.extension, doc.size);
+
+  if (!summary) {
+    return res.status(503).json({
+      success: false,
+      message: "AI summarization is currently unavailable. Please check your GEMINI_API_KEY.",
+    });
+  }
+
+  doc.description = summary;
+  await doc.save();
+
+  return res.status(200).json({
+    success: true,
+    message: "Summary generated successfully",
+    document: doc,
   });
 });
