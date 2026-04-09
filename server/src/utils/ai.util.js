@@ -42,7 +42,6 @@ class RateLimitedQueue {
 
 const geminiQueue = new RateLimitedQueue(12); // 12 RPM — safely under free-tier 15 RPM
 
-
 async function callWithRetry(fn, retries = 3, baseDelay = 2000) {
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
@@ -53,7 +52,9 @@ async function callWithRetry(fn, retries = 3, baseDelay = 2000) {
 
       if (is429 && !isLastAttempt) {
         const delay = baseDelay * Math.pow(2, attempt); // 2s → 4s → 8s
-        console.warn(`[AI] Rate limited. Retrying in ${delay}ms... (attempt ${attempt + 1}/${retries})`);
+        console.warn(
+          `[AI] Rate limited. Retrying in ${delay}ms... (attempt ${attempt + 1}/${retries})`,
+        );
         await new Promise((res) => setTimeout(res, delay)); // wait loop for 2s, 4s, 8s
       } else {
         throw err; // non-429 error or out of retries
@@ -71,7 +72,7 @@ async function callGemini(prompt) {
       const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
       const result = await model.generateContent(prompt);
       return result.response.text().trim();
-    })
+    }),
   );
 }
 

@@ -81,6 +81,12 @@ router.get(
 );
 
 // AI Summarize document
-router.post("/:id/summarize", protect, validateId("id"), checkPermission("edit"), summarizeDocument);
+router.post(
+  "/:id/summarize",
+  protect,
+  validateId("id"),
+  checkPermission("edit"),
+  summarizeDocument,
+);
 
 export default router;

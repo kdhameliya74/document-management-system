@@ -1,6 +1,18 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { Folder, Download, Trash2, Share2, Clock, Info, X, Pencil, Eye, Sparkles, Tag } from "lucide-react";
+import {
+  Folder,
+  Download,
+  Trash2,
+  Share2,
+  Clock,
+  Info,
+  X,
+  Pencil,
+  Eye,
+  Sparkles,
+  Tag,
+} from "lucide-react";
 import {
   setShowDetails,
   setActiveModal,
@@ -316,8 +328,19 @@ const RightSidebar = () => {
                         {isSummarizing ? (
                           <>
                             <svg className="animate-spin w-3 h-3" viewBox="0 0 24 24" fill="none">
-                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                              <circle
+                                className="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                              />
+                              <path
+                                className="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                              />
                             </svg>
                             <span>Thinking…</span>
                           </>
@@ -343,7 +366,8 @@ const RightSidebar = () => {
                         </div>
                       ) : !isSummarizing ? (
                         <p className="text-xs text-text-dim text-center py-2 font-medium">
-                          Click <span className="text-violet-400 font-bold">Summarize</span> to generate an AI description for this file.
+                          Click <span className="text-violet-400 font-bold">Summarize</span> to
+                          generate an AI description for this file.
                         </p>
                       ) : (
                         <div className="flex flex-col gap-2 animate-pulse">

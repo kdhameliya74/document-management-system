@@ -523,9 +523,7 @@ const documentsSlice = createSlice({
       })
       .addCase(summarizeDocument.rejected, (state) => {
         state.isSummarizing = false;
-      })
-
-      ;
+      });
   },
 });
 
