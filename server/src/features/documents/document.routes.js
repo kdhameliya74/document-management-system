@@ -18,6 +18,7 @@ import {
   downloadDocument,
   searchDocuments,
   removeCollaborator,
+  summarizeDocument,
 } from "./document.controller.js";
 
 const router = express.Router();
@@ -78,5 +79,8 @@ router.get(
   checkPermission("download"),
   downloadDocument,
 );
+
+// AI Summarize document
+router.post("/:id/summarize", protect, validateId("id"), checkPermission("edit"), summarizeDocument);
 
 export default router;

@@ -36,6 +36,7 @@ const initialState = {
   selectedId: null,
   showDetails: false,
   isLoading: false,
+  isSummarizing: false,
   error: null,
   activeModal: null, // 'createFolder' | 'upload' | 'edit' | 'delete' | 'move' | 'share' | 'Download'
   modalProps: {},
@@ -272,6 +273,29 @@ export const removeCollaborator = createAsyncThunk(
   },
 );
 
+/*
+|--------------------------------------------------------------------------
+| summarizeDocument
+|--------------------------------------------------------------------------
+*/
+export const summarizeDocument = createAsyncThunk(
+  "documents/summarize",
+  async (docId, { rejectWithValue }) => {
+    try {
+      const data = await DocumentService.summarizeDocument(docId);
+      return {
+        id: docId,
+        document: data.document,
+      };
+    } catch (err) {
+      logError(err);
+      return rejectWithValue(
+        err?.response?.data?.message || "AI summarization failed. Please try again.",
+      );
+    }
+  },
+);
+
 const ensureDocument = (state, id, data, rootId) => {
   const docState = state.documents;
   const parentId = data.parentId;
@@ -486,7 +510,22 @@ const documentsSlice = createSlice({
             (collaborator) => collaborator.user !== userId,
           );
         }
-      });
+      })
+      .addCase(summarizeDocument.pending, (state) => {
+        state.isSummarizing = true;
+      })
+      .addCase(summarizeDocument.fulfilled, (state, action) => {
+        state.isSummarizing = false;
+        const { id, document } = action.payload;
+        if (state.documents[id]) {
+          state.documents[id].description = document.description;
+        }
+      })
+      .addCase(summarizeDocument.rejected, (state) => {
+        state.isSummarizing = false;
+      })
+
+      ;
   },
 });
 

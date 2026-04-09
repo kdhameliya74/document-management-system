@@ -74,6 +74,11 @@ const DocumentService = {
     return response;
   },
 
+  summarizeDocument: async (docId) => {
+    const response = await api.post(`/documents/${docId}/summarize`);
+    return response.data;
+  },
+
   globalSearch: async (query, page = 1, limit = 10) => {
     const response = await api.get(`/documents/search`, { params: { q: query, page, limit } });
     return response.data;

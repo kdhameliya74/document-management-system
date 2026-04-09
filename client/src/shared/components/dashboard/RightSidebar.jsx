@@ -1,13 +1,15 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { Folder, Download, Trash2, Share2, Clock, Info, X, Pencil, Eye } from "lucide-react";
+import { Folder, Download, Trash2, Share2, Clock, Info, X, Pencil, Eye, Sparkles, Tag } from "lucide-react";
 import {
   setShowDetails,
   setActiveModal,
   setModalProps,
   clearUISelection,
 } from "@/features/documents/store/documents.slice";
+import { summarizeDocument } from "@/features/documents/store/documents.slice";
 import { format } from "date-fns";
+import toast from "react-hot-toast";
 
 import FileIcon from "@/shared/components/common/FileIcon";
 import { truncateName } from "@/shared/utils/utils";
@@ -18,7 +20,7 @@ import ActivityLog from "@/shared/components/common/ActivityLog";
 
 const RightSidebar = () => {
   const dispatch = useDispatch();
-  const { documents, currentFolderId, selectedId, showDetails } = useSelector(
+  const { documents, currentFolderId, selectedId, showDetails, isSummarizing } = useSelector(
     (state) => state.documentSystem,
   );
   const { downloadFile, downloadFolder } = useDownloadDocument();
@@ -34,6 +36,17 @@ const RightSidebar = () => {
     setActiveTab("info");
     dispatch(clearUISelection());
   }, [dispatch]);
+
+  const handleSummarize = async () => {
+    const docId = selectedItem?.id || selectedItem?._id;
+    if (!docId) return;
+    try {
+      await dispatch(summarizeDocument(docId)).unwrap();
+      toast.success("AI summary generated!");
+    } catch (err) {
+      toast.error(err || "Failed to generate summary.");
+    }
+  };
 
   useEffect(() => {
     return () => {
@@ -281,6 +294,89 @@ const RightSidebar = () => {
                     </div>
                   </div>
                 </div>
+
+                {/* ── AI Insights Section (files only) ── */}
+                {!isFolder && (
+                  <div className="mt-3 rounded-3xl border border-border-muted/50 overflow-hidden">
+                    {/* Header */}
+                    <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-violet-500/10 via-primary/10 to-fuchsia-500/10 border-b border-border-muted/30">
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-md">
+                          <Sparkles size={12} className="text-white" strokeWidth={2.5} />
+                        </div>
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-text-main">
+                          AI Insights
+                        </span>
+                      </div>
+                      <button
+                        onClick={handleSummarize}
+                        disabled={isSummarizing}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 hover:opacity-90 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                      >
+                        {isSummarizing ? (
+                          <>
+                            <svg className="animate-spin w-3 h-3" viewBox="0 0 24 24" fill="none">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                            </svg>
+                            <span>Thinking…</span>
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles size={10} strokeWidth={3} />
+                            <span>{selectedItem?.description ? "Re-summarize" : "Summarize"}</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+
+                    <div className="p-4 flex flex-col gap-3 bg-bg-panel/30">
+                      {/* Summary */}
+                      {selectedItem?.description ? (
+                        <div className="flex flex-col gap-1.5">
+                          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-text-dim">
+                            Summary
+                          </span>
+                          <p className="text-sm text-text-muted leading-relaxed font-medium">
+                            {selectedItem.description}
+                          </p>
+                        </div>
+                      ) : !isSummarizing ? (
+                        <p className="text-xs text-text-dim text-center py-2 font-medium">
+                          Click <span className="text-violet-400 font-bold">Summarize</span> to generate an AI description for this file.
+                        </p>
+                      ) : (
+                        <div className="flex flex-col gap-2 animate-pulse">
+                          <div className="h-2.5 bg-bg-hover rounded-full w-full" />
+                          <div className="h-2.5 bg-bg-hover rounded-full w-4/5" />
+                          <div className="h-2.5 bg-bg-hover rounded-full w-3/5" />
+                        </div>
+                      )}
+
+                      {/* Tags */}
+                      {selectedItem?.tags?.length > 0 && (
+                        <div className="flex flex-col gap-2">
+                          <div className="flex items-center gap-1.5">
+                            <Tag size={10} className="text-text-dim" />
+                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-text-dim">
+                              AI Tags
+                            </span>
+                          </div>
+                          <div className="flex flex-wrap gap-1.5">
+                            {selectedItem.tags.map((tag, i) => (
+                              <span
+                                key={i}
+                                className="px-2.5 py-1 rounded-xl text-[10px] font-bold bg-gradient-to-r from-violet-500/15 to-fuchsia-500/15 text-violet-300 border border-violet-500/20 tracking-wide"
+                              >
+                                #{tag}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="py-2 px-1">
