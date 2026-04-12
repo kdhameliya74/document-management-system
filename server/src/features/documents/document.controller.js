@@ -22,7 +22,7 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { asyncHandler } from "../../middlewares/error.middleware.js";
 import { notifyUser } from "../notifications/notification.controller.js";
 import { logActivity } from "../activity-logs/activitylog.controller.js";
-import { generateTags, generateSummary } from "../../utils/ai.util.js";
+import { generateTags, generateSummary, generateSmartName } from "../../utils/ai.util.js";
 
 const CONCURRENT_DOWNLOADS = 10;
 //Helpers
@@ -986,5 +986,32 @@ export const summarizeDocument = asyncHandler(async (req, res) => {
     success: true,
     message: "Summary generated successfully",
     document: doc,
+  });
+});
+
+// @desc    Suggest a meaningful name for a document via AI
+// @route   POST /api/documents/:id/suggest-name
+export const suggestDocumentName = asyncHandler(async (req, res) => {
+  const doc = req.document;
+  if (doc.docType === DOC_TYPES.FOLDER) {
+    return res.status(400).json({
+      success: false,
+      message: "AI renaming is only available for files.",
+    });
+  }
+
+  const suggestedNames = await generateSmartName(doc.name, doc.mimeType, doc.extension);
+
+  if (!suggestedNames.length) {
+    return res.status(200).json({
+      success: true,
+      message: "Current name is already descriptive enough.",
+      names: [],
+    });
+  }
+
+  return res.status(200).json({
+    success: true,
+    names: suggestedNames,
   });
 });

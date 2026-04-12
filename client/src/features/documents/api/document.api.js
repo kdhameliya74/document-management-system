@@ -79,6 +79,11 @@ const DocumentService = {
     return response.data;
   },
 
+  suggestName: async (docId) => {
+    const response = await api.post(`/documents/${docId}/suggest-name`);
+    return response.data;
+  },
+
   globalSearch: async (query, page = 1, limit = 10) => {
     const response = await api.get(`/documents/search`, { params: { q: query, page, limit } });
     return response.data;

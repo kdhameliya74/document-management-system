@@ -1,3 +1,11 @@
+/**
+ * Gemini 2.5 Flash-Lite
+ * Lightweight text generation— file renaming and short summaries— not heavy reasoning or long-form content.
+ * Case: file renaming and short AI summaries requires fast, low-cost, and reliable text generation rather than deep reasoning.
+ * The model provides low latency, which is important for real-time user experience, and it's cost-efficient for high-frequency operations.
+ * It also performs well for structured outputs like filenames, making it a good fit without overusing a heavier model.
+ */
+
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 let genAIInstance = null;
@@ -69,7 +77,7 @@ async function callGemini(prompt) {
 
   return geminiQueue.add(() =>
     callWithRetry(async () => {
-      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
       const result = await model.generateContent(prompt);
       return result.response.text().trim();
     }),
@@ -145,5 +153,39 @@ Output:`;
   } catch (err) {
     console.error("[AI] generateSummary failed:", err?.message);
     return "";
+  }
+}
+
+export async function generateSmartName(fileName, mimeType, extension) {
+  const prompt = `You are a document management assistant. Analyze this filename and suggest a better, more descriptive name if it looks generic.
+
+File name: "${fileName}"
+MIME type: "${mimeType}"
+Extension: "${extension}"
+
+Generic patterns: scan_001, IMG_1234, document, untitled, DSC_001.
+
+Rules:
+- If the name is already descriptive, return "null".
+- If generic, suggest a concise, professional name WITHOUT extension.
+- Use Underscores_For_Spaces.
+- Give atleast 4 names so that user can choose from them.
+- return ONLY the filename or "null".
+
+Output:`;
+
+  try {
+    const text = await callGemini(prompt);
+    if (!text || text.toLowerCase().includes("null")) {
+      return [];
+    }
+    const result = text
+      .split("\n") // split by new lines
+      .map((item) => item.trim()) // trim each item
+      .filter(Boolean); // remove empty strings
+    return result;
+  } catch (err) {
+    console.error("[AI] generateSmartName failed:", err?.message);
+    return [];
   }
 }
