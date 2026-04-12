@@ -1,3 +1,11 @@
+/**
+ * Gemini 2.5 Flash-Lite
+ * Lightweight text generation— file renaming and short summaries— not heavy reasoning or long-form content.
+ * Case: file renaming and short AI summaries requires fast, low-cost, and reliable text generation rather than deep reasoning.
+ * The model provides low latency, which is important for real-time user experience, and it's cost-efficient for high-frequency operations.
+ * It also performs well for structured outputs like filenames, making it a good fit without overusing a heavier model.
+ */
+
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 let genAIInstance = null;
@@ -172,13 +180,12 @@ Output:`;
       return [];
     }
     const result = text
-      .split("\n")               // split by new lines
-      .map(item => item.trim()) // trim each item
-      .filter(Boolean);         // remove empty strings
+      .split("\n") // split by new lines
+      .map((item) => item.trim()) // trim each item
+      .filter(Boolean); // remove empty strings
     return result;
   } catch (err) {
     console.error("[AI] generateSmartName failed:", err?.message);
     return [];
   }
 }
-

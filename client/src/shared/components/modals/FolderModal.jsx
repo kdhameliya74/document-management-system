@@ -37,7 +37,7 @@ const FolderModal = ({ documentItem, onClose, currentFolderId, mode = DOCUMENT_M
         setSuggestedNames(suggestedNames);
       }
     } catch (err) {
-      console.error("Failed to suggest name. Please try again.");
+      console.error("Failed to suggest name. Please try again.", err);
     } finally {
       setIsSuggestingName(false);
     }
@@ -147,10 +147,11 @@ const FolderModal = ({ documentItem, onClose, currentFolderId, mode = DOCUMENT_M
             onChange={(e) => setFolderName(e.target.value)}
             onKeyDown={handleKeyDown}
             autoFocus
-            className={`w-full py-3.5 px-5 rounded-2xl bg-bg-panel text-text-main text-base font-medium outline-none border transition-all duration-300 shadow-inner group-hover:border-border-muted ${errorMessage
-              ? "border-red-500/50 focus:border-red-500 focus:ring-4 focus:ring-red-500/5"
-              : "border-border-main focus:border-primary/50 focus:ring-4 focus:ring-primary/5"
-              } ${isFile && extension ? "pr-32" : ""}`}
+            className={`w-full py-3.5 px-5 rounded-2xl bg-bg-panel text-text-main text-base font-medium outline-none border transition-all duration-300 shadow-inner group-hover:border-border-muted ${
+              errorMessage
+                ? "border-red-500/50 focus:border-red-500 focus:ring-4 focus:ring-red-500/5"
+                : "border-border-main focus:border-primary/50 focus:ring-4 focus:ring-primary/5"
+            } ${isFile && extension ? "pr-32" : ""}`}
           />
 
           <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
@@ -165,7 +166,11 @@ const FolderModal = ({ documentItem, onClose, currentFolderId, mode = DOCUMENT_M
                 {isSuggestingName ? (
                   <Loader size={12} className="animate-spin" />
                 ) : (
-                  <Sparkles size={12} strokeWidth={2.5} className="group-hover/ai:scale-110 transition-transform" />
+                  <Sparkles
+                    size={12}
+                    strokeWidth={2.5}
+                    className="group-hover/ai:scale-110 transition-transform"
+                  />
                 )}
               </button>
             )}
@@ -183,7 +188,9 @@ const FolderModal = ({ documentItem, onClose, currentFolderId, mode = DOCUMENT_M
               <div className="w-5 h-5 rounded-md bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center">
                 <Sparkles size={10} className="text-white" strokeWidth={2.5} />
               </div>
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-text-main">AI Suggested Names</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-text-main">
+                AI Suggested Names
+              </span>
             </div>
             <div className="flex flex-wrap gap-2 p-3">
               {suggestedNames.map((name, index) => (
@@ -215,10 +222,11 @@ const FolderModal = ({ documentItem, onClose, currentFolderId, mode = DOCUMENT_M
               <button
                 key={color}
                 onClick={() => setSelectedColor(color)}
-                className={`w-7 h-7 rounded-full transition-all duration-300 transform hover:scale-125 hover:rotate-6 cursor-pointer border-2 shadow-sm ${selectedColor === color
-                  ? "border-white scale-125 shadow-lg shadow-white/20 z-10"
-                  : "border-transparent opacity-40 hover:opacity-100"
-                  }`}
+                className={`w-7 h-7 rounded-full transition-all duration-300 transform hover:scale-125 hover:rotate-6 cursor-pointer border-2 shadow-sm ${
+                  selectedColor === color
+                    ? "border-white scale-125 shadow-lg shadow-white/20 z-10"
+                    : "border-transparent opacity-40 hover:opacity-100"
+                }`}
                 style={{ backgroundColor: color }}
                 title={color}
               />

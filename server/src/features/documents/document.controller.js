@@ -656,10 +656,10 @@ export const confirmUpload = asyncHandler(async (req, res) => {
   generateTags(name, mimeType, extension)
     .then((tags) => {
       if (tags?.length) {
-        Document.findByIdAndUpdate(file._id, { $set: { tags } }).catch(() => { });
+        Document.findByIdAndUpdate(file._id, { $set: { tags } }).catch(() => {});
       }
     })
-    .catch(() => { });
+    .catch(() => {});
 
   return res.status(201).json({ success: true, message: "File record created", file: fileObj });
 });
