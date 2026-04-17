@@ -36,8 +36,13 @@ export const ACTIVITY_MESSAGES = {
     const parts = [];
     if (a.details?.newName)
       parts.push(`Renamed folder from "${a.details.oldName}" to "${a.details.newName}"`);
-    if (a.details?.newColor)
-      parts.push(`Changed color from "${a.details.oldColor}" to "${a.details.newColor}"`);
+    if (a.details?.newColor) {
+      const spanOld = document.createElement("span");
+      spanOld.className = `inline-block w-[12px] h-[12px] bg-[${a.details.oldColor}]`;
+      const spanNew = document.createElement("span");
+      spanNew.className = `inline-block w-[12px] h-[12px] bg-[${a.details.newColor}]`;
+      parts.push(`Changed color from ${spanOld.outerHTML} to ${spanNew.outerHTML}`);
+    }
     return parts.length > 0 ? parts.join(" and ") : `Updated folder "${a.targetName}"`;
   },
   folder_move: (a) =>
@@ -62,6 +67,7 @@ export const ACTIVITY_MESSAGES = {
 // Extracted + memoized — only re-renders when this specific activity or user changes
 const ActivityItem = memo(({ activity, user }) => {
   const getMessage = ACTIVITY_MESSAGES[activity.action] ?? (() => activity.action);
+  const message = getMessage(activity, user);
   const timeAgo = formatDistanceToNow(new Date(activity.timestamp), { addSuffix: true });
   const { firstName, lastName, email } = activity.performedBy;
   const performedBy = email === user.email ? "You" : firstName + " " + lastName;
@@ -70,7 +76,10 @@ const ActivityItem = memo(({ activity, user }) => {
     <div className="group flex flex-col gap-1 relative border-l-2 border-border-muted pl-4 py-0.5">
       <p className="text-xs text-text-main leading-relaxed">
         <span className="font-black text-text-main opacity-90">{performedBy}</span>{" "}
-        <span className="text-text-muted font-medium">{getMessage(activity, user)}</span>
+        <span
+          className="text-text-muted font-medium inline-flex gap-2 justify-center items-center"
+          dangerouslySetInnerHTML={{ __html: message }}
+        />
       </p>
       <p className="text-[9px] font-black text-text-dim uppercase tracking-tighter mt-1 opacity-60">
         {timeAgo}
