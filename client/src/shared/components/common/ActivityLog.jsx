@@ -38,9 +38,9 @@ export const ACTIVITY_MESSAGES = {
       parts.push(`Renamed folder from "${a.details.oldName}" to "${a.details.newName}"`);
     if (a.details?.newColor) {
       const spanOld = document.createElement("span");
-      spanOld.className = `inline-block w-[10px] h-[10px] rounded-full bg-[${a.details.oldColor}]`;
+      spanOld.className = `inline-block w-[12px] h-[12px] bg-[${a.details.oldColor}]`;
       const spanNew = document.createElement("span");
-      spanNew.className = `inline-block w-[10px] h-[10px] rounded-full bg-[${a.details.newColor}]`;
+      spanNew.className = `inline-block w-[12px] h-[12px] bg-[${a.details.newColor}]`;
       parts.push(
         `Changed color from ${spanOld.outerHTML} to ${spanNew.outerHTML}`,
       );
@@ -78,7 +78,7 @@ const ActivityItem = memo(({ activity, user }) => {
     <div className="group flex flex-col gap-1 relative border-l-2 border-border-muted pl-4 py-0.5">
       <p className="text-xs text-text-main leading-relaxed">
         <span className="font-black text-text-main opacity-90">{performedBy}</span>{" "}
-        <span className="text-text-muted font-medium inline-flex gap-1" dangerouslySetInnerHTML={{ __html: message }} />
+        <span className="text-text-muted font-medium inline-flex gap-2 justify-center items-center" dangerouslySetInnerHTML={{ __html: message }} />
       </p>
       <p className="text-[9px] font-black text-text-dim uppercase tracking-tighter mt-1 opacity-60">
         {timeAgo}
