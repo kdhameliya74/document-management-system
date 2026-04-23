@@ -21,7 +21,9 @@
     "format:all": "npm run format:client && npm run format:server",
     "format:check:client": "cd client && npm run format:check",
     "format:check:server": "cd server && npm run format:check",
-    "format:check:all": "npm run format:check:client && npm run format:check:server"
+    "format:check:all": "npm run format:check:client && npm run format:check:server",
+    "test:client": "cd client && npm run test",
+    "test:client:watch": "cd client && npm run test:watch"
   },
   "keywords": [],
   "author": "",
