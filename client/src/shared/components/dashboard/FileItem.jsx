@@ -3,13 +3,14 @@ import FileIcon from "@/shared/components/common/FileIcon";
 import { getBaseName, getFileExtension } from "@/shared/utils/utils.js";
 import { getFileIcon } from "@/shared/utils/fileIcons.js";
 
-const FileItem = ({ file, isSelected, onSelect, onContextMenu, onDoubleClick }) => {
+const FileItem = ({ file, isSelected, onSelect, onContextMenu, onDoubleClick, ...props }) => {
   const displayName = getBaseName(file.name);
   const extension = getFileExtension(file.name);
   const { className: colorClass } = getFileIcon(file.mimeType);
 
   return (
     <div
+      {...props}
       className={`flex flex-col items-center gap-2.5 p-4 rounded-3xl cursor-pointer transition-all duration-300 group border border-transparent relative
         ${
           isSelected
