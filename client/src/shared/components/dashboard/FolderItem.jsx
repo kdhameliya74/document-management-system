@@ -3,11 +3,12 @@ import { Folder } from "lucide-react";
 import { FOLDER_COLORS } from "@/shared/utils/constants.js";
 import { truncateFolderName } from "@/shared/utils/utils.js";
 
-const FolderItem = ({ folder, isSelected, onNavigate, onContextMenu }) => {
+const FolderItem = ({ folder, isSelected, onNavigate, onContextMenu, ...props }) => {
   const displayName = truncateFolderName(folder.name);
 
   return (
     <div
+      {...props}
       className={`flex flex-col items-center gap-2.5 p-4 rounded-3xl cursor-pointer transition-all duration-300 group border border-transparent relative
         ${
           isSelected
