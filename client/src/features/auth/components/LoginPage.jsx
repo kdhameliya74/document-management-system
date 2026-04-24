@@ -4,7 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { login, clearError } from "@/features/auth/store/auth.slice";
 import { motion } from "framer-motion";
 import { useSelector } from "react-redux";
-import { Lock, Mail, ArrowRight, AlertCircle, Loader } from "lucide-react";
+import { Lock, Mail, ArrowRight, AlertCircle } from "lucide-react";
 import AuthBackground from "@/shared/components/auth/AuthBackground";
 import ROUTES from "@/shared/utils/routes";
 

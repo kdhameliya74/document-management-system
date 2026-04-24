@@ -6,17 +6,14 @@ import { configureStore } from "@reduxjs/toolkit";
 import documentSystemReducer from "@/features/documents/store/documents.slice";
 import * as documentActions from "@/features/documents/store/documents.slice";
 import { useDownloadDocument } from "@/shared/hooks/useDownloadDocument";
-import toast from "react-hot-toast";
 
-// Mock hooks
 jest.mock("@/shared/hooks/useDownloadDocument");
 jest.mock("react-hot-toast");
 
-// Mock components
 jest.mock("@/shared/components/common/ActivityLog", () => () => <div data-testid="activity-log">Activity Log</div>);
 jest.mock("@/shared/components/common/UserTag", () => ({ collaborator }) => <div>{collaborator?.name || collaborator?.fullName}</div>);
 jest.mock("@/shared/components/common/FileIcon", () => () => <div>FileIcon</div>);
-// Mock lucide-react icons that might be used as components
+
 jest.mock("lucide-react", () => {
     const original = jest.requireActual("lucide-react");
     return {
