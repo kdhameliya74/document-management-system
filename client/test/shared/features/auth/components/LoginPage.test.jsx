@@ -4,9 +4,9 @@ import userEvent from "@testing-library/user-event";
 import { Provider } from "react-redux";
 import { MemoryRouter } from "react-router-dom";
 import { configureStore } from "@reduxjs/toolkit";
-import LoginPage from "@/features/auth/components/LoginPage";
-import { login, clearError } from "@/features/auth/store/auth.slice";
-import ROUTES from "@/shared/utils/routes";
+import LoginPage from "@/features/auth/components/LoginPage.jsx";
+import { login, clearError } from "@/features/auth/store/auth.slice.js";
+import ROUTES from "@/shared/utils/routes.js";
 
 jest.mock("framer-motion", () => ({
   motion: {
@@ -14,7 +14,7 @@ jest.mock("framer-motion", () => ({
   },
 }));
 
-jest.mock("@/shared/components/auth/AuthBackground", () => () => (
+jest.mock("@/shared/components/auth/AuthBackground.jsx", () => () => (
   <div data-testid="auth-background" />
 ));
 
@@ -32,7 +32,7 @@ jest.mock("react-router-dom", () => ({
   Link: ({ children, to }) => <a href={to}>{children}</a>,
 }));
 
-jest.mock("@/features/auth/store/auth.slice", () => ({
+jest.mock("@/features/auth/store/auth.slice.js", () => ({
   login: jest.fn(() => ({ type: "auth/login" })),
   clearError: jest.fn(() => ({ type: "auth/clearError" })),
 }));
