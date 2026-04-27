@@ -8,28 +8,8 @@ import toast from "react-hot-toast";
 import authService from "@/features/auth/api/auth.api";
 import { format } from "date-fns";
 import userAvatar from "@/assets/avatar.png";
+import { createThumbnail } from "@/shared/utils/image.utils";
 
-const createThumbnail = (file, width = 150, height = 150) => {
-  return new Promise((resolve) => {
-    const img = new Image();
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-
-    img.onload = () => {
-      canvas.width = width;
-      canvas.height = height;
-      ctx.drawImage(img, 0, 0, width, height);
-      canvas.toBlob(
-        (blob) => {
-          resolve(blob);
-        },
-        "image/webp",
-        0.8,
-      );
-    };
-    img.src = URL.createObjectURL(file);
-  });
-};
 
 const UserProfilePage = () => {
   const dispatch = useDispatch();
@@ -217,9 +197,10 @@ const UserProfilePage = () => {
             <form onSubmit={handleUpdateDetails} className="space-y-6">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-text-muted ml-1">First Name</label>
+                  <label htmlFor="firstName" className="text-sm font-medium text-text-muted ml-1">First Name</label>
                   <input
                     type="text"
+                    id="firstName"
                     name="firstName"
                     value={details.firstName}
                     onChange={handleDetailsChange}
@@ -227,9 +208,10 @@ const UserProfilePage = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-text-muted ml-1">Last Name</label>
+                  <label htmlFor="lastName" className="text-sm font-medium text-text-muted ml-1">Last Name</label>
                   <input
                     type="text"
+                    id="lastName"
                     name="lastName"
                     value={details.lastName}
                     onChange={handleDetailsChange}
@@ -239,7 +221,7 @@ const UserProfilePage = () => {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-text-muted ml-1">Username</label>
+                <label htmlFor="username" className="text-sm font-medium text-text-muted ml-1">Username</label>
                 <div className="relative">
                   <User
                     size={18}
@@ -247,6 +229,7 @@ const UserProfilePage = () => {
                   />
                   <input
                     type="text"
+                    id="username"
                     name="username"
                     value={user.username}
                     readOnly
@@ -256,7 +239,7 @@ const UserProfilePage = () => {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-text-muted ml-1">Email Address</label>
+                <label htmlFor="email" className="text-sm font-medium text-text-muted ml-1">Email Address</label>
                 <div className="relative">
                   <Mail
                     size={18}
@@ -264,6 +247,7 @@ const UserProfilePage = () => {
                   />
                   <input
                     type="email"
+                    id="email"
                     name="email"
                     value={user.email}
                     onChange={handleDetailsChange}
@@ -297,9 +281,10 @@ const UserProfilePage = () => {
 
             <form onSubmit={handleUpdatePassword} className="space-y-6">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-text-muted ml-1">Current Password</label>
+                <label htmlFor="currentPassword" className="text-sm font-medium text-text-muted ml-1">Current Password</label>
                 <input
                   type="password"
+                  id="currentPassword"
                   name="currentPassword"
                   value={passwords.currentPassword}
                   onChange={handlePasswordChange}
@@ -310,9 +295,10 @@ const UserProfilePage = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-text-muted ml-1">New Password</label>
+                  <label htmlFor="newPassword" className="text-sm font-medium text-text-muted ml-1">New Password</label>
                   <input
                     type="password"
+                    id="newPassword"
                     name="newPassword"
                     value={passwords.newPassword}
                     onChange={handlePasswordChange}
@@ -326,11 +312,12 @@ const UserProfilePage = () => {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-text-muted ml-1">
+                  <label htmlFor="confirmPassword" className="text-sm font-medium text-text-muted ml-1">
                     Confirm New Password
                   </label>
                   <input
                     type="password"
+                    id="confirmPassword"
                     name="confirmPassword"
                     value={passwords.confirmPassword}
                     onChange={handlePasswordChange}
