@@ -114,7 +114,7 @@ const SignupPage = () => {
             </motion.div>
           )}
 
-          <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+          <form aria-label="signup form" onSubmit={handleSubmit} className="flex flex-col gap-5">
             <div className="grid grid-cols-2 gap-5">
               <div className="flex flex-col gap-2">
                 <label className="text-[10px] font-black uppercase tracking-[0.2em] text-text-dim px-1">
