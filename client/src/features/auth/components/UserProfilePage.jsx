@@ -196,9 +196,7 @@ const UserProfilePage = () => {
             <form onSubmit={handleUpdateDetails} className="space-y-6">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label htmlFor="firstName" className="text-sm font-medium text-text-muted ml-1">
-                    First Name
-                  </label>
+                  <label htmlFor="firstName" className="text-sm font-medium text-text-muted ml-1">First Name</label>
                   <input
                     type="text"
                     id="firstName"
@@ -209,9 +207,7 @@ const UserProfilePage = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label htmlFor="lastName" className="text-sm font-medium text-text-muted ml-1">
-                    Last Name
-                  </label>
+                  <label htmlFor="lastName" className="text-sm font-medium text-text-muted ml-1">Last Name</label>
                   <input
                     type="text"
                     id="lastName"
@@ -224,9 +220,7 @@ const UserProfilePage = () => {
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="username" className="text-sm font-medium text-text-muted ml-1">
-                  Username
-                </label>
+                <label htmlFor="username" className="text-sm font-medium text-text-muted ml-1">Username</label>
                 <div className="relative">
                   <User
                     size={18}
@@ -244,9 +238,7 @@ const UserProfilePage = () => {
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="email" className="text-sm font-medium text-text-muted ml-1">
-                  Email Address
-                </label>
+                <label htmlFor="email" className="text-sm font-medium text-text-muted ml-1">Email Address</label>
                 <div className="relative">
                   <Mail
                     size={18}
@@ -288,12 +280,7 @@ const UserProfilePage = () => {
 
             <form onSubmit={handleUpdatePassword} className="space-y-6">
               <div className="space-y-2">
-                <label
-                  htmlFor="currentPassword"
-                  className="text-sm font-medium text-text-muted ml-1"
-                >
-                  Current Password
-                </label>
+                <label htmlFor="currentPassword" className="text-sm font-medium text-text-muted ml-1">Current Password</label>
                 <input
                   type="password"
                   id="currentPassword"
@@ -307,9 +294,7 @@ const UserProfilePage = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label htmlFor="newPassword" className="text-sm font-medium text-text-muted ml-1">
-                    New Password
-                  </label>
+                  <label htmlFor="newPassword" className="text-sm font-medium text-text-muted ml-1">New Password</label>
                   <input
                     type="password"
                     id="newPassword"
@@ -326,10 +311,7 @@ const UserProfilePage = () => {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label
-                    htmlFor="confirmPassword"
-                    className="text-sm font-medium text-text-muted ml-1"
-                  >
+                  <label htmlFor="confirmPassword" className="text-sm font-medium text-text-muted ml-1">
                     Confirm New Password
                   </label>
                   <input
