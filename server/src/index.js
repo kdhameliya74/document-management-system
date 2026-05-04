@@ -7,6 +7,8 @@ import mongoSanitize from "express-mongo-sanitize";
 import cookieParser from "cookie-parser";
 import rateLimit from "express-rate-limit";
 import chalk from "chalk";
+import path from "path";
+import { fileURLToPath } from "url";
 
 import connectDB from "./config/database.js";
 import { initSocket } from "./config/socket.js";
@@ -75,8 +77,25 @@ const startServer = async () => {
     app.use("/api/notifications", notificationRoutes);
     app.use("/api/activity-logs", activityLogRoutes);
 
+    // Handle unhandled API routes
+    app.use("/api/*", notFound);
+
+    // Serve Frontend in Production
+    if (process.env.NODE_ENV === "production") {
+      const __filename = fileURLToPath(import.meta.url);
+      const __dirname = path.dirname(__filename);
+      const clientDist = path.join(__dirname, "../../dist");
+
+      app.use(express.static(clientDist));
+
+      app.get("*", (req, res) => {
+        res.sendFile(path.join(clientDist, "index.html"));
+      });
+    } else {
+      app.use(notFound);
+    }
+
     // Error handlers
-    app.use(notFound);
     app.use(errorHandler);
 
     const httpServer = http.createServer(app);
